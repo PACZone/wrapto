@@ -71,5 +71,5 @@ func getFee() uint64 {
 }
 
 func (o *Order) IsValid() bool {
-	return o.Amount > uint64(getFee())
+	return o.Amount > getFee()
 }
