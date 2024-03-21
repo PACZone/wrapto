@@ -32,11 +32,11 @@ type Order struct {
 	Sender          string
 	Amount          uint64
 	Status          Status
-	Fee             uint32
+	Fee             uint64
 	Reason          string
 	ProcessedHash   string
 	DestinationAddr string
-	Block           uint32 // todo : update type
+	Block           uint32
 }
 
 func NewOrder(txHash string, t Type, sender string, amount uint64,
@@ -61,13 +61,13 @@ func NewOrder(txHash string, t Type, sender string, amount uint64,
 	}, nil
 }
 
-func getFee() uint32 {
-	num, err := strconv.ParseUint(os.Getenv("Fee"), 10, 32)
+func getFee() uint64 {
+	num, err := strconv.ParseUint(os.Getenv("Fee"), 10, 64)
 	if err != nil {
 		return 0
 	}
 
-	return uint32(num)
+	return num
 }
 
 func (o *Order) IsValid() bool {

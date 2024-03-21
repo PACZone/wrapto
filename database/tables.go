@@ -13,7 +13,7 @@ type Order struct {
 	Sender          string
 	Amount          uint64
 	Status          order.Status
-	Fee             uint32
+	Fee             uint64
 	Reason          string
 	ProcessedHash   string
 	DestinationAddr string
