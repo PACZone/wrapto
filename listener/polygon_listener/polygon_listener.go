@@ -16,11 +16,11 @@ type PolygonListener struct {
 	DB        database.DB
 }
 
-func NewPolygonListener(startFrom uint32, c polygonClient.PolygonClient, polygonCh *chan (order.Order), db database.DB) *PolygonListener {
+func NewPolygonListener(startFrom uint32, c polygonClient.PolygonClient, polygonCh chan(order.Order), db database.DB) *PolygonListener {
 	return &PolygonListener{
 		lastOrder: startFrom,
 		client:    c,
-		polygonCh: *polygonCh,
+		polygonCh: polygonCh,
 		DB:        db,
 	}
 }

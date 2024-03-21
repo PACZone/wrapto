@@ -14,18 +14,18 @@ import (
 )
 
 type PactusListener struct {
-	client     pactusClient.PactusClient
-	pactusCh   chan (order.Order)
+	client     *pactusClient.PactusClient
+	orderCh   chan (order.Order)
 	lastBlock  uint32
 	bridgeAddr string
 	ctx        context.Context
-	db         database.DB
+	db         *database.DB
 }
 
-func NewPactusListener(c pactusClient.PactusClient, pactusCh chan (order.Order), lastBlock uint32, bridgeAddr string, db database.DB) *PactusListener {
+func NewPactusListener(c *pactusClient.PactusClient, pactusCh chan(order.Order), lastBlock uint32, bridgeAddr string, db *database.DB) *PactusListener {
 	return &PactusListener{
 		client:     c,
-		pactusCh:   pactusCh,
+		orderCh:   pactusCh,
 		lastBlock:  lastBlock,
 		bridgeAddr: bridgeAddr,
 		ctx:        context.Background(),
@@ -57,7 +57,7 @@ func (p *PactusListener) processOrder() {
 		if err != nil {
 			//gracefull
 		}
-		p.pactusCh <- order
+		p.orderCh <- order
 	}
 
 	a := p.db.CreateListened(0, int(p.lastBlock), len(extractedOrder))
