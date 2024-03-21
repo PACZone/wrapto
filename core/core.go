@@ -1,18 +1,18 @@
 package core
 
 import (
-	"os"
-
 	"github.com/PacmanHQ/teleport/bridge"
 	pactusClient "github.com/PacmanHQ/teleport/client/pactusclient"
 	polygonClient "github.com/PacmanHQ/teleport/client/polygonclient"
+	"github.com/PacmanHQ/teleport/config"
 	"github.com/PacmanHQ/teleport/database"
 	pactusListener "github.com/PacmanHQ/teleport/listener/pactuslistener"
 	polygonListener "github.com/PacmanHQ/teleport/listener/polygonlistener"
 	"github.com/PacmanHQ/teleport/order"
 	"github.com/PacmanHQ/teleport/wallet"
-	"github.com/joho/godotenv"
 )
+
+const PolygonChainID = 80001 // TODO: make me multi chain!
 
 type Core struct {
 	orderCh  chan order.Order
@@ -25,30 +25,24 @@ type Core struct {
 	bridge   *bridge.Bridge
 }
 
-var pactusNodes = []string{
-	"bootstrap1.pactus.org:50051", "bootstrap2.pactus.org:50051",
-	"bootstrap3.pactus.org:50051", "bootstrap4.pactus.org:50051",
-	"151.115.110.114:50051", "188.121.116.247:50051",
-}
-
-func NewCore() *Core {
-	err := godotenv.Load(".env")
+func NewCore(pactusBlockStart, polygonOrderStart int, filepaths ...string) *Core {
+	cfg, err := config.LoadConfig(filepaths...)
 	if err != nil {
-		panic(err)
+		panic(err) // TODO: make me logger.panic...
 	}
 
 	orderCh := make(chan order.Order, 10)
 
-	w := wallet.Open(os.Getenv("WALLET_PATH"), os.Getenv("WALLET_ADDRESS"),
-		os.Getenv("PACTUS_NODE"), os.Getenv("WALLET_PASSWORD"))
+	w := wallet.Open(cfg.Wallet.Path, cfg.Wallet.Address,
+		cfg.PacLsn.RPCURLS[0], cfg.Wallet.Password)
 
-	db, err := database.NewDB(os.Getenv("DB_PATH"))
+	db, err := database.NewDB(cfg.DBPath)
 	if err != nil {
 		panic(err)
 	}
 
 	pactusC := pactusClient.NewPactusClient()
-	for _, n := range pactusNodes {
+	for _, n := range cfg.PacLsn.RPCURLS {
 		err = pactusC.AddClient(n)
 		if err != nil {
 			panic(err) // TODO: must be graceful shutdown
@@ -56,15 +50,15 @@ func NewCore() *Core {
 	}
 
 	pactusL := pactusListener.NewPactusListener(pactusC, orderCh,
-		442320, os.Getenv("PACTUS_BRIDGE_ADDRESS"), db)
+		uint32(pactusBlockStart), cfg.PacLsn.BridgeAddress, db)
 
-	polygonC, err := polygonClient.NewPolygonClient(os.Getenv("POLYGON_RPC"),
-		os.Getenv("POLYGON_PRIVATE_KEY"), os.Getenv("POLYGON_CONTRACT_ADDRESS"), 80001)
+	polygonC, err := polygonClient.NewPolygonClient(cfg.PolLsn.RPCURL,
+		cfg.PolLsn.PrivateKey, cfg.PolLsn.ContractAddress, PolygonChainID)
 	if err != nil {
 		panic(err)
 	}
 
-	polygonL := polygonListener.NewPolygonListener(1, polygonC, orderCh, *db)
+	polygonL := polygonListener.NewPolygonListener(uint32(polygonOrderStart), polygonC, orderCh, *db)
 
 	brg := bridge.NewBridge(*pactusC, polygonC, orderCh, *w, *db)
 
@@ -85,3 +79,5 @@ func (c *Core) Start() {
 	go c.polygonL.Start()
 	go c.pactusL.Start()
 }
+
+// TODO: implement STOP method for me!
