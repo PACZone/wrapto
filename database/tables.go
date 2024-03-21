@@ -5,9 +5,8 @@ import (
 	"gorm.io/gorm"
 )
 
-
 type Order struct {
-	Id              string
+	ID              string
 	TxHash          string
 	Type            order.Type
 	Receiver        string
@@ -24,7 +23,7 @@ type Order struct {
 }
 
 type Listened struct {
-	Id      string
+	ID      string
 	Network int
 	Last    int
 	TxCount int

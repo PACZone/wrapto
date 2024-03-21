@@ -4,18 +4,18 @@ import (
 	"os"
 
 	"github.com/PacmanHQ/teleport/bridge"
-	pactusClient "github.com/PacmanHQ/teleport/client/pactus_client"
-	polygonClient "github.com/PacmanHQ/teleport/client/polygon_client"
+	pactusClient "github.com/PacmanHQ/teleport/client/pactusclient"
+	polygonClient "github.com/PacmanHQ/teleport/client/polygonclient"
 	"github.com/PacmanHQ/teleport/database"
-	pactusListener "github.com/PacmanHQ/teleport/listener/pactus_listener"
-	polygonListener "github.com/PacmanHQ/teleport/listener/polygon_listener"
+	pactusListener "github.com/PacmanHQ/teleport/listener/pactuslistener"
+	polygonListener "github.com/PacmanHQ/teleport/listener/polygonlistener"
 	"github.com/PacmanHQ/teleport/order"
 	"github.com/PacmanHQ/teleport/wallet"
 	"github.com/joho/godotenv"
 )
 
-type core struct {
-	orderCh  chan (order.Order)
+type Core struct {
+	orderCh  chan order.Order
 	wallet   *wallet.Wallet
 	db       *database.DB
 	pactusL  *pactusListener.PactusListener
@@ -25,9 +25,13 @@ type core struct {
 	bridge   *bridge.Bridge
 }
 
-var pactusNodes = []string{"bootstrap1.pactus.org:50051", "bootstrap2.pactus.org:50051", "bootstrap3.pactus.org:50051", "bootstrap4.pactus.org:50051", "151.115.110.114:50051", "188.121.116.247:50051"}
+var pactusNodes = []string{
+	"bootstrap1.pactus.org:50051", "bootstrap2.pactus.org:50051",
+	"bootstrap3.pactus.org:50051", "bootstrap4.pactus.org:50051",
+	"151.115.110.114:50051", "188.121.116.247:50051",
+}
 
-func NewCore() *core {
+func NewCore() *Core {
 	err := godotenv.Load(".env")
 	if err != nil {
 		panic(err)
@@ -35,7 +39,8 @@ func NewCore() *core {
 
 	orderCh := make(chan order.Order, 10)
 
-	wallet := wallet.Open(os.Getenv("WALLET_PATH"), os.Getenv("WALLET_ADDRESS"), os.Getenv("PACTUS_NODE"), os.Getenv("WALLET_PASSWORD"))
+	w := wallet.Open(os.Getenv("WALLET_PATH"), os.Getenv("WALLET_ADDRESS"),
+		os.Getenv("PACTUS_NODE"), os.Getenv("WALLET_PASSWORD"))
 
 	db, err := database.NewDB(os.Getenv("DB_PATH"))
 	if err != nil {
@@ -46,37 +51,37 @@ func NewCore() *core {
 	for _, n := range pactusNodes {
 		err = pactusC.AddClient(n)
 		if err != nil {
-			//
+			panic(err) // TODO: must be graceful shutdown
 		}
 	}
 
-	pactusL := pactusListener.NewPactusListener(pactusC, orderCh, 442320, os.Getenv("PACTUS_BRIDGE_ADDRESS"), db)
+	pactusL := pactusListener.NewPactusListener(pactusC, orderCh,
+		442320, os.Getenv("PACTUS_BRIDGE_ADDRESS"), db)
 
-	polygonC, err := polygonClient.NewPolygonClient(os.Getenv("POLYGON_RPC"), os.Getenv("POLYGON_PRIVATE_KEY"), os.Getenv("POLYGON_CONTRACT_ADDRESS"), 80001)
+	polygonC, err := polygonClient.NewPolygonClient(os.Getenv("POLYGON_RPC"),
+		os.Getenv("POLYGON_PRIVATE_KEY"), os.Getenv("POLYGON_CONTRACT_ADDRESS"), 80001)
 	if err != nil {
 		panic(err)
 	}
 
-	polygonL := polygonListener.NewPolygonListener(1, *polygonC, orderCh, *db)
+	polygonL := polygonListener.NewPolygonListener(1, polygonC, orderCh, *db)
 
-	bridge := bridge.NewBridge(*pactusC, *polygonC, orderCh, *wallet, *db)
+	brg := bridge.NewBridge(*pactusC, polygonC, orderCh, *w, *db)
 
-	return &core{
+	return &Core{
 		orderCh:  orderCh,
-		wallet:   wallet,
+		wallet:   w,
 		db:       db,
 		pactusL:  pactusL,
 		polygonL: polygonL,
 		pactusC:  pactusC,
 		polygonC: polygonC,
-		bridge:   bridge,
+		bridge:   brg,
 	}
-
 }
 
-func (c *core) Start() {
+func (c *Core) Start() {
 	go c.bridge.Start()
 	go c.polygonL.Start()
 	go c.pactusL.Start()
-
 }

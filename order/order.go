@@ -4,11 +4,13 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/matoous/go-nanoid/v2"
+	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
-type Status string
-type Type string
+type (
+	Status string
+	Type   string
+)
 
 const (
 	CREATED  Status = "CREATED"
@@ -18,12 +20,12 @@ const (
 )
 
 const (
-	PACTUS_POLYGON Type = "PACTUS_POLYGON"
-	POLYGON_PACTUS Type = "POLYGON_PACTUS"
+	PACTUS_POLYGON Type = "PACTUS_POLYGON" //nolint
+	POLYGON_PACTUS Type = "POLYGON_PACTUS" //nolint
 )
 
 type Order struct {
-	Id              string
+	ID              string
 	TxHash          string
 	Type            Type
 	Receiver        string
@@ -34,18 +36,19 @@ type Order struct {
 	Reason          string
 	ProcessedHash   string
 	DestinationAddr string
-	Block           uint32 //todo : update type
-
+	Block           uint32 // todo : update type
 }
 
-func NewOrder(txHash string, t Type, sender string, amount uint64, destAddr string, block uint32,rec string) (*Order, error) {
+func NewOrder(txHash string, t Type, sender string, amount uint64,
+	destAddr string, block uint32, rec string,
+) (*Order, error) {
 	id, err := gonanoid.New()
 	if err != nil {
 		return &Order{}, err
 	}
 
 	return &Order{
-		Id:              id,
+		ID:              id,
 		TxHash:          txHash,
 		Type:            t,
 		Sender:          sender,
@@ -54,7 +57,7 @@ func NewOrder(txHash string, t Type, sender string, amount uint64, destAddr stri
 		Block:           block,
 		Status:          CREATED,
 		Fee:             getFee(),
-		Receiver: rec,
+		Receiver:        rec,
 	}, nil
 }
 
@@ -63,12 +66,10 @@ func getFee() uint32 {
 	if err != nil {
 		return 0
 	}
+
 	return uint32(num)
 }
 
 func (o *Order) IsValid() bool {
-	if o.Amount > uint64(getFee()) {
-		return true
-	}
-	return false
+	return o.Amount > uint64(getFee())
 }

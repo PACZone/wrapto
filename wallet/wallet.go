@@ -17,14 +17,14 @@ type Wallet struct {
 	wallet   *pWallet.Wallet
 }
 
-func Open(path, addr, rpcUrl, pass string) *Wallet {
+func Open(path, addr, rpcURL, pass string) *Wallet {
 	if doesWalletExist(path) {
 		wt, err := pWallet.Open(path, true)
 		if err != nil {
 			log.Fatal("error opening existing wallet", "err", err)
 		}
 
-		err = wt.Connect(rpcUrl)
+		err = wt.Connect(rpcURL)
 		if err != nil {
 			log.Fatal("error establishing connection", "err", err)
 		}
@@ -34,9 +34,8 @@ func Open(path, addr, rpcUrl, pass string) *Wallet {
 			address:  addr,
 			password: pass,
 		}
-	} else {
-		log.Panic("wallet is required")
 	}
+	log.Panic("wallet is required")
 
 	return nil
 }
@@ -52,10 +51,11 @@ func (w *Wallet) TransferTransaction(toAddress, memo string, amount int64) (stri
 		pWallet.OptionMemo(memo),
 	}
 
-	tx, err := w.wallet.MakeTransferTx(w.address, toAddress, int64(amount), opts...)
+	tx, err := w.wallet.MakeTransferTx(w.address, toAddress, amount, opts...)
 	if err != nil {
 		log.Print("error creating transfer transaction", "err", err,
 			"to", toAddress, "amount", util.ChangeToCoin(amount))
+
 		return "", err
 	}
 
@@ -64,6 +64,7 @@ func (w *Wallet) TransferTransaction(toAddress, memo string, amount int64) (stri
 	if err != nil {
 		log.Print("error signing transfer transaction", "err", err,
 			"to", toAddress, "amount", util.ChangeToCoin(amount))
+
 		return "", err
 	}
 
@@ -72,6 +73,7 @@ func (w *Wallet) TransferTransaction(toAddress, memo string, amount int64) (stri
 	if err != nil {
 		log.Print("error broadcasting transfer transaction", "err", err,
 			"to", toAddress, "amount", util.ChangeToCoin(amount))
+
 		return "", err
 	}
 
@@ -80,6 +82,7 @@ func (w *Wallet) TransferTransaction(toAddress, memo string, amount int64) (stri
 		log.Print("error saving wallet transaction history", "err", err,
 			"to", toAddress, "amount", util.ChangeToCoin(amount))
 	}
+
 	return res, nil
 }
 
@@ -89,6 +92,7 @@ func (w *Wallet) Address() string {
 
 func (w *Wallet) Balance() int64 {
 	balance, _ := w.wallet.Balance(w.address)
+
 	return balance
 }
 
@@ -102,11 +106,13 @@ func IsValidData(address, pubKey string) bool {
 		return false
 	}
 	err = pub.VerifyAddress(addr)
+
 	return err == nil
 }
 
 // function to check if file exists.
 func doesWalletExist(fileName string) bool {
 	_, err := os.Stat(fileName)
+
 	return !os.IsNotExist(err)
 }

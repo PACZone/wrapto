@@ -1,11 +1,10 @@
 package bridge
 
 import (
-	"fmt"
 	"math/big"
 
-	pactusClient "github.com/PacmanHQ/teleport/client/pactus_client"
-	polygonClient "github.com/PacmanHQ/teleport/client/polygon_client"
+	pactusClient "github.com/PacmanHQ/teleport/client/pactusclient"
+	polygonClient "github.com/PacmanHQ/teleport/client/polygonclient"
 	"github.com/PacmanHQ/teleport/database"
 	"github.com/PacmanHQ/teleport/order"
 	"github.com/PacmanHQ/teleport/wallet"
@@ -15,15 +14,18 @@ import (
 type Bridge struct {
 	pactusClient  pactusClient.PactusClient
 	polygonClient polygonClient.PolygonClient
-	orderCh       chan (order.Order)
+	orderCh       chan order.Order
 	wallet        wallet.Wallet
 	db            database.DB
 }
 
-func NewBridge(pactusC pactusClient.PactusClient, polygonC polygonClient.PolygonClient, orderCh chan (order.Order), w wallet.Wallet, db database.DB) *Bridge {
+func NewBridge(pactusC pactusClient.PactusClient, polygonC *polygonClient.PolygonClient,
+	orderCh chan order.Order,
+	w wallet.Wallet, db database.DB,
+) *Bridge {
 	return &Bridge{
 		pactusClient:  pactusC,
-		polygonClient: polygonC,
+		polygonClient: *polygonC,
 		orderCh:       orderCh,
 		wallet:        w,
 		db:            db,
@@ -31,41 +33,54 @@ func NewBridge(pactusC pactusClient.PactusClient, polygonC polygonClient.Polygon
 }
 
 func (b *Bridge) Start() {
-	fmt.Println("bridge start")
-	for {
+	for { //nolint
+		// TODO FIX LINT ISSUE
 		select {
 		case ord := <-b.orderCh:
-			b.db.UpdateOrderStatus(ord.Id, order.PENDING)
-			b.processOrder(ord)
+			if err := b.db.UpdateOrderStatus(ord.ID, order.PENDING); err != nil {
+				panic(err) // TODO: must be graceful shutdown
+			}
+
+			b.processOrder(&ord)
 		}
 	}
 }
 
-func (b *Bridge) processOrder(ord order.Order) {
+func (b *Bridge) processOrder(ord *order.Order) {
 	if !ord.IsValid() {
 		return
 	}
 
-	if ord.Type == order.PACTUS_POLYGON {
+	if ord.Type == order.PACTUS_POLYGON { //nolint
+		// TODO EXPORT ME
 		amountBigInt := new(big.Int).SetUint64(ord.Amount)
 		hash, err := b.polygonClient.Mint(*amountBigInt, common.HexToAddress(ord.DestinationAddr))
 		if err != nil {
-			b.db.UpdateOrderProcessedHashAndReason(ord.Id, "", err.Error(), order.FAILED)
+			err := b.db.UpdateOrderProcessedHashAndReason(ord.ID, "", err.Error(), order.FAILED)
+			if err != nil {
+				panic(err) // TODO: must be graceful shutdown
+			}
+
 			return
 		}
 
-		b.db.UpdateOrderProcessedHashAndReason(ord.Id, hash, "SUCCESSFUL", order.COMPLETE)
-
+		if err = b.db.UpdateOrderProcessedHashAndReason(ord.ID, hash, "SUCCESSFUL", order.COMPLETE); err != nil {
+			panic(err) // TODO: must be graceful shutdown
+		}
 	} else if ord.Type == order.POLYGON_PACTUS {
-		hash, err := b.wallet.TransferTransaction(ord.DestinationAddr, ord.Id, int64(ord.Amount))
-
+		hash, err := b.wallet.TransferTransaction(ord.DestinationAddr, ord.ID, int64(ord.Amount))
 		if err != nil {
-			b.db.UpdateOrderProcessedHashAndReason(ord.Id, "", err.Error(), order.FAILED)
+			if err = b.db.UpdateOrderProcessedHashAndReason(ord.ID, "", err.Error(), order.FAILED); err != nil {
+				panic(err) // TODO: must be graceful shutdown
+			}
+
 			return
 		}
 
-		b.db.UpdateOrderProcessedHashAndReason(ord.Id, hash, "SUCCESSFUL", order.COMPLETE)
+		if err = b.db.UpdateOrderProcessedHashAndReason(ord.ID, hash, "SUCCESSFUL", order.COMPLETE); err != nil {
+			panic(err) // TODO: must be graceful shutdown
+		}
 
-		panic("END")
+		panic("END") // TODO REMOVE ME
 	}
 }

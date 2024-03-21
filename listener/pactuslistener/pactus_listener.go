@@ -1,4 +1,4 @@
-package pactusListener
+package pactuslistener
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	pactusClient "github.com/PacmanHQ/teleport/client/pactus_client"
+	pactusClient "github.com/PacmanHQ/teleport/client/pactusclient"
 	"github.com/PacmanHQ/teleport/database"
 	"github.com/PacmanHQ/teleport/order"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
@@ -15,17 +15,19 @@ import (
 
 type PactusListener struct {
 	client     *pactusClient.PactusClient
-	orderCh   chan (order.Order)
+	orderCh    chan order.Order
 	lastBlock  uint32
 	bridgeAddr string
 	ctx        context.Context
 	db         *database.DB
 }
 
-func NewPactusListener(c *pactusClient.PactusClient, pactusCh chan(order.Order), lastBlock uint32, bridgeAddr string, db *database.DB) *PactusListener {
+func NewPactusListener(c *pactusClient.PactusClient, pactusCh chan order.Order,
+	lastBlock uint32, bridgeAddr string, db *database.DB,
+) *PactusListener {
 	return &PactusListener{
 		client:     c,
-		orderCh:   pactusCh,
+		orderCh:    pactusCh,
 		lastBlock:  lastBlock,
 		bridgeAddr: bridgeAddr,
 		ctx:        context.Background(),
@@ -55,14 +57,14 @@ func (p *PactusListener) processOrder() {
 	for _, order := range extractedOrder {
 		err := p.db.AddOrder(order)
 		if err != nil {
-			//gracefull
+			panic(err) // TODO: must be graceful shutdown
 		}
-		p.orderCh <- order
+		p.orderCh <- *order
 	}
 
-	a := p.db.CreateListened(0, int(p.lastBlock), len(extractedOrder))
-	if a != nil {
-		//gracefull
+	err = p.db.CreateListened(0, int(p.lastBlock), len(extractedOrder))
+	if err != nil {
+		panic(err) // TODO: must be graceful shutdown
 	}
 
 	p.lastBlock++
@@ -77,24 +79,26 @@ func (p *PactusListener) isRepeatedBlock(block uint32) (bool, error) {
 	return block > lastBlockHeight, nil
 }
 
-func (p *PactusListener) extractOrders(txs []*pactus.TransactionInfo) []order.Order {
-
-	var correctOrder []order.Order
+func (p *PactusListener) extractOrders(txs []*pactus.TransactionInfo) []*order.Order {
+	correctOrder := make([]*order.Order, 0)
 
 	for _, tx := range txs {
-		if tx.GetTransfer() != nil && tx.GetTransfer().Receiver == p.bridgeAddr {
-			destAddr, err := detectDest(tx.Memo)
-			if err != nil {
-				//log
-				continue
-			}
-			n, err := order.NewOrder(hex.EncodeToString(tx.Id), order.PACTUS_POLYGON, tx.GetTransfer().Sender, uint64(tx.GetTransfer().Amount), destAddr, p.lastBlock, p.bridgeAddr)
-			if err != nil {
-				//log
-				continue
-			}
-			correctOrder = append(correctOrder, *n)
+		if tx.GetTransfer() == nil || tx.GetTransfer().Receiver != p.bridgeAddr {
+			continue
 		}
+
+		destAddr, err := detectDest(tx.Memo)
+		if err != nil {
+			// log
+			continue
+		}
+		o, err := order.NewOrder(hex.EncodeToString(tx.Id), order.PACTUS_POLYGON, tx.GetTransfer().Sender,
+			uint64(tx.GetTransfer().Amount), destAddr, p.lastBlock, p.bridgeAddr)
+		if err != nil {
+			// log
+			continue
+		}
+		correctOrder = append(correctOrder, o)
 	}
 
 	return correctOrder
@@ -110,14 +114,16 @@ func detectDest(memo string) (string, error) {
 	default:
 		return "", errors.New("invalid dest")
 	}
+
 	if isValidDestination(addr) {
 		return a[1], nil
-	} else {
-		return "", errors.New("invalid dest")
 	}
+
+	return "", errors.New("invalid dest")
 }
 
 func isValidDestination(address string) bool {
 	regex := regexp.MustCompile("^0x[a-fA-F0-9]{40}$")
+
 	return regex.MatchString(address)
 }

@@ -1,4 +1,4 @@
-package polygonClient
+package polygonclient
 
 import (
 	"crypto/ecdsa"
@@ -11,23 +11,22 @@ import (
 )
 
 type PolygonClient struct {
-	rpcUrl  string
+	rpcURL  string
 	pk      *ecdsa.PrivateKey
 	cAddr   common.Address
-	chainId big.Int
+	chainID big.Int
 	wpac    *WrappedPac
 }
 
-type bridgeOrder struct {
+type BridgeOrder struct {
 	Sender             common.Address
 	Amount             *big.Int
 	DestinationAddress string
 	Fee                *big.Int
 }
 
-func NewPolygonClient(rpcUrl string, pk string, cAddr string, chainId int64) (*PolygonClient, error) {
-
-	client, err := ethclient.Dial(rpcUrl)
+func NewPolygonClient(rpcURL, pk, cAddr string, chainID int64) (*PolygonClient, error) {
+	client, err := ethclient.Dial(rpcURL)
 	if err != nil {
 		return nil, err
 	}
@@ -43,16 +42,16 @@ func NewPolygonClient(rpcUrl string, pk string, cAddr string, chainId int64) (*P
 	}
 
 	return &PolygonClient{
-		rpcUrl:  rpcUrl,
+		rpcURL:  rpcURL,
 		pk:      privateKey,
 		cAddr:   common.HexToAddress(cAddr),
-		chainId: *big.NewInt(chainId),
+		chainID: *big.NewInt(chainID),
 		wpac:    instance,
 	}, nil
 }
 
 func (p *PolygonClient) Mint(amount big.Int, to common.Address) (string, error) {
-	opts, err := bind.NewKeyedTransactorWithChainID(p.pk, &p.chainId)
+	opts, err := bind.NewKeyedTransactorWithChainID(p.pk, &p.chainID)
 	if err != nil {
 		return "", err
 	}
@@ -64,13 +63,12 @@ func (p *PolygonClient) Mint(amount big.Int, to common.Address) (string, error) 
 	}
 
 	return result.Hash().String(), nil
-
 }
 
-func (p *PolygonClient) GetOrder(orderId big.Int) (bridgeOrder, error) {
-	result, err := p.wpac.Bridged(&bind.CallOpts{}, &orderId)
+func (p *PolygonClient) GetOrder(orderID big.Int) (BridgeOrder, error) {
+	result, err := p.wpac.Bridged(&bind.CallOpts{}, &orderID)
 	if err != nil {
-		return bridgeOrder{}, nil
+		return BridgeOrder{}, err
 	}
 
 	return result, nil

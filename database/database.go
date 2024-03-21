@@ -33,20 +33,20 @@ func NewDB(path string) (*DB, error) {
 	}, nil
 }
 
-func (db *DB) AddOrder(order order.Order) error {
+func (db *DB) AddOrder(ord *order.Order) error {
 	return db.Create(&Order{
-		Id:              order.Id,
-		TxHash:          order.TxHash,
-		Type:            order.Type,
-		Receiver:        order.Receiver,
-		Sender:          order.Sender,
-		Amount:          order.Amount,
-		Status:          order.Status,
-		Fee:             order.Fee,
-		Reason:          order.Reason,
-		ProcessedHash:   order.ProcessedHash,
-		DestinationAddr: order.DestinationAddr,
-		Block:           order.Block,
+		ID:              ord.ID,
+		TxHash:          ord.TxHash,
+		Type:            ord.Type,
+		Receiver:        ord.Receiver,
+		Sender:          ord.Sender,
+		Amount:          ord.Amount,
+		Status:          ord.Status,
+		Fee:             ord.Fee,
+		Reason:          ord.Reason,
+		ProcessedHash:   ord.ProcessedHash,
+		DestinationAddr: ord.DestinationAddr,
+		Block:           ord.Block,
 	}).Error
 }
 
@@ -54,29 +54,34 @@ func (db *DB) UpdateOrderStatus(id string, status order.Status) error {
 	return db.Model(&Order{}).Where("id = ?", id).Update("status", status).Error
 }
 
-func (db *DB) UpdateOrderProcessedHashAndReason(id string, processedTxHash string, reason string, s order.Status) error {
-	return db.Model(&Order{}).Where("id = ?", id).Updates(map[string]interface{}{"processed_tx_hash": processedTxHash, "reason": reason, "status": s}).Error
+func (db *DB) UpdateOrderProcessedHashAndReason(id, processedTxHash, reason string, s order.Status) error {
+	return db.Model(&Order{}).Where("id = ?", id).Updates(map[string]interface{}{
+		"processed_tx_hash": processedTxHash,
+		"reason":            reason, "status": s,
+	}).Error
 }
 
 func (db *DB) GetOrderByTxHash(txHash string) (*Order, error) {
-	var order Order
-	if err := db.First(&order, "tx_hash = ?", txHash).Error; err != nil {
+	var ord Order
+	if err := db.First(&ord, "tx_hash = ?", txHash).Error; err != nil {
 		return nil, err
 	}
-	return &order, nil
+
+	return &ord, nil
 }
 
-func (db *DB) CreateListened(network int, last int, txCount int) error {
+func (db *DB) CreateListened(network, last, txCount int) error {
 	id, err := gonanoid.New()
 	if err != nil {
 		return err
 	}
 	listened := &Listened{
-		Id:      id,
+		ID:      id,
 		Network: network,
 		Last:    last,
 		TxCount: txCount,
 	}
+
 	return db.Create(listened).Error
 }
 
@@ -85,5 +90,6 @@ func (db *DB) GetLastListened() (*Listened, error) {
 	if err := db.Last(&listened).Error; err != nil {
 		return nil, err
 	}
+
 	return &listened, nil
 }
