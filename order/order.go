@@ -1,6 +1,9 @@
 package order
 
 import (
+	"os"
+	"strconv"
+
 	"github.com/matoous/go-nanoid/v2"
 )
 
@@ -31,10 +34,11 @@ type Order struct {
 	Reason          string
 	ProcessedHash   string
 	DestinationAddr string
-	Block           uint32
+	Block           uint32 //todo : update type
+
 }
 
-func NewOrder(txHash string, t Type, sender string, amount uint64, destAddr string, block uint32) (*Order, error) {
+func NewOrder(txHash string, t Type, sender string, amount uint64, destAddr string, block uint32,rec string) (*Order, error) {
 	id, err := gonanoid.New()
 	if err != nil {
 		return &Order{}, err
@@ -49,10 +53,22 @@ func NewOrder(txHash string, t Type, sender string, amount uint64, destAddr stri
 		DestinationAddr: destAddr,
 		Block:           block,
 		Status:          CREATED,
-		Fee:             calculateFee(),
+		Fee:             getFee(),
+		Receiver: rec,
 	}, nil
 }
 
-func calculateFee() uint32 {
-	return 1_000_000_000
+func getFee() uint32 {
+	num, err := strconv.ParseUint(os.Getenv("Fee"), 10, 32)
+	if err != nil {
+		return 0
+	}
+	return uint32(num)
+}
+
+func (o *Order) IsValid() bool {
+	if o.Amount > uint64(getFee()) {
+		return true
+	}
+	return false
 }
