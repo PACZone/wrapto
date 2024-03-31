@@ -9,7 +9,8 @@ devtools:
 
 ### Building
 
-#  TODO
+build:
+	go build -o build/teleport-cli cmd/cmd.go 
 
 ### ABIs (EVM contracts)
 build-abis:
