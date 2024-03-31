@@ -5,11 +5,31 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/PacmanHQ/teleport"
 	"github.com/PacmanHQ/teleport/core"
-	"github.com/spf13/cobra"
+	cobra "github.com/spf13/cobra"
 )
 
-func RunCommand(parentCmd *cobra.Command) {
+func main() {
+	rootCmd := &cobra.Command{
+		Use:     "teleport-cli",
+		Version: teleport.StringVersion(),
+	}
+
+	runCommand(rootCmd)
+
+	err := rootCmd.Execute()
+	ExitOnError(rootCmd, err)
+}
+
+func ExitOnError(cmd *cobra.Command, err error) {
+	if err != nil {
+		cmd.PrintErr(err.Error())
+		os.Exit(1)
+	}
+}
+
+func runCommand(parentCmd *cobra.Command) {
 	run := &cobra.Command{
 		Use:   "run",
 		Short: "Runs a mainnet instance of Teleport", // TODO add a testnet mode for me.
