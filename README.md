@@ -23,13 +23,13 @@ Currently Teleport it a semi-centralized protocol (half decentralized) since the
 #### Our RoadMap
 
 - [ ] We will add [wPAC](https://github.com/PACZone/TeleWrapped) to More blockchains such as Solana, TON, Aptos, etc.
-- [ ] The main plan is to make this protocol 100% decentralized and trust-less using multi-signature cryptography (Teleport Protocol V2).
-- [ ] We have plan to update the protocol and use Pactus contracts (still decentralized and trust-less but using contracts) in 2025 Q1 once contracts was available on Pactus (Teleport Protocol V3).
-- [ ] After contract support on Pactus chain we will add wrapped of other coins on Pactus too(Teleport Protocol V3).
+- [ ] The main plan is to make this protocol 100% decentralized and trustless using multi-signature cryptography (Teleport Protocol V2).
+- [ ] We have a plan to update the protocol and use Pactus contracts (still decentralized and trustless but using contracts) in 2025 Q1 once contracts are available on Pactus (Teleport Protocol V3).
+- [ ] After contract support on the Pactus chain we will add wrapped of other coins on Pactus too(Teleport Protocol V3).
 
-All V1(semi-centralized), V2(decentralizes using multi-signature) and V3(decentralizes smart-contract) [Wrapped Tokens](https://github.com/PACZone/TeleWrapped) minted on different networks, will be compatible on Teleport.
+All V1(semi-centralized), V2(decentralizes using multi-signature), and V3(decentralizes smart-contract) [Wrapped Tokens](https://github.com/PACZone/TeleWrapped) minted on different networks, will be compatible with Teleport.
 
-# How it works?
+# How does it work?
 
 ## Teleport Protocol V1
 
@@ -39,7 +39,7 @@ This part is a description of how our V1 works (semi-centralized)
 
 # Contribution
 
-Contributions are welcome here, please make sure you make an issue before making a PR and you are following linter and conventional commit rules and you tests are passing.
+Contributions are welcome here, please make sure you make an issue before making a PR you are following linter and conventional commit rules and your tests are passing.
 
 # License
 
