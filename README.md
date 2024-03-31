@@ -22,10 +22,10 @@ Currently Teleport it a semi-centralized protocol (half decentralized) since the
 
 #### Our RoadMap
 
-- We will add [wPAC](https://github.com/PACZone/TeleWrapped) to More blockchains such as Solana, TON, Aptos and ... [ ]
-- The main plan is to make this protocol 100% decentralized and trust-less using multi-signature cryptography (Teleport Protocol V2). [ ]
-- We have plan to update the protocol and use Pactus contracts (still decentralized and trust-less but using contracts) in 2025 Q1 once contracts was available on Pactus (Teleport Protocol V3). [ ]
-- After contract support on Pactu chain we will add wrapped of other coins on Pactus too(Teleport Protocol V3). [ ]
+- [ ] We will add [wPAC](https://github.com/PACZone/TeleWrapped) to More blockchains such as Solana, TON, Aptos and ...
+- [ ] The main plan is to make this protocol 100% decentralized and trust-less using multi-signature cryptography (Teleport Protocol V2).
+- [ ] We have plan to update the protocol and use Pactus contracts (still decentralized and trust-less but using contracts) in 2025 Q1 once contracts was available on Pactus (Teleport Protocol V3).
+- [ ] After contract support on Pactu chain we will add wrapped of other coins on Pactus too(Teleport Protocol V3).
 
 All V1(semi-centralized), V2(decentralizes using multi-signature) and V3(decentralizes smart-contract) [Wrapped Tokens](https://github.com/PACZone/TeleWrapped) minted on different networks, will be compatible on Teleport.
 
