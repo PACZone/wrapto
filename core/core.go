@@ -1,6 +1,8 @@
 package core
 
 import (
+	"log"
+
 	"github.com/PacmanHQ/teleport/bridge"
 	pactusClient "github.com/PacmanHQ/teleport/client/pactusclient"
 	polygonClient "github.com/PacmanHQ/teleport/client/polygonclient"
@@ -25,10 +27,10 @@ type Core struct {
 	bridge   *bridge.Bridge
 }
 
-func NewCore(pactusBlockStart, polygonOrderStart int, filepaths ...string) *Core {
+func NewCore(pactusBlockStart, polygonOrderStart int, filepaths ...string) (*Core, error) {
 	cfg, err := config.LoadConfig(filepaths...)
 	if err != nil {
-		panic(err) // TODO: make me logger.panic...
+		return nil, err
 	}
 
 	orderCh := make(chan order.Order, 10)
@@ -38,14 +40,14 @@ func NewCore(pactusBlockStart, polygonOrderStart int, filepaths ...string) *Core
 
 	db, err := database.NewDB(cfg.DBPath)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	pactusC := pactusClient.NewPactusClient()
 	for _, n := range cfg.PacLsn.RPCURLS {
-		err = pactusC.AddClient(n)
+		err = pactusC.AddClient(n) // TODO using example client
 		if err != nil {
-			panic(err) // TODO: must be graceful shutdown
+			log.Print(n) // TODO add logger
 		}
 	}
 
@@ -55,7 +57,7 @@ func NewCore(pactusBlockStart, polygonOrderStart int, filepaths ...string) *Core
 	polygonC, err := polygonClient.NewPolygonClient(cfg.PolLsn.RPCURL,
 		cfg.PolLsn.PrivateKey, cfg.PolLsn.ContractAddress, PolygonChainID)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	polygonL := polygonListener.NewPolygonListener(uint32(polygonOrderStart), polygonC, orderCh, *db)
@@ -71,7 +73,7 @@ func NewCore(pactusBlockStart, polygonOrderStart int, filepaths ...string) *Core
 		pactusC:  pactusC,
 		polygonC: polygonC,
 		bridge:   brg,
-	}
+	}, nil
 }
 
 func (c *Core) Start() {
