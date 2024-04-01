@@ -40,7 +40,11 @@ func runCommand(parentCmd *cobra.Command) {
 	pson := run.Flags().Int("polygon-start-order", 0, "The start order number for Polygon listener")
 
 	run.Run = func(cmd *cobra.Command, _ []string) {
-		c := core.NewCore(*psbn, *pson)
+		c, err := core.NewCore(*psbn, *pson)
+		if err != nil {
+			ExitOnError(cmd, err)
+		}
+
 		c.Start()
 
 		sigChan := make(chan os.Signal, 1)

@@ -42,3 +42,5 @@ check:
 ### pre commit
 pre-commit: fmt check unit_test build-abis
 	@echo pre commit...
+
+.PHONY: build
