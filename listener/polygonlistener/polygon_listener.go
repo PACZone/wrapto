@@ -3,25 +3,25 @@ package polygonlistener
 import (
 	"math/big"
 
-	"github.com/PacmanHQ/teleport/client/polygonclient"
-	"github.com/PacmanHQ/teleport/database"
-	"github.com/PacmanHQ/teleport/order"
+	"github.com/PACZone/teleport/client/polygon"
+	"github.com/PACZone/teleport/database"
+	"github.com/PACZone/teleport/order"
 	"github.com/ethereum/go-ethereum/common"
 )
 
 type PolygonListener struct {
-	client    polygonclient.PolygonClient
+	client    *polygon.Client
 	polygonCh chan order.Order
 	lastOrder uint32
 	DB        database.DB
 }
 
-func NewPolygonListener(startFrom uint32, c *polygonclient.PolygonClient,
+func NewPolygonListener(startFrom uint32, c *polygon.Client,
 	polygonCh chan order.Order, db database.DB,
 ) *PolygonListener {
 	return &PolygonListener{
 		lastOrder: startFrom,
-		client:    *c,
+		client:    c,
 		polygonCh: polygonCh,
 		DB:        db,
 	}

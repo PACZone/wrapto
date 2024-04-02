@@ -1,17 +1,18 @@
 package core
 
 import (
+	"context"
 	"log"
 
-	"github.com/PacmanHQ/teleport/bridge"
-	pactusClient "github.com/PacmanHQ/teleport/client/pactusclient"
-	polygonClient "github.com/PacmanHQ/teleport/client/polygonclient"
-	"github.com/PacmanHQ/teleport/config"
-	"github.com/PacmanHQ/teleport/database"
-	pactusListener "github.com/PacmanHQ/teleport/listener/pactuslistener"
-	polygonListener "github.com/PacmanHQ/teleport/listener/polygonlistener"
-	"github.com/PacmanHQ/teleport/order"
-	"github.com/PacmanHQ/teleport/wallet"
+	"github.com/PACZone/teleport/bridge"
+	pactus "github.com/PACZone/teleport/client/pactus"
+	polygon "github.com/PACZone/teleport/client/polygon"
+	"github.com/PACZone/teleport/config"
+	"github.com/PACZone/teleport/database"
+	pactusListener "github.com/PACZone/teleport/listener/pactuslistener"
+	polygonListener "github.com/PACZone/teleport/listener/polygonlistener"
+	"github.com/PACZone/teleport/order"
+	"github.com/PACZone/teleport/wallet"
 )
 
 const PolygonChainID = 80001 // TODO: make me multi chain!
@@ -22,12 +23,14 @@ type Core struct {
 	db       *database.DB
 	pactusL  *pactusListener.PactusListener
 	polygonL *polygonListener.PolygonListener
-	pactusC  *pactusClient.PactusClient
-	polygonC *polygonClient.PolygonClient
+	pactusC  *pactus.Mgr
+	polygonC *polygon.Client
 	bridge   *bridge.Bridge
 }
 
 func NewCore(pactusBlockStart, polygonOrderStart int, filepaths ...string) (*Core, error) {
+	ctx := context.Background()
+
 	cfg, err := config.LoadConfig(filepaths...)
 	if err != nil {
 		return nil, err
@@ -43,18 +46,19 @@ func NewCore(pactusBlockStart, polygonOrderStart int, filepaths ...string) (*Cor
 		return nil, err
 	}
 
-	pactusC := pactusClient.NewPactusClient()
-	for _, n := range cfg.PacLsn.RPCURLS {
-		err = pactusC.AddClient(n) // TODO using example client
+	pactusCm := pactus.NewClientMgr(ctx)
+	for _, c := range cfg.PacLsn.RPCURLS {
+		pc, err := pactus.NewClient(c)
 		if err != nil {
-			log.Print(n) // TODO add logger
+			log.Printf("can't connect to: %s", c)
 		}
+		pactusCm.AddClient(pc)
 	}
 
-	pactusL := pactusListener.NewPactusListener(pactusC, orderCh,
+	pactusL := pactusListener.NewPactusListener(pactusCm, orderCh,
 		uint32(pactusBlockStart), cfg.PacLsn.BridgeAddress, db)
 
-	polygonC, err := polygonClient.NewPolygonClient(cfg.PolLsn.RPCURL,
+	polygonC, err := polygon.NewClient(cfg.PolLsn.RPCURL,
 		cfg.PolLsn.PrivateKey, cfg.PolLsn.ContractAddress, PolygonChainID)
 	if err != nil {
 		return nil, err
@@ -62,7 +66,7 @@ func NewCore(pactusBlockStart, polygonOrderStart int, filepaths ...string) (*Cor
 
 	polygonL := polygonListener.NewPolygonListener(uint32(polygonOrderStart), polygonC, orderCh, *db)
 
-	brg := bridge.NewBridge(*pactusC, polygonC, orderCh, *w, *db)
+	brg := bridge.NewBridge(pactusCm, polygonC, orderCh, *w, *db)
 
 	return &Core{
 		orderCh:  orderCh,
@@ -70,7 +74,7 @@ func NewCore(pactusBlockStart, polygonOrderStart int, filepaths ...string) (*Cor
 		db:       db,
 		pactusL:  pactusL,
 		polygonL: polygonL,
-		pactusC:  pactusC,
+		pactusC:  pactusCm,
 		polygonC: polygonC,
 		bridge:   brg,
 	}, nil

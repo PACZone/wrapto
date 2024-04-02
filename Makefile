@@ -1,5 +1,11 @@
 PACKAGES=$(shell go list ./... | grep -v 'tests' | grep -v 'grpc/gen')
 
+ifneq (,$(filter $(OS),Windows_NT MINGW64))
+RM = del /q
+else
+RM = rm -rf
+endif
+
 ### Tools needed for development
 devtools:
 	@echo "Installing devtools"
@@ -14,7 +20,12 @@ build:
 
 ### ABIs (EVM contracts)
 build-abis:
-	abigen --abi ./abis/WrappedPac.json --pkg polygonClient --type WrappedPac --out ./client/polygon_client/WrappedPac.go
+	abigen --abi ./abis/WrappedPac.json --pkg polygonClient --type WrappedPac --out ./client/polygon_client/wrapped_pac.go
+
+### proto
+proto:
+	$(RM) -rf client/pactus/gen/go
+	cd client/pactus/buf && buf generate --template buf.gen.yaml ../proto
 
 ### Testing
 unit_test:
