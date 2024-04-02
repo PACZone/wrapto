@@ -3,11 +3,11 @@ package manager
 import (
 	"fmt"
 
-	"github.com/PACZone/teleport/types/bypass_name"
+	bypassname "github.com/PACZone/teleport/types/bypass_name"
 )
 
 type DupBypassError struct {
-	BypassName bypass_name.BypassName
+	BypassName bypassname.BypassName
 }
 
 func (e DupBypassError) Error() string {
@@ -15,7 +15,7 @@ func (e DupBypassError) Error() string {
 }
 
 type BypassNotFoundError struct {
-	BypassName bypass_name.BypassName
+	BypassName bypassname.BypassName
 }
 
 func (e BypassNotFoundError) Error() string {

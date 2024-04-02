@@ -1,4 +1,4 @@
-package bypass_name
+package bypassname
 
 type (
 	BypassName string
@@ -6,5 +6,4 @@ type (
 
 const (
 	PACTUS BypassName = "PACTUS"
-	//...
 )

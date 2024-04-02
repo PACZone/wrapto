@@ -6,7 +6,7 @@ import (
 )
 
 type Message struct {
-	To      bypass_name.BypassName
-	From    bypass_name.BypassName
+	To      bypassname.BypassName
+	From    bypassname.BypassName
 	Payload *order.Order
 }
