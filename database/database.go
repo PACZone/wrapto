@@ -3,7 +3,7 @@ package database
 import (
 	"errors"
 
-	"github.com/PacmanHQ/teleport/order"
+	"github.com/PACZone/teleport/order"
 	"github.com/glebarez/sqlite"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 	"gorm.io/gorm"

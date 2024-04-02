@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/PacmanHQ/teleport/order"
+	"github.com/PACZone/teleport/order"
 	"gorm.io/gorm"
 )
 

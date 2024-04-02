@@ -5,8 +5,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/PacmanHQ/teleport"
-	"github.com/PacmanHQ/teleport/core"
+	"github.com/PACZone/teleport"
+	"github.com/PACZone/teleport/core"
 	cobra "github.com/spf13/cobra"
 )
 

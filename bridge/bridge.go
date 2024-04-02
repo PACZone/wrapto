@@ -3,29 +3,30 @@ package bridge
 import (
 	"math/big"
 
-	pactusClient "github.com/PacmanHQ/teleport/client/pactusclient"
-	polygonClient "github.com/PacmanHQ/teleport/client/polygonclient"
-	"github.com/PacmanHQ/teleport/database"
-	"github.com/PacmanHQ/teleport/order"
-	"github.com/PacmanHQ/teleport/wallet"
+	pactus "github.com/PACZone/teleport/client/pactus"
+	"github.com/PACZone/teleport/client/polygon"
+	"github.com/PACZone/teleport/database"
+	"github.com/PACZone/teleport/order"
+	"github.com/PACZone/teleport/wallet"
 	"github.com/ethereum/go-ethereum/common"
 )
 
 type Bridge struct {
-	pactusClient  pactusClient.PactusClient
-	polygonClient polygonClient.PolygonClient
+	pactusClient *pactus.Mgr
+
+	polygonClient *polygon.Client
 	orderCh       chan order.Order
 	wallet        wallet.Wallet
 	db            database.DB
 }
 
-func NewBridge(pactusC pactusClient.PactusClient, polygonC *polygonClient.PolygonClient,
+func NewBridge(pactusCmgr *pactus.Mgr, polygonC *polygon.Client,
 	orderCh chan order.Order,
 	w wallet.Wallet, db database.DB,
 ) *Bridge {
 	return &Bridge{
-		pactusClient:  pactusC,
-		polygonClient: *polygonC,
+		pactusClient:  pactusCmgr,
+		polygonClient: polygonC,
 		orderCh:       orderCh,
 		wallet:        w,
 		db:            db,

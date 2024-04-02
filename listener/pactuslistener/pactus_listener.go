@@ -7,14 +7,14 @@ import (
 	"regexp"
 	"strings"
 
-	pactusClient "github.com/PacmanHQ/teleport/client/pactusclient"
-	"github.com/PacmanHQ/teleport/database"
-	"github.com/PacmanHQ/teleport/order"
-	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
+	pactus "github.com/PACZone/teleport/client/pactus"
+	pactusgRPC "github.com/PACZone/teleport/client/pactus/gen/go"
+	"github.com/PACZone/teleport/database"
+	"github.com/PACZone/teleport/order"
 )
 
 type PactusListener struct {
-	client     *pactusClient.PactusClient
+	client     *pactus.Mgr
 	orderCh    chan order.Order
 	lastBlock  uint32
 	bridgeAddr string
@@ -22,11 +22,11 @@ type PactusListener struct {
 	db         *database.DB
 }
 
-func NewPactusListener(c *pactusClient.PactusClient, pactusCh chan order.Order,
+func NewPactusListener(cm *pactus.Mgr, pactusCh chan order.Order,
 	lastBlock uint32, bridgeAddr string, db *database.DB,
 ) *PactusListener {
 	return &PactusListener{
-		client:     c,
+		client:     cm,
 		orderCh:    pactusCh,
 		lastBlock:  lastBlock,
 		bridgeAddr: bridgeAddr,
@@ -47,7 +47,7 @@ func (p *PactusListener) processOrder() {
 		return
 	}
 
-	b, err := p.client.GetBlock(p.ctx, p.lastBlock, pactus.BlockVerbosity_BLOCK_TRANSACTIONS)
+	b, err := p.client.GetBlock(p.lastBlock)
 	if err != nil {
 		return
 	}
@@ -71,7 +71,7 @@ func (p *PactusListener) processOrder() {
 }
 
 func (p *PactusListener) isRepeatedBlock(block uint32) (bool, error) {
-	lastBlockHeight, err := p.client.GetBlockchainHeight(p.ctx)
+	lastBlockHeight, err := p.client.GetHeight()
 	if err != nil {
 		return true, err
 	}
@@ -79,7 +79,7 @@ func (p *PactusListener) isRepeatedBlock(block uint32) (bool, error) {
 	return block > lastBlockHeight, nil
 }
 
-func (p *PactusListener) extractOrders(txs []*pactus.TransactionInfo) []*order.Order {
+func (p *PactusListener) extractOrders(txs []*pactusgRPC.TransactionInfo) []*order.Order {
 	correctOrder := make([]*order.Order, 0)
 
 	for _, tx := range txs {

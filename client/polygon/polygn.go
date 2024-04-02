@@ -1,4 +1,4 @@
-package polygonclient
+package polygon
 
 import (
 	"crypto/ecdsa"
@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-type PolygonClient struct {
+type Client struct {
 	rpcURL  string
 	pk      *ecdsa.PrivateKey
 	cAddr   common.Address
@@ -25,7 +25,7 @@ type BridgeOrder struct {
 	Fee                *big.Int
 }
 
-func NewPolygonClient(rpcURL, pk, cAddr string, chainID int64) (*PolygonClient, error) {
+func NewClient(rpcURL, pk, cAddr string, chainID int64) (*Client, error) {
 	client, err := ethclient.Dial(rpcURL)
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func NewPolygonClient(rpcURL, pk, cAddr string, chainID int64) (*PolygonClient, 
 		return nil, err
 	}
 
-	return &PolygonClient{
+	return &Client{
 		rpcURL:  rpcURL,
 		pk:      privateKey,
 		cAddr:   common.HexToAddress(cAddr),
@@ -50,7 +50,7 @@ func NewPolygonClient(rpcURL, pk, cAddr string, chainID int64) (*PolygonClient, 
 	}, nil
 }
 
-func (p *PolygonClient) Mint(amount big.Int, to common.Address) (string, error) {
+func (p *Client) Mint(amount big.Int, to common.Address) (string, error) {
 	opts, err := bind.NewKeyedTransactorWithChainID(p.pk, &p.chainID)
 	if err != nil {
 		return "", err
@@ -65,7 +65,7 @@ func (p *PolygonClient) Mint(amount big.Int, to common.Address) (string, error) 
 	return result.Hash().String(), nil
 }
 
-func (p *PolygonClient) GetOrder(orderID big.Int) (BridgeOrder, error) {
+func (p *Client) GetOrder(orderID big.Int) (BridgeOrder, error) {
 	result, err := p.wpac.Bridged(&bind.CallOpts{}, &orderID)
 	if err != nil {
 		return BridgeOrder{}, err
