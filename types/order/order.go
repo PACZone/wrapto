@@ -1,5 +1,3 @@
 package order
 
-type Order struct{
-	
-}
+type Order struct{}
