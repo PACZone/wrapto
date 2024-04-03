@@ -20,7 +20,7 @@ build:
 
 ### ABIs (EVM contracts)
 build-abis:
-	abigen --abi ./abis/WrappedPac.json --pkg polygonClient --type WrappedPac --out ./client/polygon_client/wrapped_pac.go
+	abigen --abi ./abis/WrappedPac.json --pkg polygon --type WrappedPac --out ./sides/polygon/wrapped_pac.go
 
 ### proto
 proto:
