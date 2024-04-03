@@ -3,21 +3,21 @@ package manager
 import (
 	"context"
 
-	"github.com/PACZone/teleport/types/bypass_name"
+	"github.com/PACZone/teleport/types/bypass"
 	"github.com/PACZone/teleport/types/message"
 )
 
 type Mgr struct {
 	Ctx      context.Context
 	Highway  chan *message.Message
-	Bypasses map[bypassname.BypassName]chan *message.Message
+	Bypasses map[bypass.Names]chan *message.Message
 }
 
 func NewManager(ctx context.Context) *Mgr {
 	return &Mgr{
 		Ctx:      ctx,
 		Highway:  make(chan *message.Message, 10),
-		Bypasses: make(map[bypassname.BypassName]chan *message.Message, 10),
+		Bypasses: make(map[bypass.Names]chan *message.Message, 10),
 	}
 }
 
@@ -27,6 +27,7 @@ func (m *Mgr) Start() {
 		case msg := <-m.Highway:
 			err := m.routing(msg)
 			if err != nil {
+				continue
 			}
 		case <-m.Ctx.Done():
 			return
@@ -34,7 +35,7 @@ func (m *Mgr) Start() {
 	}
 }
 
-func (m *Mgr) RegisterBypass(name bypassname.BypassName, b chan *message.Message) error {
+func (m *Mgr) RegisterBypass(name bypass.Names, b chan *message.Message) error {
 	_, ok := m.isRegistered(name)
 	if !ok {
 		m.Bypasses[name] = b
@@ -55,7 +56,7 @@ func (m *Mgr) routing(msg *message.Message) error {
 	return nil
 }
 
-func (m *Mgr) isRegistered(name bypassname.BypassName) (chan *message.Message, bool) {
+func (m *Mgr) isRegistered(name bypass.Names) (chan *message.Message, bool) {
 	v, ok := m.Bypasses[name]
 
 	return v, ok
