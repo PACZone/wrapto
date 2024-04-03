@@ -25,7 +25,7 @@ build-abis:
 ### proto
 proto:
 	$(RM) -rf client/pactus/gen/go
-	cd client/pactus/buf && buf generate --template buf.gen.yaml ../proto
+	cd sides/pactus/buf && buf generate --template buf.gen.yaml ../proto
 
 ### Testing
 unit_test:

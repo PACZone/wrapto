@@ -26,4 +26,4 @@ jobs:
         run: make unit_test
 
       - name: Race tests
-        run: make race_test
+        run: make test_race
