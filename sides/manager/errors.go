@@ -7,7 +7,7 @@ import (
 )
 
 type DupBypassError struct {
-	BypassName bypass.Names
+	BypassName bypass.Name
 }
 
 func (e DupBypassError) Error() string {
@@ -15,7 +15,7 @@ func (e DupBypassError) Error() string {
 }
 
 type BypassNotFoundError struct {
-	BypassName bypass.Names
+	BypassName bypass.Name
 }
 
 func (e BypassNotFoundError) Error() string {

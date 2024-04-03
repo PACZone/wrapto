@@ -10,14 +10,14 @@ import (
 type Mgr struct {
 	Ctx      context.Context
 	Highway  chan *message.Message
-	Bypasses map[bypass.Names]chan *message.Message
+	Bypasses map[bypass.Name]chan *message.Message
 }
 
 func NewManager(ctx context.Context) *Mgr {
 	return &Mgr{
 		Ctx:      ctx,
 		Highway:  make(chan *message.Message, 10),
-		Bypasses: make(map[bypass.Names]chan *message.Message, 10),
+		Bypasses: make(map[bypass.Name]chan *message.Message, 10),
 	}
 }
 
@@ -35,7 +35,7 @@ func (m *Mgr) Start() {
 	}
 }
 
-func (m *Mgr) RegisterBypass(name bypass.Names, b chan *message.Message) error {
+func (m *Mgr) RegisterBypass(name bypass.Name, b chan *message.Message) error {
 	_, ok := m.isRegistered(name)
 	if !ok {
 		m.Bypasses[name] = b
@@ -56,7 +56,7 @@ func (m *Mgr) routing(msg *message.Message) error {
 	return nil
 }
 
-func (m *Mgr) isRegistered(name bypass.Names) (chan *message.Message, bool) {
+func (m *Mgr) isRegistered(name bypass.Name) (chan *message.Message, bool) {
 	v, ok := m.Bypasses[name]
 
 	return v, ok

@@ -1,9 +1,9 @@
 package bypass
 
 type (
-	Names string
+	Name string
 )
 
 const (
-	PACTUS Names = "PACTUS"
+	PACTUS Name = "PACTUS"
 )
