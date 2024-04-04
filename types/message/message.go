@@ -11,10 +11,10 @@ type Msg struct {
 	Payload *order.Order
 }
 
-func NewMsg(to bypass.Name, from bypass.Name, Payload *order.Order) *Msg {
+func NewMsg(to, from bypass.Name, payload *order.Order) *Msg {
 	return &Msg{
 		To:      to,
 		From:    from,
-		Payload: Payload,
+		Payload: payload,
 	}
 }

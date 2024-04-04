@@ -19,10 +19,10 @@ type Listener struct {
 	ctx context.Context
 }
 
-func NewListener(ctx context.Context, client *Client, bypass bypass.Name, highway chan *message.Msg) *Listener {
+func NewListener(ctx context.Context, client *Client, bp bypass.Name, highway chan *message.Msg) *Listener {
 	return &Listener{
 		client:  client,
-		bypass:  bypass,
+		bypass:  bp,
 		highway: highway,
 		ctx:     ctx,
 	}
@@ -51,6 +51,7 @@ func (l *Listener) ProcessBlocks() error {
 	if !ok {
 		<-time.After(5 * time.Second)
 		return nil
+
 	}
 
 	blk, err := l.client.GetBlock(l.LastProcessedBlock)
@@ -80,7 +81,6 @@ func (l *Listener) ProcessBlocks() error {
 		msg := message.NewMsg(dest.name, l.bypass, ord)
 
 		l.highway <- msg
-
 	}
 
 	l.LastProcessedBlock++
@@ -101,7 +101,9 @@ func (l *Listener) FilterValidTxs(txs []*pactus.TransactionInfo) []*pactus.Trans
 	validTxs := make([]*pactus.TransactionInfo, 0)
 
 	for _, tx := range txs {
-		if tx.PayloadType != pactus.PayloadType_TRANSFER_PAYLOAD && tx.GetTransfer().Receiver != "LOCKED_ADDRESS" { // TODO:read LOCKED ADDRESS from config
+		// TODO:read LOCKED ADDRESS from config
+		if tx.PayloadType != pactus.PayloadType_TRANSFER_PAYLOAD &&
+			tx.GetTransfer().Receiver != "LOCKED_ADDRESS" {
 			continue
 		}
 
