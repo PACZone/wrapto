@@ -3,8 +3,8 @@ package manager
 import (
 	"context"
 
-	"github.com/PACZone/teleport/types/bypass"
-	"github.com/PACZone/teleport/types/message"
+	"github.com/PACZone/wrapto/types/bypass"
+	"github.com/PACZone/wrapto/types/message"
 )
 
 type Mgr struct {

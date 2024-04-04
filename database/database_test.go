@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/PACZone/teleport/database"
+	"github.com/PACZone/wrapto/database"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

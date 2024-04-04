@@ -3,7 +3,7 @@ package manager
 import (
 	"fmt"
 
-	"github.com/PACZone/teleport/types/bypass"
+	"github.com/PACZone/wrapto/types/bypass"
 )
 
 type DupBypassError struct {

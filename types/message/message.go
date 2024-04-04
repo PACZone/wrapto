@@ -1,8 +1,8 @@
 package message
 
 import (
-	"github.com/PACZone/teleport/types/bypass"
-	"github.com/PACZone/teleport/types/order"
+	"github.com/PACZone/wrapto/types/bypass"
+	"github.com/PACZone/wrapto/types/order"
 )
 
 type Message struct {
