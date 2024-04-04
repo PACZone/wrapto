@@ -16,7 +16,7 @@ type Mgr struct {
 func NewManager(ctx context.Context) *Mgr {
 	return &Mgr{
 		Ctx:      ctx,
-		Highway:  make(chan message.Message, 10), // TODO: cap
+		Highway:  make(chan message.Message, 10),                 // TODO: cap
 		Bypasses: make(map[bypass.Name]chan message.Message, 10), // TODO: cap
 	}
 }

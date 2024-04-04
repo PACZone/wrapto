@@ -12,7 +12,7 @@ type Side struct {
 	listener *Listener
 	highway  chan message.Message
 
-	Ctx context.Context
+	ctx context.Context
 }
 
 func NewSide(ctx context.Context, highway chan message.Message, startBlock uint32) (*Side, error) {
@@ -26,8 +26,8 @@ func NewSide(ctx context.Context, highway chan message.Message, startBlock uint3
 	return &Side{
 		client:   client,
 		listener: listener,
-		highway: highway,
-		
-		Ctx:      ctx,
+		highway:  highway,
+
+		ctx: ctx,
 	}, nil
 }

@@ -52,8 +52,8 @@ func (l *Listener) ProcessBlocks() error {
 
 	if !ok {
 		<-time.After(5 * time.Second)
-		return nil
 
+		return nil
 	}
 
 	blk, err := l.client.GetBlock(l.nextBlock)
