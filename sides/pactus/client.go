@@ -12,9 +12,11 @@ type Client struct {
 	blockchainClient  pactus.BlockchainClient
 	transactionClient pactus.TransactionClient
 	conn              *grpc.ClientConn
+
+	ctx context.Context
 }
 
-func NewClient(endpoint string) (*Client, error) {
+func NewClient(c context.Context, endpoint string) (*Client, error) {
 	conn, err := grpc.Dial(endpoint,
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -25,11 +27,12 @@ func NewClient(endpoint string) (*Client, error) {
 		blockchainClient:  pactus.NewBlockchainClient(conn),
 		transactionClient: pactus.NewTransactionClient(conn),
 		conn:              conn,
+		ctx:               c,
 	}, nil
 }
 
-func (c *Client) GetLastBlockHeight(ctx context.Context) (uint32, error) {
-	blockchainInfo, err := c.blockchainClient.GetBlockchainInfo(ctx, &pactus.GetBlockchainInfoRequest{})
+func (c *Client) GetLastBlockHeight() (uint32, error) {
+	blockchainInfo, err := c.blockchainClient.GetBlockchainInfo(c.ctx, &pactus.GetBlockchainInfoRequest{})
 	if err != nil {
 		return 0, err
 	}
@@ -37,8 +40,8 @@ func (c *Client) GetLastBlockHeight(ctx context.Context) (uint32, error) {
 	return blockchainInfo.LastBlockHeight, nil
 }
 
-func (c *Client) GetBlock(ctx context.Context, h uint32) (*pactus.GetBlockResponse, error) {
-	block, err := c.blockchainClient.GetBlock(ctx, &pactus.GetBlockRequest{
+func (c *Client) GetBlock(h uint32) (*pactus.GetBlockResponse, error) {
+	block, err := c.blockchainClient.GetBlock(c.ctx, &pactus.GetBlockRequest{
 		Height:    h,
 		Verbosity: pactus.BlockVerbosity_BLOCK_TRANSACTIONS,
 	})
