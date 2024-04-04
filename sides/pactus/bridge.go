@@ -8,12 +8,12 @@ import (
 )
 
 type Bridge struct {
-	wallet     Wallet
+	wallet     *Wallet
 	bypassName bypass.Name
 	bypass     chan message.Message
 }
 
-func NewBridge(w Wallet, b chan message.Message, bn bypass.Name) Bridge {
+func NewBridge(w *Wallet, b chan message.Message, bn bypass.Name) Bridge {
 	return Bridge{
 		wallet:     w,
 		bypass:     b,
@@ -23,7 +23,11 @@ func NewBridge(w Wallet, b chan message.Message, bn bypass.Name) Bridge {
 
 func (b Bridge) Start() {
 	for msg := range b.bypass {
-		b.ProcessMsg(msg)
+		err := b.ProcessMsg(msg)
+		if err != nil {
+			// TODO: Log
+			continue
+		}
 	}
 }
 

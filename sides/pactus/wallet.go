@@ -1,7 +1,6 @@
 package pactus
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/pactus-project/pactus/types/tx/payload"
@@ -14,24 +13,24 @@ type Wallet struct {
 	wallet   pWallet.Wallet
 }
 
-func Open(path, addr, rpcURL, pass string) (Wallet, error) {
+func Open(path, addr, rpcURL, pass string) (*Wallet, error) {
 	if !doesWalletExist(path) {
-		return Wallet{}, WalletNotExistError{
+		return nil, WalletNotExistError{
 			path: path,
 		}
 	}
 
 	wt, err := pWallet.Open(path, true)
 	if err != nil {
-		return Wallet{}, err
+		return nil, err
 	}
 
 	err = wt.Connect(rpcURL)
 	if err != nil {
-		return Wallet{}, err
+		return nil, err
 	}
 
-	return Wallet{
+	return &Wallet{
 		wallet:   *wt,
 		address:  addr,
 		password: pass,
@@ -68,7 +67,7 @@ func (w *Wallet) TransferTransaction(toAddress, memo string, amount int64) (stri
 
 	err = w.wallet.Save()
 	if err != nil {
-		fmt.Println("wallet save error") // TODO: replace with logger
+		return "", SaveWalletError{}
 	}
 
 	return res, nil
