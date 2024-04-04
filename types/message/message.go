@@ -1,6 +1,8 @@
 package message
 
 import (
+	"fmt"
+
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/order"
 )
@@ -17,4 +19,14 @@ func NewMessage(to, from bypass.Name, payload *order.Order) Message {
 		From:    from,
 		Payload: payload,
 	}
+}
+
+func (m Message) BasicCheck(to bypass.Name) error {
+	if m.To != to {
+		return BasicCheckError{
+			Reason: fmt.Sprintf("invalid to value: %s", to),
+		}
+	}
+
+	return nil
 }

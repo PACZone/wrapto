@@ -1,0 +1,47 @@
+package pactus
+
+import (
+	"fmt"
+
+	"github.com/PACZone/wrapto/types/bypass"
+	"github.com/PACZone/wrapto/types/message"
+)
+
+type Bridge struct {
+	wallet     Wallet
+	bypassName bypass.Name
+	bypass     chan message.Message
+}
+
+func NewBridge(w Wallet, b chan message.Message, bn bypass.Name) Bridge {
+	return Bridge{
+		wallet:     w,
+		bypass:     b,
+		bypassName: bn,
+	}
+}
+
+func (b Bridge) Start() {
+	for msg := range b.bypass {
+		b.ProcessMsg(msg)
+	}
+}
+
+func (b Bridge) ProcessMsg(msg message.Message) error {
+	err := msg.BasicCheck(b.bypassName)
+	if err != nil {
+		return err
+	}
+
+	payload := msg.Payload
+
+	amt := int64(payload.Amount())
+	memo := fmt.Sprintf("bridge from %s to %s by Wraptor.app", msg.From, msg.To)
+
+	_, err = b.wallet.TransferTransaction(payload.Receiver, memo, amt) // TODO: update order
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
