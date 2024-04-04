@@ -32,6 +32,7 @@ require (
 	github.com/holiman/uint256 v1.2.4 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/matoous/go-nanoid v1.5.0
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
