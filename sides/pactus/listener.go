@@ -11,20 +11,22 @@ import (
 )
 
 type Listener struct {
-	client             *Client
-	LastProcessedBlock uint32
-	bypass             bypass.Name
-	highway            chan *message.Msg
+	client    *Client
+	nextBlock uint32
+	bypass    bypass.Name
+	highway   chan message.Message
 
 	ctx context.Context
 }
 
-func NewListener(ctx context.Context, client *Client, bp bypass.Name, highway chan *message.Msg) *Listener {
+func NewListener(ctx context.Context, client *Client, bp bypass.Name, highway chan message.Message, startBlock uint32) *Listener {
 	return &Listener{
-		client:  client,
-		bypass:  bp,
-		highway: highway,
-		ctx:     ctx,
+		client:    client,
+		bypass:    bp,
+		highway:   highway,
+		nextBlock: startBlock,
+
+		ctx: ctx,
 	}
 }
 
@@ -43,7 +45,7 @@ func (l *Listener) Start() {
 }
 
 func (l *Listener) ProcessBlocks() error {
-	ok, err := l.isEligibleBlock(l.LastProcessedBlock)
+	ok, err := l.isEligibleBlock(l.nextBlock)
 	if err != nil {
 		return err // TODO: handle errors from client
 	}
@@ -54,7 +56,7 @@ func (l *Listener) ProcessBlocks() error {
 
 	}
 
-	blk, err := l.client.GetBlock(l.LastProcessedBlock)
+	blk, err := l.client.GetBlock(l.nextBlock)
 	if err != nil {
 		return err // TODO: handle errors from client
 	}
@@ -78,12 +80,12 @@ func (l *Listener) ProcessBlocks() error {
 			continue
 		}
 
-		msg := message.NewMsg(dest.name, l.bypass, ord)
+		msg := message.NewMessage(dest.name, l.bypass, ord)
 
 		l.highway <- msg
 	}
 
-	l.LastProcessedBlock++
+	l.nextBlock++
 
 	return nil
 }

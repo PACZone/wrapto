@@ -8,24 +8,26 @@ import (
 )
 
 type Side struct {
-	Client   *Client
-	Listener *Listener
-	Highway  chan *message.Msg
+	client   *Client
+	listener *Listener
+	highway  chan message.Message
 
 	Ctx context.Context
 }
 
-func NewSide(ctx context.Context, highway chan *message.Msg) (*Side, error) {
+func NewSide(ctx context.Context, highway chan message.Message, startBlock uint32) (*Side, error) {
 	client, err := NewClient(ctx, "") // TODO:read rpc url from config
 	if err != nil {
 		return nil, err
 	}
 
-	listener := NewListener(ctx, client, bypass.PACTUS, highway)
+	listener := NewListener(ctx, client, bypass.PACTUS, highway, startBlock)
 
 	return &Side{
-		Client:   client,
-		Listener: listener,
+		client:   client,
+		listener: listener,
+		highway: highway,
+		
 		Ctx:      ctx,
 	}, nil
 }
