@@ -5,41 +5,47 @@ import (
 	"time"
 
 	pactus "github.com/PACZone/wrapto/sides/pactus/gen/go"
+	"github.com/PACZone/wrapto/types/bypass"
+	"github.com/PACZone/wrapto/types/message"
+	"github.com/PACZone/wrapto/types/order"
 )
 
 type Listener struct {
-	Client   *Client
-	LstBlock uint32
+	client             *Client
+	LastProcessedBlock uint32
+	bypass             bypass.Name
+	highway            chan *message.Msg
 
-	Ctx context.Context
+	ctx context.Context
 }
 
-func NewListener(ctx context.Context, client *Client) *Listener {
+func NewListener(ctx context.Context, client *Client, bypass bypass.Name, highway chan *message.Msg) *Listener {
 	return &Listener{
-		Client: client,
-		Ctx:    ctx,
+		client:  client,
+		bypass:  bypass,
+		highway: highway,
+		ctx:     ctx,
 	}
 }
 
 func (l *Listener) Start() {
 	for {
 		select {
-		case <-l.Ctx.Done():
-			//state
+		case <-l.ctx.Done():
+			// state
 			return
 		default:
-			err := l.ProcessBlocks()
-			if err != nil {
-				// ?
+			if err := l.ProcessBlocks(); err != nil {
+				continue
 			}
 		}
 	}
 }
 
 func (l *Listener) ProcessBlocks() error {
-	ok, err := l.isEligibleBlock(l.LstBlock)
+	ok, err := l.isEligibleBlock(l.LastProcessedBlock)
 	if err != nil {
-		return err
+		return err // TODO: handle errors from client
 	}
 
 	if !ok {
@@ -47,35 +53,43 @@ func (l *Listener) ProcessBlocks() error {
 		return nil
 	}
 
-	// blk, err := l.Client.GetBlock(l.LstBlock)
-	// if err != nil {
-	// 	return err
-	// }
+	blk, err := l.client.GetBlock(l.LastProcessedBlock)
+	if err != nil {
+		return err // TODO: handle errors from client
+	}
 
-	// validTxs := l.FilterValidTxs(blk.Txs)
+	validTxs := l.FilterValidTxs(blk.Txs)
 
-	// for _,tx:=range validTxs{
-	// 	// dest,err := parseMemo(tx.Memo)
-	// 	// if err!= nil{
+	for _, tx := range validTxs {
+		dest, err := parseMemo(tx.Memo)
+		if err != nil {
+			// log -> db
+			continue
+		}
 
-	// 	// }
+		txHash := string(tx.Id)
+		sender := tx.GetTransfer().Sender
+		amt := uint64(tx.GetTransfer().Amount)
 
+		ord, err := order.NewOrder(txHash, sender, dest.addr, amt)
+		if err != nil {
+			// log -> db
+			continue
+		}
 
-	// }
-	// detect destination
-	// crete order
-	// order basic check
-	// create message
-	// push to highway
+		msg := message.NewMsg(dest.name, l.bypass, ord)
 
-	l.LstBlock++
+		l.highway <- msg
+
+	}
+
+	l.LastProcessedBlock++
 
 	return nil
-
 }
 
 func (l *Listener) isEligibleBlock(h uint32) (bool, error) {
-	lst, err := l.Client.GetLastBlockHeight()
+	lst, err := l.client.GetLastBlockHeight()
 	if err != nil {
 		return false, err
 	}
@@ -87,7 +101,7 @@ func (l *Listener) FilterValidTxs(txs []*pactus.TransactionInfo) []*pactus.Trans
 	validTxs := make([]*pactus.TransactionInfo, 0)
 
 	for _, tx := range txs {
-		if tx.PayloadType != pactus.PayloadType_TRANSFER_PAYLOAD && tx.GetTransfer().Receiver != "p.bridgeAddr" {
+		if tx.PayloadType != pactus.PayloadType_TRANSFER_PAYLOAD && tx.GetTransfer().Receiver != "LOCKED_ADDRESS" { // TODO:read LOCKED ADDRESS from config
 			continue
 		}
 
@@ -95,5 +109,4 @@ func (l *Listener) FilterValidTxs(txs []*pactus.TransactionInfo) []*pactus.Trans
 	}
 
 	return validTxs
-
 }
