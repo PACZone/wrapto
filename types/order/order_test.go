@@ -11,34 +11,30 @@ import (
 func TestNewOrder(t *testing.T) {
 	ord, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", 10e9)
 	assert.NoError(t, err)
-	assert.True(t, ord.BasicCheck())
 	assert.Equal(t, order.CREATED, ord.Status)
 }
 
 func TestBasicCheck(t *testing.T) {
 	t.Run("everything ok", func(t *testing.T) {
-		ord, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", 10e9)
+		_, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", 10e9)
 		assert.NoError(t, err)
-		assert.True(t, ord.BasicCheck())
 	})
 
 	t.Run("amount less than minium fee", func(t *testing.T) {
-		ord, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", 0)
-		assert.NoError(t, err)
-		assert.False(t, ord.BasicCheck())
+		_, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", 0)
+		assert.Error(t, err)
 	})
 
 	t.Run("amount equal to minium fee", func(t *testing.T) {
-		ord, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", types.MinimumFee)
-		assert.NoError(t, err)
-		assert.False(t, ord.BasicCheck())
+		_, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", types.MinimumFee)
+		assert.Error(t, err)
 	})
 }
 
 func TestFee(t *testing.T) {
 	feeAndAmts := []struct { // better name?
-		Fee    float64
-		Amount float64
+		Fee    uint64
+		Amount uint64
 	}{
 		{
 			Amount: 1_903_076_060_983,
@@ -64,8 +60,8 @@ func TestFee(t *testing.T) {
 
 func TestAmount(t *testing.T) {
 	feeAndAmts := []struct { // better name?
-		Fee    float64
-		Amount float64
+		Fee    uint64
+		Amount uint64
 	}{
 		{
 			Amount: 1_903_076_060_983,
