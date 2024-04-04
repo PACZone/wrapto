@@ -3,7 +3,7 @@ package pactus
 import (
 	"context"
 
-	pactus "github.com/PACZone/wrapto/sides/pactus/gen/go"
+	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

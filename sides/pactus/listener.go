@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	pactus "github.com/PACZone/wrapto/sides/pactus/gen/go"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 	"github.com/PACZone/wrapto/types/order"
+	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 )
 
 type Listener struct {
@@ -74,7 +74,7 @@ func (l *Listener) ProcessBlocks() error {
 
 		txHash := string(tx.Id)
 		sender := tx.GetTransfer().Sender
-		amt := uint64(tx.GetTransfer().Amount)
+		amt := float64(tx.GetTransfer().Amount)
 
 		ord, err := order.NewOrder(txHash, sender, dest.addr, amt)
 		if err != nil {

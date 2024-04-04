@@ -33,8 +33,8 @@ func TestBasicCheck(t *testing.T) {
 
 func TestFee(t *testing.T) {
 	feeAndAmts := []struct { // better name?
-		Fee    uint64
-		Amount uint64
+		Fee    float64
+		Amount float64
 	}{
 		{
 			Amount: 1_903_076_060_983,
@@ -60,8 +60,8 @@ func TestFee(t *testing.T) {
 
 func TestAmount(t *testing.T) {
 	feeAndAmts := []struct { // better name?
-		Fee    uint64
-		Amount uint64
+		Fee    float64
+		Amount float64
 	}{
 		{
 			Amount: 1_903_076_060_983,

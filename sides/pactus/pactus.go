@@ -16,7 +16,9 @@ type Side struct {
 	ctx context.Context
 }
 
-func NewSide(ctx context.Context, highway chan message.Message, startBlock uint32, w *Wallet, b chan message.Message) (*Side, error) {
+func NewSide(ctx context.Context,
+	highway chan message.Message, startBlock uint32, w *Wallet, b chan message.Message,
+) (*Side, error) {
 	client, err := NewClient(ctx, "") // TODO:read rpc url from config
 	if err != nil {
 		return nil, err
