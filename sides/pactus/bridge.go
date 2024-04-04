@@ -5,6 +5,7 @@ import (
 
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
+	"github.com/pactus-project/pactus/types/amount"
 )
 
 type Bridge struct {
@@ -39,7 +40,11 @@ func (b Bridge) ProcessMsg(msg message.Message) error {
 
 	payload := msg.Payload
 
-	amt := int64(payload.Amount())
+	amt, err := amount.NewAmount(payload.Amount())
+	if err != nil {
+		return err
+	}
+
 	memo := fmt.Sprintf("bridge from %s to %s by Wraptor.app", msg.From, msg.To)
 
 	_, err = b.wallet.TransferTransaction(payload.Receiver, memo, amt) // TODO: update order

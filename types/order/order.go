@@ -31,7 +31,7 @@ type Order struct {
 	Sender string
 
 	// * amount of PAC to be bridged, **including fee**.
-	amount uint64
+	amount float64
 
 	// * status of order on wraptor system.
 	Status Status
@@ -43,7 +43,7 @@ type Order struct {
 	Reason string
 }
 
-func NewOrder(txHash, sender, receiver string, amount uint64) (*Order, error) {
+func NewOrder(txHash, sender, receiver string, amount float64) (*Order, error) {
 	ID, err := gonanoid.ID(10)
 	if err != nil {
 		return nil, err
@@ -65,10 +65,9 @@ func NewOrder(txHash, sender, receiver string, amount uint64) (*Order, error) {
 	return ord, nil
 }
 
-func (o *Order) Fee() uint64 {
-	fee := float64(o.amount) * types.FeeFraction
-
-	ceiledFee := uint64(math.Ceil(fee))
+func (o *Order) Fee() float64 {
+	fee := o.amount * types.FeeFraction
+	ceiledFee := math.Ceil(fee)
 
 	if ceiledFee <= types.MinimumFee {
 		return types.MinimumFee
@@ -81,14 +80,14 @@ func (o *Order) Fee() uint64 {
 	return ceiledFee
 }
 
-func (o *Order) Amount() uint64 {
+func (o *Order) Amount() float64 {
 	return o.amount - o.Fee()
 }
 
 func (o *Order) basicCheck() error {
 	if o.amount <= types.MinimumFee {
 		return BasicCheckError{
-			Reason: fmt.Sprintf("amount must be more than %d PAC", types.MinimumFee),
+			Reason: fmt.Sprintf("amount must be more than %v PAC", types.MinimumFee),
 		}
 	}
 

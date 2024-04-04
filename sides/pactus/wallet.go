@@ -3,6 +3,7 @@ package pactus
 import (
 	"os"
 
+	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pactus-project/pactus/types/tx/payload"
 	pWallet "github.com/pactus-project/pactus/wallet"
 )
@@ -37,8 +38,8 @@ func Open(path, addr, rpcURL, pass string) (*Wallet, error) {
 	}, nil
 }
 
-func (w *Wallet) TransferTransaction(toAddress, memo string, amount int64) (string, error) {
-	fee, err := w.wallet.CalculateFee(amount, payload.TypeTransfer)
+func (w *Wallet) TransferTransaction(toAddress, memo string, amt amount.Amount) (string, error) {
+	fee, err := w.wallet.CalculateFee(amt, payload.TypeTransfer)
 	if err != nil {
 		return "", err
 	}
@@ -48,7 +49,7 @@ func (w *Wallet) TransferTransaction(toAddress, memo string, amount int64) (stri
 		pWallet.OptionMemo(memo),
 	}
 
-	tx, err := w.wallet.MakeTransferTx(w.address, toAddress, amount, opts...)
+	tx, err := w.wallet.MakeTransferTx(w.address, toAddress, amt, opts...)
 	if err != nil {
 		return "", err
 	}
@@ -77,10 +78,13 @@ func (w *Wallet) Address() string {
 	return w.address
 }
 
-func (w *Wallet) Balance() int64 {
-	balance, _ := w.wallet.Balance(w.address)
+func (w *Wallet) Balance() amount.Amount {
+	blnc, err := w.wallet.Balance(w.address)
+	if err != nil {
+		return 0
+	}
 
-	return balance
+	return blnc
 }
 
 func doesWalletExist(fileName string) bool {

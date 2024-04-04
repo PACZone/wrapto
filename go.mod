@@ -4,10 +4,20 @@ go 1.21.5
 
 require (
 	github.com/ethereum/go-ethereum v1.13.14
-	github.com/pactus-project/pactus v1.0.2
+	github.com/pactus-project/pactus v1.0.1-0.20240404174554-d68f43459d48
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/grpc v1.62.1
-	google.golang.org/protobuf v1.32.0
+)
+
+require (
+	github.com/NathanBaulch/protoc-gen-cobra v1.2.1 // indirect
+	github.com/iancoleman/strcase v0.2.0 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/spf13/cast v1.5.0 // indirect
+	github.com/spf13/cobra v1.8.0 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 )
 
 require (
@@ -28,7 +38,7 @@ require (
 	github.com/glebarez/go-sqlite v1.21.2 // indirect
 	github.com/glebarez/sqlite v1.11.0
 	github.com/go-ole/go-ole v1.3.0 // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0 // indirect
