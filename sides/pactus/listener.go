@@ -19,7 +19,9 @@ type Listener struct {
 	ctx context.Context
 }
 
-func NewListener(ctx context.Context, client *Client, bp bypass.Name, highway chan message.Message, startBlock uint32) *Listener {
+func NewListener(ctx context.Context,
+	client *Client, bp bypass.Name, highway chan message.Message, startBlock uint32,
+) *Listener {
 	return &Listener{
 		client:    client,
 		bypass:    bp,
