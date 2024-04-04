@@ -10,3 +10,11 @@ type Message struct {
 	From    bypass.Name
 	Payload *order.Order
 }
+
+func NewMessage(to, from bypass.Name, payload *order.Order) Message {
+	return Message{
+		To:      to,
+		From:    from,
+		Payload: payload,
+	}
+}

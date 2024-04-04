@@ -5,5 +5,6 @@ type (
 )
 
 const (
-	PACTUS Name = "PACTUS"
+	PACTUS  Name = "PACTUS"
+	POLYGON Name = "POLYGON"
 )
