@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/PACZone/wrapto/database"
-	"github.com/PACZone/wrapto/types"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 	"github.com/PACZone/wrapto/types/order"
