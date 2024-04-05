@@ -58,6 +58,7 @@ func (l *Listener) Start() error {
 
 				return err
 			}
+			l.nextBlock++
 		}
 	}
 }
@@ -157,8 +158,6 @@ func (l *Listener) processBlocks() error {
 		}
 	}
 
-	l.nextBlock++
-
 	return nil
 }
 
@@ -175,7 +174,7 @@ func (l *Listener) filterValidTxs(txs []*pactus.TransactionInfo) []*pactus.Trans
 	validTxs := make([]*pactus.TransactionInfo, 0)
 
 	for _, tx := range txs {
-		if tx.PayloadType != pactus.PayloadType_TRANSFER_PAYLOAD &&
+		if tx.PayloadType != pactus.PayloadType_TRANSFER_PAYLOAD ||
 			tx.GetTransfer().Receiver != l.lockAddr {
 			continue
 		}
