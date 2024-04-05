@@ -3,25 +3,67 @@ package manager
 import (
 	"context"
 
+	"github.com/PACZone/wrapto/config"
+	"github.com/PACZone/wrapto/database"
+	"github.com/PACZone/wrapto/sides/pactus"
+	"github.com/PACZone/wrapto/sides/polygon"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 )
 
 type Mgr struct {
 	ctx      context.Context
+	cancel   context.CancelFunc
 	highway  chan message.Message
 	bypasses map[bypass.Name]chan message.Message
+
+	sides *sides
 }
 
-func NewManager(ctx context.Context) *Mgr {
+type sides struct {
+	pactus  *pactus.Side
+	polygon *polygon.Side
+}
+
+func NewManager(ctx context.Context, cancel context.CancelFunc, cfg *config.Config, db *database.DB) (*Mgr, error) {
+	highway := make(chan message.Message, 10)                  // TODO: what should we use as size?
+	bypasses := make(map[bypass.Name]chan message.Message, 10) // TODO: what should we use as size?
+
+	pactusCh := make(chan message.Message, 10)
+	polygonCh := make(chan message.Message, 10)
+
+	pactusSide, err := pactus.NewSide(ctx, highway, 0, pactusCh, cfg.Environment, cfg.Pactus, db)
+	if err != nil {
+		return nil, err
+	}
+
+	polygonSide, err := polygon.NewSide(ctx, highway, 0, polygonCh, cfg.Environment, cfg.Polygon, db)
+	if err != nil {
+		return nil, err
+	}
+
+	sides := &sides{
+		pactus:  pactusSide,
+		polygon: polygonSide,
+	}
+
+	bypasses[bypass.POLYGON] = polygonCh
+	bypasses[bypass.PACTUS] = pactusCh
+
 	return &Mgr{
 		ctx:      ctx,
-		highway:  make(chan message.Message, 10),                 // TODO: what should we use as size?
-		bypasses: make(map[bypass.Name]chan message.Message, 10), // TODO: what should we use as size?
-	}
+		cancel:   cancel,
+		highway:  highway,
+		bypasses: bypasses,
+
+		sides: sides,
+	}, nil
 }
 
 func (m *Mgr) Start() {
+	go m.sides.pactus.Start()
+	go m.sides.polygon.Start()
+
 	for {
 		select {
 		case msg := <-m.highway:
@@ -35,18 +77,13 @@ func (m *Mgr) Start() {
 	}
 }
 
-func (m *Mgr) RegisterBypass(name bypass.Name, b chan message.Message) error {
-	_, ok := m.isRegistered(name)
-	if !ok {
-		m.bypasses[name] = b
+func (m *Mgr) routing(msg message.Message) error {
+	if msg.To == bypass.MANAGER && msg.Payload == nil {
+		m.cancel()
 
 		return nil
 	}
 
-	return DupBypassError{BypassName: name}
-}
-
-func (m *Mgr) routing(msg message.Message) error {
 	b, ok := m.isRegistered(msg.To)
 	if !ok {
 		return BypassNotFoundError{BypassName: msg.To}
