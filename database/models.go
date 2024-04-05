@@ -45,6 +45,8 @@ type Log struct {
 
 	Description string
 
+	Trace string
+
 	gorm.Model
 
 	OrderID string

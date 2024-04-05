@@ -2,10 +2,12 @@ package polygon
 
 import (
 	"context"
+	"fmt"
 	"math/big"
 	"strconv"
 	"time"
 
+	"github.com/PACZone/wrapto/database"
 	"github.com/PACZone/wrapto/types"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
@@ -15,6 +17,7 @@ import (
 
 type Listener struct {
 	client    *Client
+	db        *database.DB
 	bypass    bypass.Name
 	nextOrder uint32
 	highway   chan message.Message
@@ -65,8 +68,28 @@ func (l *Listener) ProcessOrder() error {
 	id := strconv.FormatUint(uint64(l.nextOrder), 10)
 	ord, err := order.NewOrder(id, sender, "", amt)
 	if err != nil {
+		err = l.db.CreateLog(&database.Log{
+			Actor:       "POLYGON",
+			Description: fmt.Sprintf("failed to create order: %s",id),
+			Trace: err.Error(),
+		})
 		return err
 	}
+
+	id, err = l.db.CreateOrder(ord)
+	if err != nil {
+		return err
+	}
+
+	err = l.db.CreateLog(&database.Log{
+		Actor:       "POLYGON",
+		Description: "order created",
+		OrderID:     id,
+	})
+	if err != nil{
+		return err
+	}
+
 	// fee
 	msg := message.NewMessage(types.MainBypass, l.bypass, ord)
 	err = msg.BasicCheck(types.MainBypass)
@@ -75,6 +98,15 @@ func (l *Listener) ProcessOrder() error {
 	}
 
 	l.highway <- msg
+
+	err = l.db.CreateLog(&database.Log{
+		Actor:       "POLYGON",
+		Description: "sent order to highway",
+		OrderID:     id,
+	})
+	if err != nil{
+		return err
+	}
 
 	return nil
 }

@@ -1,7 +1,9 @@
 package database
 
 import (
+	"github.com/PACZone/wrapto/types/order"
 	"github.com/glebarez/sqlite"
+	gonanoid "github.com/matoous/go-nanoid"
 	"gorm.io/gorm"
 )
 
@@ -45,11 +47,28 @@ func NewDB(path string) (*DB, error) {
 	}, nil
 }
 
-func (db *DB) CreateOrder(order *Order) error {
-	return db.Create(order).Error
+func (db *DB) CreateOrder(order *order.Order) (string, error) {
+	ord:= Order{
+		ID:       order.ID,
+		TxHash:   order.TxHash,
+		Receiver: order.Receiver,
+		Sender:   order.Sender,
+		Amount:   order.OriginalAmount(),
+		Fee:      order.Fee(),
+		Status:   order.Status,
+	}
+	if err := db.Create(ord).Error; err != nil {
+		return "", err
+	}
+	return order.ID, nil
 }
 
 func (db *DB) CreateLog(log *Log) error {
+	id, err := gonanoid.ID(10)
+	if err != nil {
+		return err
+	}
+	log.ID = id
 	return db.Create(log).Error
 }
 

@@ -46,7 +46,7 @@ type Order struct {
 func NewOrder(txHash, sender, receiver string, amount float64) (*Order, error) {
 	ID, err := gonanoid.ID(10)
 	if err != nil {
-		return nil, err
+		return nil, err //? panic 
 	}
 
 	ord := &Order{
@@ -82,6 +82,10 @@ func (o *Order) Fee() float64 {
 
 func (o *Order) Amount() float64 {
 	return o.amount - o.Fee()
+}
+
+func (o *Order) OriginalAmount() float64 {
+	return o.amount
 }
 
 func (o *Order) basicCheck() error {
