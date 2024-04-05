@@ -20,7 +20,7 @@ type Listener struct {
 	ctx context.Context
 }
 
-func NewListener(ctx context.Context,
+func newListener(ctx context.Context,
 	client *Client, bp bypass.Name, highway chan message.Message,
 	startBlock uint32, lockAddr string,
 ) *Listener {
@@ -66,7 +66,7 @@ func (l *Listener) ProcessBlocks() error {
 		return err // TODO: handle errors from client
 	}
 
-	validTxs := l.FilterValidTxs(blk.Txs)
+	validTxs := l.filterValidTxs(blk.Txs)
 
 	for _, tx := range validTxs {
 		dest, err := parseMemo(tx.Memo)
@@ -104,7 +104,7 @@ func (l *Listener) isEligibleBlock(h uint32) (bool, error) {
 	return h < lst, nil
 }
 
-func (l *Listener) FilterValidTxs(txs []*pactus.TransactionInfo) []*pactus.TransactionInfo {
+func (l *Listener) filterValidTxs(txs []*pactus.TransactionInfo) []*pactus.TransactionInfo {
 	validTxs := make([]*pactus.TransactionInfo, 0)
 
 	for _, tx := range txs {

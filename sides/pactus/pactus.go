@@ -26,18 +26,18 @@ func NewSide(ctx context.Context,
 		crypto.AddressHRP = "tpc"
 	}
 
-	client, err := NewClient(ctx, cfg.RPCNode)
+	client, err := newClient(ctx, cfg.RPCNode)
 	if err != nil {
 		return nil, err
 	}
 
-	wallet, err := OpenWallet(cfg.WalletPath, cfg.LockAddr, cfg.RPCNode, cfg.WalletPass)
+	wallet, err := openWallet(cfg.WalletPath, cfg.LockAddr, cfg.RPCNode, cfg.WalletPass)
 	if err != nil {
 		return nil, err
 	}
 
-	listener := NewListener(ctx, client, bypass.PACTUS, highway, startBlock, cfg.LockAddr)
-	bridge := NewBridge(wallet, b, bypass.PACTUS)
+	listener := newListener(ctx, client, bypass.PACTUS, highway, startBlock, cfg.LockAddr)
+	bridge := newBridge(wallet, b, bypass.PACTUS)
 
 	return &Side{
 		client:   client,

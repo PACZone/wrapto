@@ -31,13 +31,13 @@ func NewSide(ctx context.Context, highway chan message.Message, startOrder uint3
 		chainID = mumbaiChainID
 	}
 
-	client, err := NewClient(cfg.RPCNode, cfg.PrivateKey, cfg.ContractAddr, chainID)
+	client, err := newClient(cfg.RPCNode, cfg.PrivateKey, cfg.ContractAddr, chainID)
 	if err != nil {
 		return nil, err
 	}
 
-	listener := NewListener(ctx, client, bypass.POLYGON, highway, startOrder)
-	bridge := NewBridge(bp, bypass.POLYGON, client)
+	listener := newListener(ctx, client, bypass.POLYGON, highway, startOrder)
+	bridge := newBridge(bp, bypass.POLYGON, client)
 
 	return &Side{
 		client:   client,

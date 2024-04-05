@@ -14,7 +14,7 @@ type Wallet struct {
 	wallet   pWallet.Wallet
 }
 
-func OpenWallet(path, addr, rpcURL, pass string) (*Wallet, error) {
+func openWallet(path, addr, rpcURL, pass string) (*Wallet, error) {
 	if !doesWalletExist(path) {
 		return nil, WalletNotExistError{
 			path: path,

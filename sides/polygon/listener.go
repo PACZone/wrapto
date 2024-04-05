@@ -22,7 +22,7 @@ type Listener struct {
 	ctx context.Context
 }
 
-func NewListener(ctx context.Context,
+func newListener(ctx context.Context,
 	client *Client, bp bypass.Name, highway chan message.Message, startOrder uint32,
 ) *Listener {
 	return &Listener{
