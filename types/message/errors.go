@@ -2,10 +2,10 @@ package message
 
 import "fmt"
 
-type BasicCheckError struct {
+type InvalidMessageError struct {
 	Reason string
 }
 
-func (e BasicCheckError) Error() string {
+func (e InvalidMessageError) Error() string {
 	return fmt.Sprintf("invalid message: %s", e.Reason)
 }

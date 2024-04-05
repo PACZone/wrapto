@@ -6,20 +6,20 @@ import (
 	"github.com/PACZone/wrapto/types/bypass"
 )
 
-type dest struct {
-	name bypass.Name
-	addr string
+type Dest struct {
+	BypassName bypass.Name
+	Addr       string
 }
 
-func parseMemo(memo string) (*dest, error) {
+func ParseMemo(memo string) (*Dest, error) {
 	splitMemo := strings.Split(memo, "@")
 
 	if len(splitMemo) != 2 {
-		return nil, InvalidMemeError{}
+		return nil, InvalidMemoError{}
 	}
 
-	return &dest{
-		name: bypass.Name(splitMemo[1]),
-		addr: splitMemo[0],
+	return &Dest{
+		BypassName: bypass.Name(splitMemo[1]),
+		Addr:       splitMemo[0],
 	}, nil
 }

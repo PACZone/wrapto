@@ -3,8 +3,8 @@ package order_test
 import (
 	"testing"
 
-	"github.com/PACZone/wrapto/types"
 	"github.com/PACZone/wrapto/types/order"
+	"github.com/PACZone/wrapto/types/params"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,7 +26,7 @@ func TestBasicCheck(t *testing.T) {
 	})
 
 	t.Run("amount equal to minium fee", func(t *testing.T) {
-		_, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", types.MinimumFee)
+		_, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", params.MinimumFee)
 		assert.Error(t, err)
 	})
 }
@@ -38,11 +38,11 @@ func TestFee(t *testing.T) {
 	}{
 		{
 			Amount: 1_903_076_060_983,
-			Fee:    types.MaximumFee,
+			Fee:    params.MaximumFee,
 		},
 		{
 			Amount: 2_874_345_000,
-			Fee:    types.MinimumFee,
+			Fee:    params.MinimumFee,
 		},
 		{
 			Amount: 200e9,
@@ -65,11 +65,11 @@ func TestAmount(t *testing.T) {
 	}{
 		{
 			Amount: 1_903_076_060_983,
-			Fee:    types.MaximumFee,
+			Fee:    params.MaximumFee,
 		},
 		{
 			Amount: 2_874_345_000,
-			Fee:    types.MinimumFee,
+			Fee:    params.MinimumFee,
 		},
 		{
 			Amount: 200e9,

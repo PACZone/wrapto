@@ -69,7 +69,7 @@ func (l *Listener) ProcessBlocks() error {
 	validTxs := l.filterValidTxs(blk.Txs)
 
 	for _, tx := range validTxs {
-		dest, err := parseMemo(tx.Memo)
+		dest, err := ParseMemo(tx.Memo)
 		if err != nil {
 			// log -> db
 			continue
@@ -79,13 +79,13 @@ func (l *Listener) ProcessBlocks() error {
 		sender := tx.GetTransfer().Sender
 		amt := float64(tx.GetTransfer().Amount)
 
-		ord, err := order.NewOrder(txHash, sender, dest.addr, amt)
+		ord, err := order.NewOrder(txHash, sender, dest.Addr, amt)
 		if err != nil {
 			// log -> db
 			continue
 		}
 
-		msg := message.NewMessage(dest.name, l.bypass, ord)
+		msg := message.NewMessage(dest.BypassName, l.bypass, ord)
 
 		l.highway <- msg
 	}
