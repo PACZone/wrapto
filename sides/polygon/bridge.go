@@ -6,6 +6,7 @@ import (
 	"math/big"
 
 	"github.com/PACZone/wrapto/database"
+	logger "github.com/PACZone/wrapto/log"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 	"github.com/PACZone/wrapto/types/order"
@@ -33,21 +34,28 @@ func newBridge(ctx context.Context, bp chan message.Message, bn bypass.Name, c *
 }
 
 func (b Bridge) Start() error {
+	logger.Info("starting bridge", "actor", b.bypassName)
+
 	for {
 		select {
 		case <-b.ctx.Done():
-			// state
+			logger.Info("stopping bridge", "actor", b.bypassName)
+
 			return nil
 		case msg := <-b.bypass:
-			err := b.ProcessMsg(msg)
+			err := b.processMsg(msg)
 			if err != nil {
+				logger.Error("error while processing message on bridge", "actor", b.bypassName, "err", err)
+
 				return err
 			}
 		}
 	}
 }
 
-func (b *Bridge) ProcessMsg(msg message.Message) error {
+func (b *Bridge) processMsg(msg message.Message) error {
+	logger.Info("received new message on bridge", "actor", b.bypassName, "orderID", msg.Payload.ID)
+
 	err := b.db.AddLog(&database.Log{
 		OrderID:     msg.Payload.ID,
 		Actor:       "POLYGON",
@@ -58,9 +66,11 @@ func (b *Bridge) ProcessMsg(msg message.Message) error {
 	}
 	err = msg.Validate(b.bypassName)
 	if err != nil {
+		logger.Warn("received message was invalid", "actor", b.bypassName, "err", err)
+
 		dbErr := b.db.AddLog(&database.Log{
 			OrderID:     msg.Payload.ID,
-			Actor:       "POLYGON",
+			Actor:       string(b.bypassName),
 			Description: "invalid message",
 			Trace:       err.Error(),
 		})
@@ -84,7 +94,7 @@ func (b *Bridge) ProcessMsg(msg message.Message) error {
 	if err != nil {
 		dbErr := b.db.AddLog(&database.Log{
 			OrderID:     msg.Payload.ID,
-			Actor:       "POLYGON",
+			Actor:       string(b.bypassName),
 			Description: "tx failed",
 			Trace:       err.Error(),
 		})
@@ -100,10 +110,13 @@ func (b *Bridge) ProcessMsg(msg message.Message) error {
 		return err
 	}
 
+	logger.Info("wPAC minted successfully", "actor", b.bypassName, "txHahs", hash, "orderID", msg.Payload.ID)
+
 	err = b.db.AddLog(&database.Log{
 		OrderID:     msg.Payload.ID,
 		Actor:       "POLYGON",
 		Description: fmt.Sprintf("tx success with tx hash: %s", hash),
+		Trace:       hash,
 	})
 	if err != nil {
 		return err

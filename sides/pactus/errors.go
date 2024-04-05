@@ -15,9 +15,3 @@ type WalletNotExistError struct {
 func (e WalletNotExistError) Error() string {
 	return fmt.Sprintf("wallet not exist at: %s", e.path)
 }
-
-type SaveWalletError struct{}
-
-func (e SaveWalletError) Error() string {
-	return "failed to save error"
-}

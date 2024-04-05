@@ -6,6 +6,7 @@ import (
 
 	"github.com/PACZone/wrapto/config"
 	"github.com/PACZone/wrapto/database"
+	logger "github.com/PACZone/wrapto/log"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 )
@@ -55,6 +56,8 @@ func NewSide(ctx context.Context, highway chan message.Message, startOrder uint3
 }
 
 func (s *Side) Start() {
+	logger.Info("polygon actor spawned")
+
 	var wg sync.WaitGroup
 
 	wg.Add(2)
@@ -84,4 +87,6 @@ func (s *Side) Start() {
 	}()
 
 	wg.Wait()
+
+	logger.Info("polygon actor stopped")
 }

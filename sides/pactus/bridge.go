@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/PACZone/wrapto/database"
+	logger "github.com/PACZone/wrapto/log"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 	"github.com/PACZone/wrapto/types/order"
@@ -31,23 +32,32 @@ func newBridge(ctx context.Context, w *Wallet, b chan message.Message, bn bypass
 }
 
 func (b Bridge) Start() error {
+	logger.Info("starting bridge", "actor", b.bypassName)
 	for {
 		select {
 		case <-b.ctx.Done():
+			logger.Info("stopping bridge", "actor", b.bypassName)
+			b.wallet.closeWallet()
+
 			return nil
 		case msg := <-b.bypass:
-			err := b.ProcessMsg(msg)
+			err := b.processMsg(msg)
 			if err != nil {
+				logger.Error("error while processing message in bridge",
+					"actor", b.bypassName, "orderID", msg.Payload.ID)
+
 				return err
 			}
 		}
 	}
 }
 
-func (b Bridge) ProcessMsg(msg message.Message) error {
+func (b Bridge) processMsg(msg message.Message) error {
+	logger.Info("new message received for process", "actor", b.bypassName, "orderID", msg.Payload.ID)
+
 	err := b.db.AddLog(&database.Log{
 		OrderID:     msg.Payload.ID,
-		Actor:       "PACTUS",
+		Actor:       string(b.bypassName),
 		Description: "order received as message",
 	})
 	if err != nil {
@@ -56,9 +66,11 @@ func (b Bridge) ProcessMsg(msg message.Message) error {
 
 	err = msg.Validate(b.bypassName)
 	if err != nil {
+		logger.Warn("received an invalid message", "actor", b.bypassName, "err", err)
+
 		dbErr := b.db.AddLog(&database.Log{
 			OrderID:     msg.Payload.ID,
-			Actor:       "PACTUS",
+			Actor:       string(b.bypassName),
 			Description: "invalid message",
 			Trace:       err.Error(),
 		})
@@ -80,7 +92,7 @@ func (b Bridge) ProcessMsg(msg message.Message) error {
 	if err != nil {
 		dbErr := b.db.AddLog(&database.Log{
 			OrderID:     msg.Payload.ID,
-			Actor:       "PACTUS",
+			Actor:       string(b.bypassName),
 			Description: "failed to cast amount",
 			Trace:       err.Error(),
 		})
@@ -96,14 +108,14 @@ func (b Bridge) ProcessMsg(msg message.Message) error {
 		return nil
 	}
 
-	memo := fmt.Sprintf("bridge from %s to %s by Wrapto.app", msg.From, msg.To)
+	memo := fmt.Sprintf("bridge from %s to %s by wrapto.app", msg.From, msg.To)
 
-	_, err = b.wallet.TransferTransaction(payload.Receiver, memo, amt)
+	txID, err := b.wallet.transferTx(payload.Receiver, memo, amt)
 	if err != nil {
 		dbErr := b.db.AddLog(&database.Log{
 			OrderID:     msg.Payload.ID,
-			Actor:       "PACTUS",
-			Description: "tx failed",
+			Actor:       string(b.bypassName),
+			Description: "bridge failed",
 			Trace:       err.Error(),
 		})
 		if dbErr != nil {
@@ -118,8 +130,19 @@ func (b Bridge) ProcessMsg(msg message.Message) error {
 		return nil
 	}
 
-	dbErr := b.db.UpdateOrderStatus(payload.ID, order.COMPLETE)
-	if dbErr != nil {
+	logger.Info("successful bridge", "actor", b.bypassName, "txID", txID, "orderID", msg.Payload.ID)
+	err = b.db.AddLog(&database.Log{
+		OrderID:     msg.Payload.ID,
+		Actor:       string(b.bypassName),
+		Description: "successfully bridged",
+		Trace:       txID,
+	})
+	if err != nil {
+		return err
+	}
+
+	err = b.db.UpdateOrderStatus(payload.ID, order.COMPLETE)
+	if err != nil {
 		return err
 	}
 
