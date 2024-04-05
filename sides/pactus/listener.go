@@ -2,16 +2,20 @@ package pactus
 
 import (
 	"context"
+	"fmt"
 	"time"
 
+	"github.com/PACZone/wrapto/database"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 	"github.com/PACZone/wrapto/types/order"
+	"github.com/PACZone/wrapto/types/params"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 )
 
 type Listener struct {
 	client    *Client
+	db        *database.DB
 	nextBlock uint32
 	bypass    bypass.Name
 	highway   chan message.Message
@@ -23,9 +27,11 @@ type Listener struct {
 func newListener(ctx context.Context,
 	client *Client, bp bypass.Name, highway chan message.Message,
 	startBlock uint32, lockAddr string,
+	db *database.DB,
 ) *Listener {
 	return &Listener{
 		client:    client,
+		db:        db,
 		bypass:    bp,
 		highway:   highway,
 		nextBlock: startBlock,
@@ -35,15 +41,15 @@ func newListener(ctx context.Context,
 	}
 }
 
-func (l *Listener) Start() {
+func (l *Listener) Start() error {
 	for {
 		select {
 		case <-l.ctx.Done():
 			// state
-			return
+			return nil
 		default:
 			if err := l.ProcessBlocks(); err != nil {
-				continue
+				return err
 			}
 		}
 	}
@@ -81,13 +87,54 @@ func (l *Listener) ProcessBlocks() error {
 
 		ord, err := order.NewOrder(txHash, sender, dest.Addr, amt)
 		if err != nil {
-			// log -> db
+			dbErr := l.db.UpdateOrderStatus(ord.ID, order.FAILED)
+			if dbErr != nil {
+				return dbErr
+			}
+			dbErr = l.db.AddLog(&database.Log{
+				Actor:       "PACTUS",
+				Description: fmt.Sprintf("failed to create order: %s", txHash),
+				Trace:       err.Error(),
+			})
+
+			if dbErr != nil {
+				return dbErr
+			}
+
 			continue
 		}
 
 		msg := message.NewMessage(dest.BypassName, l.bypass, ord)
+		err = msg.Validate(params.MainBypass)
+		if err != nil {
+			dbErr := l.db.UpdateOrderStatus(ord.ID, order.FAILED)
+			if dbErr != nil {
+				return dbErr
+			}
+
+			dbErr = l.db.AddLog(&database.Log{
+				Actor:       "PACTUS",
+				Description: "invalid message",
+				OrderID:     ord.ID,
+				Trace:       err.Error(),
+			})
+			if dbErr != nil {
+				return dbErr
+			}
+
+			continue
+		}
 
 		l.highway <- msg
+
+		dbErr := l.db.AddLog(&database.Log{
+			Actor:       "PACTUS",
+			Description: "sent order to highway",
+			OrderID:     ord.ID,
+		})
+		if dbErr != nil {
+			return dbErr
+		}
 	}
 
 	l.nextBlock++

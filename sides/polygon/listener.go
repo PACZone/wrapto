@@ -38,15 +38,15 @@ func newListener(ctx context.Context,
 	}
 }
 
-func (l *Listener) Start() {
+func (l *Listener) Start() error {
 	for {
 		select {
 		case <-l.ctx.Done():
 			// state
-			return
+			return nil
 		default:
 			if err := l.ProcessOrder(); err != nil {
-				continue
+				return err
 			}
 		}
 	}
@@ -55,7 +55,7 @@ func (l *Listener) Start() {
 func (l *Listener) ProcessOrder() error {
 	o, err := l.client.Get(*big.NewInt(int64(l.nextOrder)))
 	if err != nil {
-		return err
+		return err // TODO: retry 3 time
 	}
 
 	if o.Sender == common.HexToAddress("0x0000000000000000000000000000000000000000") {
@@ -69,13 +69,22 @@ func (l *Listener) ProcessOrder() error {
 	id := strconv.FormatUint(uint64(l.nextOrder), 10)
 	ord, err := order.NewOrder(id, sender, "", amt)
 	if err != nil {
-		err = l.db.AddLog(&database.Log{
+		dbErr := l.db.UpdateOrderStatus(ord.ID, order.FAILED)
+		if dbErr != nil {
+			return dbErr
+		}
+
+		dbErr = l.db.AddLog(&database.Log{
 			Actor:       "POLYGON",
 			Description: fmt.Sprintf("failed to create order: %s", id),
 			Trace:       err.Error(),
 		})
 
-		return err
+		if dbErr != nil {
+			return dbErr
+		}
+
+		return nil
 	}
 
 	id, err = l.db.AddOrder(ord)
@@ -92,22 +101,36 @@ func (l *Listener) ProcessOrder() error {
 		return err
 	}
 
-	// fee
 	msg := message.NewMessage(params.MainBypass, l.bypass, ord)
 	err = msg.Validate(params.MainBypass)
 	if err != nil {
-		return err
+		dbErr := l.db.UpdateOrderStatus(id, order.FAILED)
+		if dbErr != nil {
+			return dbErr
+		}
+
+		dbErr = l.db.AddLog(&database.Log{
+			Actor:       "POLYGON",
+			Description: "invalid message",
+			OrderID:     id,
+			Trace:       err.Error(),
+		})
+		if dbErr != nil {
+			return dbErr
+		}
+
+		return nil
 	}
 
 	l.highway <- msg
 
-	err = l.db.AddLog(&database.Log{
+	dbErr := l.db.AddLog(&database.Log{
 		Actor:       "POLYGON",
 		Description: "sent order to highway",
 		OrderID:     id,
 	})
-	if err != nil {
-		return err
+	if dbErr != nil {
+		return dbErr
 	}
 
 	return nil

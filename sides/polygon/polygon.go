@@ -39,7 +39,7 @@ func NewSide(ctx context.Context, highway chan message.Message, startOrder uint3
 	}
 
 	listener := newListener(ctx, client, bypass.POLYGON, highway, startOrder, db)
-	bridge := newBridge(bp, bypass.POLYGON, client)
+	bridge := newBridge(ctx, bp, bypass.POLYGON, client, db)
 
 	return &Side{
 		client:   client,

@@ -57,42 +57,68 @@ func (db *DB) AddOrder(ord *order.Order) (string, error) {
 		Status:   ord.Status,
 	}
 	if err := db.Create(o).Error; err != nil {
-		return "", err
+		return "", DBError{
+			TableName: "Orders",
+			Reason:    err.Error(),
+		}
 	}
 
 	return ord.ID, nil
 }
 
 func (db *DB) AddLog(log *Log) error {
-	return db.Create(log).Error
+	if err := db.Create(log).Error; err != nil {
+		return DBError{
+			TableName: "Logs",
+			Reason:    err.Error(),
+		}
+	}
+
+	return nil
 }
 
-func (db *DB) UpdateOrder(ord *Order) error {
-	return db.Save(ord).Error
+func (db *DB) UpdateOrderStatus(id string, status order.Status) error {
+	if err := db.Model(&Order{}).Where("id = ?", id).Update("status", status).Error; err != nil {
+		return DBError{
+			TableName: "Orders",
+			Reason:    err.Error(),
+		}
+	}
+
+	return nil
 }
 
 func (db *DB) GetOrder(id string) (*Order, error) {
-	var ord Order
+	var ord *Order
 	if err := db.First(&ord, "id = ?", id).Error; err != nil {
-		return nil, err
+		return nil, DBError{
+			TableName: "Orders",
+			Reason:    err.Error(),
+		}
 	}
 
-	return &ord, nil
+	return ord, nil
 }
 
 func (db *DB) GetOrderWithLogs(id string) (*Order, error) {
-	var ord Order
+	var ord *Order
 	if err := db.Preload("Logs").First(&ord, "id = ?", id).Error; err != nil {
-		return nil, err
+		return nil, DBError{
+			TableName: "Orders",
+			Reason:    err.Error(),
+		}
 	}
 
-	return &ord, nil
+	return ord, nil
 }
 
 func (db *DB) GetOrderLogs(orderID string) ([]Log, error) {
 	var logs []Log
 	if err := db.Where("order_id = ?", orderID).Find(&logs).Error; err != nil {
-		return nil, err
+		return nil, DBError{
+			TableName: "Logs",
+			Reason:    err.Error(),
+		}
 	}
 
 	return logs, nil

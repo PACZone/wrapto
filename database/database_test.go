@@ -63,23 +63,19 @@ func TestAddLogForOrder(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestUpdateOrder(t *testing.T) {
+func TestUpdateOrderStatus(t *testing.T) {
 	db := setup(t)
 
 	newOrd, err := order.NewOrder("aaa", "sendet", "rec", 20e9)
 	require.NoError(t, err)
 
-	o, err := db.AddOrder(newOrd)
+	ordID, err := db.AddOrder(newOrd)
 	require.NoError(t, err)
 
-	retOrd, err := db.GetOrder(o)
+	err = db.UpdateOrderStatus(ordID, order.COMPLETE)
 	require.NoError(t, err)
 
-	retOrd.Status = order.COMPLETE
-	err = db.UpdateOrder(retOrd)
-	require.NoError(t, err)
-
-	updatedOrd, err := db.GetOrder(o)
+	updatedOrd, err := db.GetOrder(ordID)
 	require.NoError(t, err)
 
 	assert.Equal(t, order.COMPLETE, updatedOrd.Status)

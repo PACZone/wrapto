@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/PACZone/wrapto/config"
+	"github.com/PACZone/wrapto/database"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 	"github.com/pactus-project/pactus/crypto"
@@ -21,6 +22,7 @@ type Side struct {
 func NewSide(ctx context.Context,
 	highway chan message.Message, startBlock uint32,
 	b chan message.Message, env string, cfg config.PactusConfig,
+	db *database.DB,
 ) (*Side, error) {
 	if env == "dev" {
 		crypto.AddressHRP = "tpc"
@@ -36,8 +38,8 @@ func NewSide(ctx context.Context,
 		return nil, err
 	}
 
-	listener := newListener(ctx, client, bypass.PACTUS, highway, startBlock, cfg.LockAddr)
-	bridge := newBridge(wallet, b, bypass.PACTUS)
+	listener := newListener(ctx, client, bypass.PACTUS, highway, startBlock, cfg.LockAddr, db)
+	bridge := newBridge(ctx, wallet, b, bypass.PACTUS, db)
 
 	return &Side{
 		client:   client,
