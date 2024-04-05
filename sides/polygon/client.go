@@ -25,7 +25,7 @@ type BridgeOrder struct {
 	Fee                *big.Int
 }
 
-func NewClient(rpcURL, pk, cAddr string, chainID int64) (*Client, error) {
+func newClient(rpcURL, pk, cAddr string, chainID int64) (*Client, error) {
 	client, err := ethclient.Dial(rpcURL)
 	if err != nil {
 		return nil, err

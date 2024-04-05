@@ -15,18 +15,21 @@ type Listener struct {
 	nextBlock uint32
 	bypass    bypass.Name
 	highway   chan message.Message
+	lockAddr  string
 
 	ctx context.Context
 }
 
-func NewListener(ctx context.Context,
-	client *Client, bp bypass.Name, highway chan message.Message, startBlock uint32,
+func newListener(ctx context.Context,
+	client *Client, bp bypass.Name, highway chan message.Message,
+	startBlock uint32, lockAddr string,
 ) *Listener {
 	return &Listener{
 		client:    client,
 		bypass:    bp,
 		highway:   highway,
 		nextBlock: startBlock,
+		lockAddr:  lockAddr,
 
 		ctx: ctx,
 	}
@@ -63,7 +66,7 @@ func (l *Listener) ProcessBlocks() error {
 		return err // TODO: handle errors from client
 	}
 
-	validTxs := filterValidTxs(blk.Txs)
+	validTxs := l.filterValidTxs(blk.Txs)
 
 	for _, tx := range validTxs {
 		dest, err := parseMemo(tx.Memo)
@@ -101,13 +104,12 @@ func (l *Listener) isEligibleBlock(h uint32) (bool, error) {
 	return h < lst, nil
 }
 
-func filterValidTxs(txs []*pactus.TransactionInfo) []*pactus.TransactionInfo {
+func (l *Listener) filterValidTxs(txs []*pactus.TransactionInfo) []*pactus.TransactionInfo {
 	validTxs := make([]*pactus.TransactionInfo, 0)
 
 	for _, tx := range txs {
-		// TODO:read LOCKED ADDRESS from config
 		if tx.PayloadType != pactus.PayloadType_TRANSFER_PAYLOAD &&
-			tx.GetTransfer().Receiver != "LOCKED_ADDRESS" {
+			tx.GetTransfer().Receiver != l.lockAddr {
 			continue
 		}
 

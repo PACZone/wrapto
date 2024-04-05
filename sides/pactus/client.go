@@ -16,7 +16,7 @@ type Client struct {
 	ctx context.Context
 }
 
-func NewClient(c context.Context, endpoint string) (*Client, error) {
+func newClient(c context.Context, endpoint string) (*Client, error) {
 	conn, err := grpc.Dial(endpoint,
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {

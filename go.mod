@@ -45,6 +45,7 @@ require (
 	github.com/holiman/uint256 v1.2.4 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/joho/godotenv v1.5.1
 	github.com/kilic/bls12-381 v0.1.0 // indirect
 	github.com/matoous/go-nanoid v1.5.0
 	github.com/mattn/go-isatty v0.0.20 // indirect
