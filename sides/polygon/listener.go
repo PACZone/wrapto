@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/big"
 	"strconv"
+	"time"
 
 	"github.com/PACZone/wrapto/types"
 	"github.com/PACZone/wrapto/types/bypass"
@@ -49,8 +50,12 @@ func (l *Listener) Start() {
 
 func (l *Listener) ProcessOrder() error {
 	o, err := l.client.Get(*big.NewInt(int64(l.nextOrder)))
+	if err != nil {
+		return nil
+	}
 
-	if err != nil || o.Sender == common.HexToAddress("0x0000000000000000000000000000000000000000") {
+	if o.Sender == common.HexToAddress("0x0000000000000000000000000000000000000000") {
+		<-time.After(20 * time.Second)
 		return nil
 	}
 
