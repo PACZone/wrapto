@@ -2,6 +2,7 @@ package polygon
 
 import (
 	"context"
+	"sync"
 
 	"github.com/PACZone/wrapto/config"
 	"github.com/PACZone/wrapto/database"
@@ -51,4 +52,36 @@ func NewSide(ctx context.Context, highway chan message.Message, startOrder uint3
 
 		ctx: ctx,
 	}, nil
+}
+
+func (s *Side) Start() {
+	var wg sync.WaitGroup
+
+	wg.Add(2)
+
+	go func() {
+		err := s.listener.Start()
+		if err != nil {
+			s.highway <- message.Message{
+				To:      bypass.MANAGER,
+				From:    s.bridge.bypassName,
+				Payload: nil,
+			}
+		}
+		wg.Done()
+	}()
+
+	go func() {
+		err := s.bridge.Start()
+		if err != nil {
+			s.highway <- message.Message{
+				To:      bypass.MANAGER,
+				From:    s.bridge.bypassName,
+				Payload: nil,
+			}
+		}
+		wg.Done()
+	}()
+
+	wg.Wait()
 }
