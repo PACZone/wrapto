@@ -43,12 +43,11 @@ func (b *Bridge) ProcessMsg(msg message.Message) error {
 	amountBigInt := new(big.Int).SetUint64(uint64(payload.Amount()))
 
 	// TODO: log hash
-	_ , err = b.client.Mint(*amountBigInt, common.HexToAddress(payload.Receiver))
-	if err != nil{
-		//log
+	_, err = b.client.Mint(*amountBigInt, common.HexToAddress(payload.Receiver))
+	if err != nil {
+		// log
 		return err
 	}
 
 	return nil
-
 }
