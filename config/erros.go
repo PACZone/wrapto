@@ -2,10 +2,10 @@ package config
 
 import "fmt"
 
-type InvalidNetworkError struct {
-	Network string
+type InvalidEnvironmentError struct {
+	Environment string
 }
 
-func (e InvalidNetworkError) Error() string {
-	return fmt.Sprintf("network can be `main` or `test` not: %s", e.Network)
+func (e InvalidEnvironmentError) Error() string {
+	return fmt.Sprintf("environment can be `dev` or `prod` not: %s", e.Environment)
 }

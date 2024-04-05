@@ -24,10 +24,10 @@ type Side struct {
 }
 
 func NewSide(ctx context.Context, highway chan message.Message, startOrder uint32,
-	bp chan message.Message, net string, cfg config.PolygonConfig,
+	bp chan message.Message, env string, cfg config.PolygonConfig,
 ) (*Side, error) {
 	chainID := mainChainID
-	if net == "test" {
+	if env == "dev" {
 		chainID = mumbaiChainID
 	}
 

@@ -20,9 +20,9 @@ type Side struct {
 
 func NewSide(ctx context.Context,
 	highway chan message.Message, startBlock uint32,
-	b chan message.Message, net string, cfg config.PactusConfig,
+	b chan message.Message, env string, cfg config.PactusConfig,
 ) (*Side, error) {
-	if net == "test" {
+	if env == "dev" {
 		crypto.AddressHRP = "tpc"
 	}
 

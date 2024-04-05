@@ -7,10 +7,10 @@ import (
 )
 
 type Config struct {
-	Network  string
-	Pactus   PactusConfig
-	Polygon  PolygonConfig
-	Database DatabaseConfig
+	Environment string
+	Pactus      PactusConfig
+	Polygon     PolygonConfig
+	Database    DatabaseConfig
 }
 
 type PactusConfig struct {
@@ -36,7 +36,7 @@ func LoadConfig() (*Config, error) {
 	}
 
 	cfg := &Config{
-		Network: os.Getenv("NETWORK"),
+		Environment: os.Getenv("NETWORK"),
 		Pactus: PactusConfig{
 			WalletPath: os.Getenv("PACTUS_WALLET_PATH"),
 			WalletPass: os.Getenv("PACTUS_WALLET_PASSWORD"),
@@ -61,9 +61,9 @@ func LoadConfig() (*Config, error) {
 }
 
 func (c *Config) basicCheck() error {
-	if !(c.Network == "main") || !(c.Network == "test") {
-		return InvalidNetworkError{
-			Network: c.Network,
+	if !(c.Environment == "dev") || !(c.Environment == "prod") {
+		return InvalidEnvironmentError{
+			Environment: c.Environment,
 		}
 	}
 
