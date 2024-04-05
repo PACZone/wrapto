@@ -6,6 +6,7 @@ import (
 	"github.com/PACZone/wrapto/config"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
+	"github.com/pactus-project/pactus/crypto"
 )
 
 type Side struct {
@@ -19,8 +20,12 @@ type Side struct {
 
 func NewSide(ctx context.Context,
 	highway chan message.Message, startBlock uint32,
-	b chan message.Message, cfg config.PactusConfig,
+	b chan message.Message, net string, cfg config.PactusConfig,
 ) (*Side, error) {
+	if net == "test" {
+		crypto.AddressHRP = "tpc"
+	}
+
 	client, err := NewClient(ctx, cfg.RPCNode)
 	if err != nil {
 		return nil, err
