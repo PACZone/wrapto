@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/PACZone/wrapto/database"
+	logger "github.com/PACZone/wrapto/log"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 	"github.com/PACZone/wrapto/types/order"
@@ -16,11 +17,11 @@ import (
 )
 
 type Listener struct {
-	client    *Client
-	db        *database.DB
-	bypass    bypass.Name
-	nextOrder uint32
-	highway   chan message.Message
+	client     *Client
+	db         *database.DB
+	bypassName bypass.Name
+	nextOrder  uint32
+	highway    chan message.Message
 
 	ctx context.Context
 }
@@ -29,30 +30,33 @@ func newListener(ctx context.Context,
 	client *Client, bp bypass.Name, highway chan message.Message, startOrder uint32, db *database.DB,
 ) *Listener {
 	return &Listener{
-		client:    client,
-		db:        db,
-		bypass:    bp,
-		nextOrder: startOrder,
-		highway:   highway,
-		ctx:       ctx,
+		client:     client,
+		db:         db,
+		bypassName: bp,
+		nextOrder:  startOrder,
+		highway:    highway,
+		ctx:        ctx,
 	}
 }
 
 func (l *Listener) Start() error {
+	logger.Info("listener started", "actor", l.bypassName)
+
 	for {
 		select {
 		case <-l.ctx.Done():
-			// state
+			logger.Info("stopping listener", "actor", l.bypassName, "nextOrder", l.nextOrder)
+
 			return nil
 		default:
-			if err := l.ProcessOrder(); err != nil {
+			if err := l.processOrder(); err != nil {
 				return err
 			}
 		}
 	}
 }
 
-func (l *Listener) ProcessOrder() error {
+func (l *Listener) processOrder() error {
 	o, err := l.client.Get(*big.NewInt(int64(l.nextOrder)))
 	if err != nil {
 		return err // TODO: retry 3 time
@@ -63,6 +67,8 @@ func (l *Listener) ProcessOrder() error {
 
 		return nil
 	}
+
+	logger.Info("processing new message on listener", "actor", l.bypassName, "orderNumber", l.nextOrder)
 
 	amt, _ := o.Amount.Float64()
 	sender := o.Sender.Hex()
@@ -75,7 +81,7 @@ func (l *Listener) ProcessOrder() error {
 		}
 
 		dbErr = l.db.AddLog(&database.Log{
-			Actor:       "POLYGON",
+			Actor:       string(l.bypassName),
 			Description: fmt.Sprintf("failed to create order: %s", id),
 			Trace:       err.Error(),
 		})
@@ -93,7 +99,7 @@ func (l *Listener) ProcessOrder() error {
 	}
 
 	err = l.db.AddLog(&database.Log{
-		Actor:       "POLYGON",
+		Actor:       string(l.bypassName),
 		Description: "order created",
 		OrderID:     id,
 	})
@@ -101,7 +107,7 @@ func (l *Listener) ProcessOrder() error {
 		return err
 	}
 
-	msg := message.NewMessage(params.MainBypass, l.bypass, ord)
+	msg := message.NewMessage(params.MainBypass, l.bypassName, ord)
 	err = msg.Validate(params.MainBypass)
 	if err != nil {
 		dbErr := l.db.UpdateOrderStatus(id, order.FAILED)
@@ -110,7 +116,7 @@ func (l *Listener) ProcessOrder() error {
 		}
 
 		dbErr = l.db.AddLog(&database.Log{
-			Actor:       "POLYGON",
+			Actor:       string(l.bypassName),
 			Description: "invalid message",
 			OrderID:     id,
 			Trace:       err.Error(),
@@ -124,13 +130,15 @@ func (l *Listener) ProcessOrder() error {
 
 	l.highway <- msg
 
-	dbErr := l.db.AddLog(&database.Log{
-		Actor:       "POLYGON",
+	logger.Info("new message passed to pactus", "actor", l.bypassName, "orderID", ord.ID)
+
+	err = l.db.AddLog(&database.Log{
+		Actor:       string(l.bypassName),
 		Description: "sent order to highway",
 		OrderID:     id,
 	})
-	if dbErr != nil {
-		return dbErr
+	if err != nil {
+		return err
 	}
 
 	return nil

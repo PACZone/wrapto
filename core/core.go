@@ -6,6 +6,7 @@ import (
 
 	"github.com/PACZone/wrapto/config"
 	"github.com/PACZone/wrapto/database"
+	logger "github.com/PACZone/wrapto/log"
 	"github.com/PACZone/wrapto/sides/manager"
 )
 
@@ -13,15 +14,15 @@ type Core struct {
 	mgr *manager.Mgr
 }
 
-func NewCore() (*Core, error) {
-	ctx, cancel := context.WithCancel(context.Background())
-
+func NewCore(ctx context.Context, cancel context.CancelFunc) (*Core, error) {
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		cancel()
 
 		return nil, err
 	}
+
+	logger.InitGlobalLogger(&cfg.Logger)
 
 	db, err := database.NewDB(cfg.Database.Path)
 	if err != nil {

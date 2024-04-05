@@ -38,7 +38,7 @@ func openWallet(path, addr, rpcURL, pass string) (*Wallet, error) {
 	}, nil
 }
 
-func (w *Wallet) TransferTransaction(toAddress, memo string, amt amount.Amount) (string, error) {
+func (w *Wallet) transferTx(toAddress, memo string, amt amount.Amount) (string, error) {
 	fee, err := w.wallet.CalculateFee(amt, payload.TypeTransfer)
 	if err != nil {
 		return "", err
@@ -68,7 +68,7 @@ func (w *Wallet) TransferTransaction(toAddress, memo string, amt amount.Amount) 
 
 	err = w.wallet.Save()
 	if err != nil {
-		return "", SaveWalletError{}
+		return "", err
 	}
 
 	return res, nil
@@ -85,6 +85,10 @@ func (w *Wallet) Balance() amount.Amount {
 	}
 
 	return blnc
+}
+
+func (w *Wallet) closeWallet() {
+	_ = w.wallet.Save()
 }
 
 func doesWalletExist(fileName string) bool {

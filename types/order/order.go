@@ -35,12 +35,6 @@ type Order struct {
 
 	// * status of order on wrapto system.
 	Status Status
-
-	// * once status got COMPLETE, this will be filled with destination network transaction hash made by wrapto.
-	DestNetworkTxHash string
-
-	// * will be filled if order failed.
-	Reason string
 }
 
 func NewOrder(txHash, sender, receiver string, amount float64) (*Order, error) {

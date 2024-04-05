@@ -6,6 +6,7 @@ import (
 
 	"github.com/PACZone/wrapto/config"
 	"github.com/PACZone/wrapto/database"
+	logger "github.com/PACZone/wrapto/log"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 	"github.com/pactus-project/pactus/crypto"
@@ -53,6 +54,8 @@ func NewSide(ctx context.Context,
 }
 
 func (s *Side) Start() {
+	logger.Info("pactus actor spawned")
+
 	var wg sync.WaitGroup
 
 	wg.Add(2)
@@ -82,4 +85,6 @@ func (s *Side) Start() {
 	}()
 
 	wg.Wait()
+
+	logger.Info("stopping pactus actor")
 }
