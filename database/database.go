@@ -32,7 +32,7 @@ func NewDB(path string) (*DB, error) {
 
 	if !db.Migrator().HasTable(&Log{}) {
 		if err := db.AutoMigrate(
-			&Order{},
+			&Log{},
 		); err != nil {
 			return nil, DBError{
 				DBPath: path,
@@ -47,7 +47,7 @@ func NewDB(path string) (*DB, error) {
 }
 
 func (db *DB) AddOrder(ord *order.Order) (string, error) {
-	o := Order{
+	o := &Order{
 		ID:       ord.ID,
 		TxHash:   ord.TxHash,
 		Receiver: ord.Receiver,
@@ -73,8 +73,7 @@ func (db *DB) UpdateOrder(ord *Order) error {
 
 func (db *DB) GetOrder(id string) (*Order, error) {
 	var ord Order
-	err := db.Preload("Logs").First(&ord, "id = ?", id).Error
-	if err != nil {
+	if err := db.First(&ord, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 
@@ -83,8 +82,7 @@ func (db *DB) GetOrder(id string) (*Order, error) {
 
 func (db *DB) GetOrderWithLogs(id string) (*Order, error) {
 	var ord Order
-	err := db.Preload("Logs").First(&ord, "id = ?", id).Error
-	if err != nil {
+	if err := db.Preload("Logs").First(&ord, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 
@@ -93,8 +91,7 @@ func (db *DB) GetOrderWithLogs(id string) (*Order, error) {
 
 func (db *DB) GetOrderLogs(orderID string) ([]Log, error) {
 	var logs []Log
-	err := db.Where("order_id = ?", orderID).Find(&logs).Error
-	if err != nil {
+	if err := db.Where("order_id = ?", orderID).Find(&logs).Error; err != nil {
 		return nil, err
 	}
 
