@@ -33,9 +33,9 @@ type Order struct {
 	// * will be filled if order failed.
 	Reason string
 
-	gorm.Model
-
 	Logs []Log `gorm:"foreignKey:OrderID"`
+
+	gorm.Model
 }
 
 type Log struct {
@@ -45,7 +45,7 @@ type Log struct {
 
 	Trace string
 
-	gorm.Model
-
 	OrderID string
+
+	gorm.Model
 }

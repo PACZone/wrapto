@@ -25,13 +25,13 @@ func setup(t *testing.T) *database.DB {
 func TestAddOrder(t *testing.T) {
 	db := setup(t)
 
-	ord, err := order.NewOrder("aaa", "sendet", "rec", 20e9)
+	ordID, err := order.NewOrder("aaa", "sendet", "rec", 20e9)
 	assert.NoError(t, err)
 
-	o, err := db.AddOrder(ord)
+	o, err := db.AddOrder(ordID)
 	assert.NoError(t, err)
 
-	assert.Equal(t, ord.ID, o)
+	assert.Equal(t, ordID.ID, o)
 }
 
 func TestAddLog(t *testing.T) {

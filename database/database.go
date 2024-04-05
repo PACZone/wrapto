@@ -19,19 +19,9 @@ func NewDB(path string) (*DB, error) {
 		}
 	}
 
-	if !db.Migrator().HasTable(&Order{}) {
+	if !db.Migrator().HasTable(&Order{}) || !db.Migrator().HasTable(&Log{}) {
 		if err := db.AutoMigrate(
 			&Order{},
-		); err != nil {
-			return nil, DBError{
-				DBPath: path,
-				Reason: err.Error(),
-			}
-		}
-	}
-
-	if !db.Migrator().HasTable(&Log{}) {
-		if err := db.AutoMigrate(
 			&Log{},
 		); err != nil {
 			return nil, DBError{
