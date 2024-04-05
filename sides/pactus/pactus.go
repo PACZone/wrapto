@@ -3,6 +3,7 @@ package pactus
 import (
 	"context"
 
+	"github.com/PACZone/wrapto/config"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 )
@@ -17,16 +18,21 @@ type Side struct {
 }
 
 func NewSide(ctx context.Context,
-	highway chan message.Message, startBlock uint32, w *Wallet, b chan message.Message,
+	highway chan message.Message, startBlock uint32,
+	b chan message.Message, cfg config.PactusConfig,
 ) (*Side, error) {
-	client, err := NewClient(ctx, "") // TODO:read rpc url from config
+	client, err := NewClient(ctx, cfg.RPCNode)
 	if err != nil {
 		return nil, err
 	}
 
-	listener := NewListener(ctx, client, bypass.PACTUS, highway, startBlock)
+	wallet, err := OpenWallet(cfg.WalletPath, cfg.LockAddr, cfg.RPCNode, cfg.WalletPass)
+	if err != nil {
+		return nil, err
+	}
 
-	bridge := NewBridge(w, b, bypass.PACTUS)
+	listener := NewListener(ctx, client, bypass.PACTUS, highway, startBlock, cfg.LockAddr)
+	bridge := NewBridge(wallet, b, bypass.PACTUS)
 
 	return &Side{
 		client:   client,

@@ -14,9 +14,9 @@ type Bridge struct {
 	bypass     chan message.Message
 }
 
-func NewBridge(b chan message.Message, bn bypass.Name, c *Client) Bridge {
+func NewBridge(bp chan message.Message, bn bypass.Name, c *Client) Bridge {
 	return Bridge{
-		bypass:     b,
+		bypass:     bp,
 		bypassName: bn,
 		client:     c,
 	}

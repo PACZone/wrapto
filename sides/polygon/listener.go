@@ -51,11 +51,12 @@ func (l *Listener) Start() {
 func (l *Listener) ProcessOrder() error {
 	o, err := l.client.Get(*big.NewInt(int64(l.nextOrder)))
 	if err != nil {
-		return nil
+		return err
 	}
 
 	if o.Sender == common.HexToAddress("0x0000000000000000000000000000000000000000") {
 		<-time.After(20 * time.Second)
+
 		return nil
 	}
 
