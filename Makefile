@@ -51,6 +51,6 @@ check:
 
 ### pre commit
 pre-commit: fmt check unit_test
-	@echo pre commit...
+	@echo ready to commit...
 
 .PHONY: build
