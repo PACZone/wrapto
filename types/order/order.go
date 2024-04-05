@@ -18,7 +18,7 @@ const (
 )
 
 type Order struct {
-	// * unique ID on wraptor system.
+	// * unique ID on wrapto system.
 	ID string
 
 	// * transaction or contract call that user made on source network.
@@ -33,10 +33,10 @@ type Order struct {
 	// * amount of PAC to be bridged, **including fee**.
 	amount float64
 
-	// * status of order on wraptor system.
+	// * status of order on wrapto system.
 	Status Status
 
-	// * once status got COMPLETE, this will be filled with destination network transaction hash made by wraptor.
+	// * once status got COMPLETE, this will be filled with destination network transaction hash made by wrapto.
 	DestNetworkTxHash string
 
 	// * will be filled if order failed.

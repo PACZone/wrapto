@@ -45,7 +45,7 @@ func (b Bridge) ProcessMsg(msg message.Message) error {
 		return err
 	}
 
-	memo := fmt.Sprintf("bridge from %s to %s by Wraptor.app", msg.From, msg.To)
+	memo := fmt.Sprintf("bridge from %s to %s by Wrapto.app", msg.From, msg.To)
 
 	_, err = b.wallet.TransferTransaction(payload.Receiver, memo, amt) // TODO: update order
 	if err != nil {
