@@ -21,9 +21,9 @@ func NewMessage(to, from bypass.Name, payload *order.Order) Message {
 	}
 }
 
-func (m Message) BasicCheck(to bypass.Name) error {
+func (m Message) Validate(to bypass.Name) error {
 	if m.To != to {
-		return BasicCheckError{
+		return InvalidMessageError{
 			Reason: fmt.Sprintf("invalid to value: %s", to),
 		}
 	}

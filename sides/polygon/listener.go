@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/PACZone/wrapto/types"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 	"github.com/PACZone/wrapto/types/order"
+	"github.com/PACZone/wrapto/types/params"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -68,8 +68,8 @@ func (l *Listener) ProcessOrder() error {
 		return err
 	}
 	// fee
-	msg := message.NewMessage(types.MainBypass, l.bypass, ord)
-	err = msg.BasicCheck(types.MainBypass)
+	msg := message.NewMessage(params.MainBypass, l.bypass, ord)
+	err = msg.Validate(params.MainBypass)
 	if err != nil {
 		return err
 	}
