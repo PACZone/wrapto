@@ -2,9 +2,9 @@ package pactus
 
 import "fmt"
 
-type InvalidMemeError struct{}
+type InvalidMemoError struct{}
 
-func (e InvalidMemeError) Error() string {
+func (e InvalidMemoError) Error() string {
 	return "invalid memo"
 }
 
