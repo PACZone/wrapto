@@ -54,7 +54,7 @@ func (l *Listener) ProcessOrder() error {
 		return nil
 	}
 
-	amt := o.Amount.Uint64()
+	amt, _ := o.Amount.Float64()
 	sender := o.Sender.Hex()
 	id := strconv.FormatUint(uint64(l.nextOrder), 10)
 	ord, err := order.NewOrder(id, sender, "", amt)
