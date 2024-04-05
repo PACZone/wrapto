@@ -68,25 +68,25 @@ func (l *Listener) ProcessOrder() error {
 	id := strconv.FormatUint(uint64(l.nextOrder), 10)
 	ord, err := order.NewOrder(id, sender, "", amt)
 	if err != nil {
-		err = l.db.CreateLog(&database.Log{
+		err = l.db.AddLog(&database.Log{
 			Actor:       "POLYGON",
-			Description: fmt.Sprintf("failed to create order: %s",id),
-			Trace: err.Error(),
+			Description: fmt.Sprintf("failed to create order: %s", id),
+			Trace:       err.Error(),
 		})
 		return err
 	}
 
-	id, err = l.db.CreateOrder(ord)
+	id, err = l.db.AddOrder(ord)
 	if err != nil {
 		return err
 	}
 
-	err = l.db.CreateLog(&database.Log{
+	err = l.db.AddLog(&database.Log{
 		Actor:       "POLYGON",
 		Description: "order created",
 		OrderID:     id,
 	})
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
@@ -99,12 +99,12 @@ func (l *Listener) ProcessOrder() error {
 
 	l.highway <- msg
 
-	err = l.db.CreateLog(&database.Log{
+	err = l.db.AddLog(&database.Log{
 		Actor:       "POLYGON",
 		Description: "sent order to highway",
 		OrderID:     id,
 	})
-	if err != nil{
+	if err != nil {
 		return err
 	}
 

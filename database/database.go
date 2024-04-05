@@ -47,8 +47,8 @@ func NewDB(path string) (*DB, error) {
 	}, nil
 }
 
-func (db *DB) CreateOrder(order *order.Order) (string, error) {
-	ord:= Order{
+func (db *DB) AddOrder(order *order.Order) (string, error) {
+	ord := Order{
 		ID:       order.ID,
 		TxHash:   order.TxHash,
 		Receiver: order.Receiver,
@@ -63,12 +63,7 @@ func (db *DB) CreateOrder(order *order.Order) (string, error) {
 	return order.ID, nil
 }
 
-func (db *DB) CreateLog(log *Log) error {
-	id, err := gonanoid.ID(10)
-	if err != nil {
-		return err
-	}
-	log.ID = id
+func (db *DB) AddLog(log *Log) error {
 	return db.Create(log).Error
 }
 

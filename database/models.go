@@ -39,8 +39,6 @@ type Order struct {
 }
 
 type Log struct {
-	ID string `gorm:"primaryKey"`
-
 	Actor string
 
 	Description string
