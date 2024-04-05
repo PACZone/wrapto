@@ -26,10 +26,11 @@ type Listener struct {
 }
 
 func newListener(ctx context.Context,
-	client *Client, bp bypass.Name, highway chan message.Message, startOrder uint32,
+	client *Client, bp bypass.Name, highway chan message.Message, startOrder uint32, db *database.DB,
 ) *Listener {
 	return &Listener{
 		client:    client,
+		db:        db,
 		bypass:    bp,
 		nextOrder: startOrder,
 		highway:   highway,
@@ -73,6 +74,7 @@ func (l *Listener) ProcessOrder() error {
 			Description: fmt.Sprintf("failed to create order: %s", id),
 			Trace:       err.Error(),
 		})
+
 		return err
 	}
 

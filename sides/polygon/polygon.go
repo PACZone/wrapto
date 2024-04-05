@@ -26,7 +26,7 @@ type Side struct {
 }
 
 func NewSide(ctx context.Context, highway chan message.Message, startOrder uint32,
-	bp chan message.Message, env string, cfg config.PolygonConfig,db *database.DB,
+	bp chan message.Message, env string, cfg config.PolygonConfig, db *database.DB,
 ) (*Side, error) {
 	chainID := mainChainID
 	if env == "dev" {
@@ -38,11 +38,12 @@ func NewSide(ctx context.Context, highway chan message.Message, startOrder uint3
 		return nil, err
 	}
 
-	listener := newListener(ctx, client, bypass.POLYGON, highway, startOrder)
+	listener := newListener(ctx, client, bypass.POLYGON, highway, startOrder, db)
 	bridge := newBridge(bp, bypass.POLYGON, client)
 
 	return &Side{
 		client:   client,
+		db:       db,
 		listener: listener,
 		bridge:   bridge,
 		highway:  highway,

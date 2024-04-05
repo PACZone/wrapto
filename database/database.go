@@ -3,7 +3,6 @@ package database
 import (
 	"github.com/PACZone/wrapto/types/order"
 	"github.com/glebarez/sqlite"
-	gonanoid "github.com/matoous/go-nanoid"
 	"gorm.io/gorm"
 )
 
@@ -47,46 +46,49 @@ func NewDB(path string) (*DB, error) {
 	}, nil
 }
 
-func (db *DB) AddOrder(order *order.Order) (string, error) {
-	ord := Order{
-		ID:       order.ID,
-		TxHash:   order.TxHash,
-		Receiver: order.Receiver,
-		Sender:   order.Sender,
-		Amount:   order.OriginalAmount(),
-		Fee:      order.Fee(),
-		Status:   order.Status,
+func (db *DB) AddOrder(ord *order.Order) (string, error) {
+	o := Order{
+		ID:       ord.ID,
+		TxHash:   ord.TxHash,
+		Receiver: ord.Receiver,
+		Sender:   ord.Sender,
+		Amount:   ord.OriginalAmount(),
+		Fee:      ord.Fee(),
+		Status:   ord.Status,
 	}
-	if err := db.Create(ord).Error; err != nil {
+	if err := db.Create(o).Error; err != nil {
 		return "", err
 	}
-	return order.ID, nil
+
+	return ord.ID, nil
 }
 
 func (db *DB) AddLog(log *Log) error {
 	return db.Create(log).Error
 }
 
-func (db *DB) UpdateOrder(order *Order) error {
-	return db.Save(order).Error
+func (db *DB) UpdateOrder(ord *Order) error {
+	return db.Save(ord).Error
 }
 
 func (db *DB) GetOrder(id string) (*Order, error) {
-	var order Order
-	err := db.Preload("Logs").First(&order, "id = ?", id).Error
+	var ord Order
+	err := db.Preload("Logs").First(&ord, "id = ?", id).Error
 	if err != nil {
 		return nil, err
 	}
-	return &order, nil
+
+	return &ord, nil
 }
 
 func (db *DB) GetOrderWithLogs(id string) (*Order, error) {
-	var order Order
-	err := db.Preload("Logs").First(&order, "id = ?", id).Error
+	var ord Order
+	err := db.Preload("Logs").First(&ord, "id = ?", id).Error
 	if err != nil {
 		return nil, err
 	}
-	return &order, nil
+
+	return &ord, nil
 }
 
 func (db *DB) GetOrderLogs(orderID string) ([]Log, error) {
@@ -95,5 +97,6 @@ func (db *DB) GetOrderLogs(orderID string) ([]Log, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return logs, nil
 }

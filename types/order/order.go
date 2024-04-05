@@ -46,7 +46,7 @@ type Order struct {
 func NewOrder(txHash, sender, receiver string, amount float64) (*Order, error) {
 	ID, err := gonanoid.ID(10)
 	if err != nil {
-		return nil, err //? panic 
+		return nil, err // ? panic
 	}
 
 	ord := &Order{
