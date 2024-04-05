@@ -5,6 +5,7 @@ import (
 
 	"github.com/PACZone/wrapto/config"
 	"github.com/PACZone/wrapto/database"
+	logger "github.com/PACZone/wrapto/log"
 	"github.com/PACZone/wrapto/sides/pactus"
 	"github.com/PACZone/wrapto/sides/polygon"
 	"github.com/PACZone/wrapto/types/bypass"
@@ -32,12 +33,12 @@ func NewManager(ctx context.Context, cancel context.CancelFunc, cfg *config.Conf
 	pactusCh := make(chan message.Message, 10)
 	polygonCh := make(chan message.Message, 10)
 
-	pactusSide, err := pactus.NewSide(ctx, highway, 0, pactusCh, cfg.Environment, cfg.Pactus, db)
+	pactusSide, err := pactus.NewSide(ctx, highway, 1, pactusCh, cfg.Environment, cfg.Pactus, db)
 	if err != nil {
 		return nil, err
 	}
 
-	polygonSide, err := polygon.NewSide(ctx, highway, 0, polygonCh, cfg.Environment, cfg.Polygon, db)
+	polygonSide, err := polygon.NewSide(ctx, highway, 4, polygonCh, cfg.Environment, cfg.Polygon, db)
 	if err != nil {
 		return nil, err
 	}
@@ -61,6 +62,8 @@ func NewManager(ctx context.Context, cancel context.CancelFunc, cfg *config.Conf
 }
 
 func (m *Mgr) Start() {
+	logger.Info("manager actor spawned")
+
 	go m.sides.pactus.Start()
 	go m.sides.polygon.Start()
 

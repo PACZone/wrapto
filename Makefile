@@ -1,6 +1,7 @@
 PACKAGES=$(shell go list ./... | grep -v 'tests' | grep -v 'grpc/gen')
 
 ifneq (,$(filter $(OS),Windows_NT MINGW64))
+EXE = .exe
 RM = del /q
 else
 RM = rm -rf
@@ -15,7 +16,8 @@ devtools:
 
 ### Building
 
-# TODO 
+build:
+	go build -o build/wrapto$(EXE)  .
 
 ### ABIs (EVM contracts)
 build-abis:

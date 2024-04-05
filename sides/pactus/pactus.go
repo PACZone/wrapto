@@ -6,6 +6,7 @@ import (
 
 	"github.com/PACZone/wrapto/config"
 	"github.com/PACZone/wrapto/database"
+	logger "github.com/PACZone/wrapto/log"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 	"github.com/pactus-project/pactus/crypto"
@@ -26,7 +27,7 @@ func NewSide(ctx context.Context,
 	db *database.DB,
 ) (*Side, error) {
 	if env == "dev" {
-		crypto.AddressHRP = "tpc"
+		crypto.AddressHRP = "pc"
 	}
 
 	client, err := newClient(ctx, cfg.RPCNode)
@@ -53,6 +54,8 @@ func NewSide(ctx context.Context,
 }
 
 func (s *Side) Start() {
+	logger.Info("pactus actor spawned")
+
 	var wg sync.WaitGroup
 
 	wg.Add(2)
@@ -66,6 +69,9 @@ func (s *Side) Start() {
 				Payload: nil,
 			}
 		}
+
+		logger.Error("error starting listener", "actor", bypass.PACTUS, "err", err)
+
 		wg.Done()
 	}()
 
@@ -78,8 +84,13 @@ func (s *Side) Start() {
 				Payload: nil,
 			}
 		}
+
+		logger.Error("error starting bridge", "actor", bypass.PACTUS, "err", err)
+
 		wg.Done()
 	}()
 
 	wg.Wait()
+
+	logger.Info("stopping pactus actor")
 }

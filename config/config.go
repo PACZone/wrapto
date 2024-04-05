@@ -2,12 +2,15 @@ package config
 
 import (
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
 	Environment string
+	Logger      LoggerConfig
 	Pactus      PactusConfig
 	Polygon     PolygonConfig
 	Database    DatabaseConfig
@@ -30,13 +33,48 @@ type DatabaseConfig struct {
 	Path string
 }
 
+type LoggerConfig struct {
+	Filename   string
+	LogLevel   string
+	Targets    []string
+	MaxSize    int
+	MaxBackups int
+	Compress   bool
+}
+
 func LoadConfig() (*Config, error) {
 	if err := godotenv.Load(); err != nil {
 		return nil, err
 	}
 
+	maxSizeStr := os.Getenv("LOG_MAX_SIZE")
+	maxSize, err := strconv.Atoi(maxSizeStr)
+	if err != nil {
+		return nil, err
+	}
+
+	maxBackupsStr := os.Getenv("LOG_MAX_BACKUPS")
+	maxBackups, err := strconv.Atoi(maxBackupsStr)
+	if err != nil {
+		return nil, err
+	}
+
+	compressStr := os.Getenv("LOG_COMPRESS")
+	compress, err := strconv.ParseBool(compressStr)
+	if err != nil {
+		return nil, err
+	}
+
 	cfg := &Config{
-		Environment: os.Getenv("NETWORK"),
+		Environment: os.Getenv("ENVIRONMENT"),
+		Logger: LoggerConfig{
+			Filename:   os.ExpandEnv("LOG_FILENAME"),
+			LogLevel:   os.Getenv("LOG_LEVEL"),
+			Targets:    strings.Split(os.Getenv("LOG_TARGETS"), ","),
+			MaxSize:    maxSize,
+			MaxBackups: maxBackups,
+			Compress:   compress,
+		},
 		Pactus: PactusConfig{
 			WalletPath: os.Getenv("PACTUS_WALLET_PATH"),
 			WalletPass: os.Getenv("PACTUS_WALLET_PASSWORD"),
@@ -61,7 +99,7 @@ func LoadConfig() (*Config, error) {
 }
 
 func (c *Config) basicCheck() error {
-	if !(c.Environment == "dev") || !(c.Environment == "prod") {
+	if c.Environment != "dev" && c.Environment != "prod" { //nolint
 		return InvalidEnvironmentError{
 			Environment: c.Environment,
 		}
