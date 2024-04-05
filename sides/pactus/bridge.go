@@ -33,7 +33,7 @@ func (b Bridge) Start() {
 }
 
 func (b Bridge) ProcessMsg(msg message.Message) error {
-	err := msg.BasicCheck(b.bypassName)
+	err := msg.Validate(b.bypassName)
 	if err != nil {
 		return err
 	}

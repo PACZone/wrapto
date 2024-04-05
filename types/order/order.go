@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/PACZone/wrapto/types"
+	"github.com/PACZone/wrapto/types/params"
 	gonanoid "github.com/matoous/go-nanoid"
 )
 
@@ -66,15 +66,15 @@ func NewOrder(txHash, sender, receiver string, amount float64) (*Order, error) {
 }
 
 func (o *Order) Fee() float64 {
-	fee := o.amount * types.FeeFraction
+	fee := o.amount * params.FeeFraction
 	ceiledFee := math.Ceil(fee)
 
-	if ceiledFee <= types.MinimumFee {
-		return types.MinimumFee
+	if ceiledFee <= params.MinimumFee {
+		return params.MinimumFee
 	}
 
-	if ceiledFee >= types.MaximumFee {
-		return types.MaximumFee
+	if ceiledFee >= params.MaximumFee {
+		return params.MaximumFee
 	}
 
 	return ceiledFee
@@ -85,9 +85,9 @@ func (o *Order) Amount() float64 {
 }
 
 func (o *Order) basicCheck() error {
-	if o.amount <= types.MinimumFee {
+	if o.amount <= params.MinimumFee {
 		return BasicCheckError{
-			Reason: fmt.Sprintf("amount must be more than %v PAC", types.MinimumFee),
+			Reason: fmt.Sprintf("amount must be more than %v PAC", params.MinimumFee),
 		}
 	}
 

@@ -1,4 +1,4 @@
-package types
+package params
 
 import "github.com/PACZone/wrapto/types/bypass"
 
