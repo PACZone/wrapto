@@ -3,10 +3,9 @@ package main
 import (
 	"context"
 	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/PACZone/wrapto/core"
+	logger "github.com/PACZone/wrapto/log"
 	"github.com/spf13/cobra"
 )
 
@@ -17,11 +16,8 @@ func run(cmd *cobra.Command, _ []string) {
 
 	c.Start()
 
-	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-	<-sigChan
-
-	cancel()
+	<-ctx.Done()
+	logger.Info("shutdown")
 }
 
 func main() {

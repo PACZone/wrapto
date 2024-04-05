@@ -112,6 +112,8 @@ func (b Bridge) processMsg(msg message.Message) error {
 
 	txID, err := b.wallet.transferTx(payload.Receiver, memo, amt)
 	if err != nil {
+		logger.Error("can't send transaction to pactus network", "actor", b.bypassName, "err", err, "payload", payload)
+
 		dbErr := b.db.AddLog(&database.Log{
 			OrderID:     msg.Payload.ID,
 			Actor:       string(b.bypassName),

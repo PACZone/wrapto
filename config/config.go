@@ -66,7 +66,7 @@ func LoadConfig() (*Config, error) {
 	}
 
 	cfg := &Config{
-		Environment: os.Getenv("NETWORK"),
+		Environment: os.Getenv("ENVIRONMENT"),
 		Logger: LoggerConfig{
 			Filename:   os.ExpandEnv("LOG_FILENAME"),
 			LogLevel:   os.Getenv("LOG_LEVEL"),
@@ -99,7 +99,7 @@ func LoadConfig() (*Config, error) {
 }
 
 func (c *Config) basicCheck() error {
-	if !(c.Environment == "dev") || !(c.Environment == "prod") {
+	if c.Environment != "dev" && c.Environment != "prod" { //nolint
 		return InvalidEnvironmentError{
 			Environment: c.Environment,
 		}

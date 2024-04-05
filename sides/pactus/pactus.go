@@ -27,7 +27,7 @@ func NewSide(ctx context.Context,
 	db *database.DB,
 ) (*Side, error) {
 	if env == "dev" {
-		crypto.AddressHRP = "tpc"
+		crypto.AddressHRP = "pc"
 	}
 
 	client, err := newClient(ctx, cfg.RPCNode)
@@ -69,6 +69,9 @@ func (s *Side) Start() {
 				Payload: nil,
 			}
 		}
+
+		logger.Error("error starting listener", "actor", bypass.PACTUS, "err", err)
+
 		wg.Done()
 	}()
 
@@ -81,6 +84,9 @@ func (s *Side) Start() {
 				Payload: nil,
 			}
 		}
+
+		logger.Error("error starting bridge", "actor", bypass.PACTUS, "err", err)
+
 		wg.Done()
 	}()
 

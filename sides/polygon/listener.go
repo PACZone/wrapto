@@ -50,8 +50,11 @@ func (l *Listener) Start() error {
 			return nil
 		default:
 			if err := l.processOrder(); err != nil {
+				logger.Error("can't process block on listener", "actor", l.bypassName, "err", err)
+
 				return err
 			}
+			l.nextOrder++
 		}
 	}
 }
