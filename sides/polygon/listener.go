@@ -54,7 +54,6 @@ func (l *Listener) Start() error {
 
 				return err
 			}
-			l.nextOrder++
 		}
 	}
 }
@@ -66,17 +65,19 @@ func (l *Listener) processOrder() error {
 	}
 
 	if o.Sender == common.HexToAddress("0x0000000000000000000000000000000000000000") {
-		<-time.After(20 * time.Second)
+		time.Sleep(20 * time.Second)
 
 		return nil
 	}
+
+	l.nextOrder++
 
 	logger.Info("processing new message on listener", "actor", l.bypassName, "orderNumber", l.nextOrder)
 
 	amt, _ := o.Amount.Float64()
 	sender := o.Sender.Hex()
 	id := strconv.FormatUint(uint64(l.nextOrder), 10)
-	ord, err := order.NewOrder(id, sender, "", amt)
+	ord, err := order.NewOrder(id, sender, o.DestinationAddress, amt)
 	if err != nil {
 		dbErr := l.db.UpdateOrderStatus(ord.ID, order.FAILED)
 		if dbErr != nil {
@@ -111,26 +112,6 @@ func (l *Listener) processOrder() error {
 	}
 
 	msg := message.NewMessage(params.MainBypass, l.bypassName, ord)
-	err = msg.Validate(params.MainBypass)
-	if err != nil {
-		dbErr := l.db.UpdateOrderStatus(id, order.FAILED)
-		if dbErr != nil {
-			return dbErr
-		}
-
-		dbErr = l.db.AddLog(&database.Log{
-			Actor:       string(l.bypassName),
-			Description: "invalid message",
-			OrderID:     id,
-			Trace:       err.Error(),
-		})
-		if dbErr != nil {
-			return dbErr
-		}
-
-		return nil
-	}
-
 	l.highway <- msg
 
 	logger.Info("new message passed to pactus", "actor", l.bypassName, "orderID", ord.ID)

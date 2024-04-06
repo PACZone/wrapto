@@ -88,7 +88,7 @@ func (b Bridge) processMsg(msg message.Message) error {
 
 	payload := msg.Payload
 
-	amt, err := amount.NewAmount(payload.Amount())
+	amt, err := amount.NewAmount((payload.Amount() / 1e9)) // TODO: FIX ME!!!!!!!!!!!!!!!!!!!
 	if err != nil {
 		dbErr := b.db.AddLog(&database.Log{
 			OrderID:     msg.Payload.ID,

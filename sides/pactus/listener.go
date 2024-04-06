@@ -11,7 +11,6 @@ import (
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 	"github.com/PACZone/wrapto/types/order"
-	"github.com/PACZone/wrapto/types/params"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 )
 
@@ -58,7 +57,6 @@ func (l *Listener) Start() error {
 
 				return err
 			}
-			l.nextBlock++
 		}
 	}
 }
@@ -70,7 +68,7 @@ func (l *Listener) processBlocks() error {
 	}
 
 	if !ok {
-		<-time.After(5 * time.Second)
+		time.Sleep(5 * time.Second)
 
 		return nil
 	}
@@ -79,6 +77,8 @@ func (l *Listener) processBlocks() error {
 	if err != nil {
 		return err // TODO: handle errors from client
 	}
+
+	l.nextBlock++
 
 	validTxs := l.filterValidTxs(blk.Txs)
 
@@ -121,29 +121,6 @@ func (l *Listener) processBlocks() error {
 		}
 
 		msg := message.NewMessage(dest.BypassName, l.bypassName, ord)
-		err = msg.Validate(params.MainBypass)
-		if err != nil {
-			logger.Warn("invalid message", "actor", l.bypassName, "err", err,
-				"height", blk.Height, "txID", txHash)
-
-			dbErr := l.db.UpdateOrderStatus(ord.ID, order.FAILED)
-			if dbErr != nil {
-				return dbErr
-			}
-
-			dbErr = l.db.AddLog(&database.Log{
-				Actor:       "PACTUS",
-				Description: "invalid message",
-				OrderID:     ord.ID,
-				Trace:       err.Error(),
-			})
-			if dbErr != nil {
-				return dbErr
-			}
-
-			continue
-		}
-
 		l.highway <- msg
 
 		logger.Info("sending order message to highway", "actor", l.bypassName, "height",
