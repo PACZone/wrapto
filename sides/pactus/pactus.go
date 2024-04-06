@@ -27,7 +27,7 @@ func NewSide(ctx context.Context,
 	db *database.DB,
 ) (*Side, error) {
 	if env == "dev" {
-		crypto.AddressHRP = "pc"
+		crypto.AddressHRP = "pc" // TODO: FIX ME!!!!!
 	}
 
 	client, err := newClient(ctx, cfg.RPCNode)
