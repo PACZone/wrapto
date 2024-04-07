@@ -98,6 +98,16 @@ func (l *Listener) processBlocks() error {
 			continue
 		}
 
+		isExist, err := l.db.IsOrderExist(txHash)
+		if err != nil {
+			return err
+		}
+		if isExist {
+			logger.Warn("error repetitive transaction", "actor", l.bypassName, "txHash", txHash)
+
+			continue
+		}
+
 		ord, err := order.NewOrder(txHash, sender, destInfo.Addr, amt)
 		if err != nil {
 			logger.Error("error while making new order", "actor", l.bypassName, "err", err,
