@@ -57,5 +57,3 @@ type State struct {
 
 	gorm.Model
 }
-
-

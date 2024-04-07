@@ -73,7 +73,6 @@ func (s *Side) Start() {
 			logger.Error("error starting listener", "actor", bypass.POLYGON, "err", err)
 		}
 
-
 		wg.Done()
 	}()
 
@@ -87,7 +86,6 @@ func (s *Side) Start() {
 			}
 			logger.Error("error starting bridge", "actor", bypass.POLYGON, "err", err)
 		}
-
 
 		wg.Done()
 	}()

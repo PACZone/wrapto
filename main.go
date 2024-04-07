@@ -7,8 +7,6 @@ import (
 	"syscall"
 	"time"
 
-	// "time"
-
 	"github.com/PACZone/wrapto/core"
 	logger "github.com/PACZone/wrapto/log"
 	"github.com/spf13/cobra"
@@ -24,7 +22,6 @@ func run(cmd *cobra.Command, _ []string) {
 	<-ctx.Done()
 	<-time.After(time.Second * 5)
 	logger.Info("shutdown")
-
 }
 
 func main() {

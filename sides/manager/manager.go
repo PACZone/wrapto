@@ -33,10 +33,9 @@ func NewManager(ctx context.Context, cancel context.CancelFunc, cfg *config.Conf
 	pactusCh := make(chan message.Message, 10)
 	polygonCh := make(chan message.Message, 10)
 
-
-	lastState,err := db.GetState()
-	if err !=nil{
-		return nil,err
+	lastState, err := db.GetState()
+	if err != nil {
+		return nil, err
 	}
 
 	pactusSide, err := pactus.NewSide(ctx, highway, lastState.Pactus, pactusCh,
@@ -91,7 +90,7 @@ func (m *Mgr) Start() {
 func (m *Mgr) routing(msg message.Message) error {
 	if msg.To == bypass.MANAGER && msg.Payload == nil {
 		m.cancel()
-		
+
 		return nil
 	}
 

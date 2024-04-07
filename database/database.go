@@ -43,7 +43,6 @@ func NewDB(path string) (*DB, error) {
 				Reason:    err.Error(),
 			}
 		}
-
 	}
 
 	return &DB{
