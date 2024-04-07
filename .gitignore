@@ -24,3 +24,5 @@ test_wallet
 teleq.sqlite
 .idea
 .code
+/.idea
+/.code
