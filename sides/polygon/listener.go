@@ -61,7 +61,7 @@ func (l *Listener) Start() error {
 func (l *Listener) processOrder() error {
 	o, err := l.client.Get(*big.NewInt(int64(l.nextOrderNumber)))
 	if err != nil {
-		return err // TODO: retry 3 time
+		return err
 	}
 
 	if o.Sender == common.HexToAddress("0x0000000000000000000000000000000000000000") {

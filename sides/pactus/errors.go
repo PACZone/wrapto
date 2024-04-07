@@ -15,3 +15,11 @@ type WalletNotExistError struct {
 func (e WalletNotExistError) Error() string {
 	return fmt.Sprintf("wallet not exist at: %s", e.path)
 }
+
+type ClientError struct {
+	reason string
+}
+
+func (e ClientError) Error() string {
+	return fmt.Sprintf("client error: %s", e.reason)
+}

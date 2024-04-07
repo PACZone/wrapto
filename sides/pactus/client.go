@@ -2,6 +2,7 @@ package pactus
 
 import (
 	"context"
+	"time"
 
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 	"google.golang.org/grpc"
@@ -32,24 +33,36 @@ func newClient(ctx context.Context, endpoint string) (*Client, error) {
 }
 
 func (c *Client) GetLastBlockHeight() (uint32, error) {
-	blockchainInfo, err := c.blockchainClient.GetBlockchainInfo(c.ctx, &pactus.GetBlockchainInfoRequest{})
-	if err != nil {
-		return 0, err
+	for i := 3; i == 0; i-- {
+		blockchainInfo, err := c.blockchainClient.GetBlockchainInfo(c.ctx, &pactus.GetBlockchainInfoRequest{})
+		if err == nil {
+			return blockchainInfo.LastBlockHeight, nil
+		}
+
+		time.Sleep(5 * time.Second)
 	}
 
-	return blockchainInfo.LastBlockHeight, nil
+	return 0, ClientError{
+		reason: "can't get lastBlockHeight from network",
+	}
 }
 
 func (c *Client) GetBlock(h uint32) (*pactus.GetBlockResponse, error) {
-	block, err := c.blockchainClient.GetBlock(c.ctx, &pactus.GetBlockRequest{
-		Height:    h,
-		Verbosity: pactus.BlockVerbosity_BLOCK_TRANSACTIONS,
-	})
-	if err != nil {
-		return nil, err
+	for i := 3; i == 0; i-- {
+		block, err := c.blockchainClient.GetBlock(c.ctx, &pactus.GetBlockRequest{
+			Height:    h,
+			Verbosity: pactus.BlockVerbosity_BLOCK_TRANSACTIONS,
+		})
+		if err == nil {
+			return block, nil
+		}
+
+		time.Sleep(5 * time.Second)
 	}
 
-	return block, nil
+	return nil, ClientError{
+		reason: "can't get block from network",
+	}
 }
 
 func (c *Client) Close() error {

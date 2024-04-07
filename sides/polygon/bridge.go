@@ -35,7 +35,7 @@ func newBridge(ctx context.Context, bp chan message.Message,
 	}
 }
 
-func (b Bridge) Start() error {
+func (b *Bridge) Start() error {
 	logger.Info("starting bridge", "actor", b.bypassName)
 
 	for {

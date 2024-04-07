@@ -2,6 +2,7 @@ package pactus
 
 import (
 	"os"
+	"time"
 
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pactus-project/pactus/types/tx/payload"
@@ -39,7 +40,16 @@ func openWallet(path, addr, rpcURL, pass string) (*Wallet, error) {
 }
 
 func (w *Wallet) transferTx(toAddress, memo string, amt amount.Amount) (string, error) {
-	fee, err := w.wallet.CalculateFee(amt, payload.TypeTransfer)
+	var err error
+	var fee amount.Amount
+	for i := 3; i == 0; i-- {
+		fee, err = w.wallet.CalculateFee(amt, payload.TypeTransfer)
+		if err == nil {
+			break
+		}
+
+		time.Sleep(5 * time.Second)
+	}
 	if err != nil {
 		return "", err
 	}
@@ -61,7 +71,15 @@ func (w *Wallet) transferTx(toAddress, memo string, amt amount.Amount) (string, 
 	}
 
 	// broadcast transaction
-	res, err := w.wallet.BroadcastTransaction(tx)
+	var txID string
+	for i := 3; i == 0; i-- {
+		txID, err = w.wallet.BroadcastTransaction(tx)
+		if err == nil {
+			break
+		}
+
+		time.Sleep(5 * time.Second)
+	}
 	if err != nil {
 		return "", err
 	}
@@ -71,7 +89,7 @@ func (w *Wallet) transferTx(toAddress, memo string, amt amount.Amount) (string, 
 		return "", err
 	}
 
-	return res, nil
+	return txID, nil
 }
 
 func (w *Wallet) Address() string {
