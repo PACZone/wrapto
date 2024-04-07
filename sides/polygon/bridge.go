@@ -22,12 +22,14 @@ type Bridge struct {
 	ctx context.Context
 }
 
-func newBridge(ctx context.Context, bp chan message.Message, bn bypass.Name, c *Client, db *database.DB) Bridge {
+func newBridge(ctx context.Context, bp chan message.Message,
+	bn bypass.Name, client *Client, db *database.DB,
+) Bridge {
 	return Bridge{
 		bypass:     bp,
 		db:         db,
 		bypassName: bn,
-		client:     c,
+		client:     client,
 
 		ctx: ctx,
 	}
@@ -79,9 +81,9 @@ func (b *Bridge) processMsg(msg message.Message) error {
 
 	payload := msg.Payload
 
-	amountBigInt := new(big.Int).SetUint64(uint64(payload.Amount()))
+	bigIntAmt := new(big.Int).SetUint64(uint64(payload.Amount()))
 
-	hash, err := b.client.Mint(*amountBigInt, common.HexToAddress(payload.Receiver))
+	hash, err := b.client.Mint(*bigIntAmt, common.HexToAddress(payload.Receiver))
 	if err != nil {
 		dbErr := b.db.AddLog(msg.Payload.ID, string(b.bypassName), "tx failed", err.Error())
 		if dbErr != nil {

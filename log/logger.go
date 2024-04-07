@@ -21,13 +21,7 @@ var (
 )
 
 type logger struct {
-	subs   map[string]*SubLogger
 	writer io.Writer
-}
-
-type SubLogger struct {
-	logger zerolog.Logger
-	name   string
 }
 
 func InitGlobalLogger(cfg *config.LoggerConfig) {
@@ -45,19 +39,16 @@ func InitGlobalLogger(cfg *config.LoggerConfig) {
 		}
 
 		if slices.Contains(cfg.Targets, "console") {
-			// Console writer.
 			writers = append(writers, zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"})
 		}
 
 		globalInst = &logger{
-			subs:   make(map[string]*SubLogger),
 			writer: io.MultiWriter(writers...),
 		}
 
-		// Set the global log level from the configuration.
 		level, err := zerolog.ParseLevel(strings.ToLower(cfg.LogLevel))
 		if err != nil {
-			level = zerolog.InfoLevel // Default to info level if parsing fails.
+			level = zerolog.InfoLevel
 		}
 		zerolog.SetGlobalLevel(level)
 
@@ -65,28 +56,14 @@ func InitGlobalLogger(cfg *config.LoggerConfig) {
 	}
 }
 
-// NewLoggerLevel initializes the logger level.
 func NewLoggerLevel(level zerolog.Level) {
 	logLevel = level
 }
 
-func getLoggersInst() *logger {
-	if globalInst == nil {
-		globalInst = &logger{
-			subs:   make(map[string]*SubLogger),
-			writer: zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"},
-		}
-		log.Logger = zerolog.New(globalInst.writer).With().Timestamp().Logger()
-	}
-
-	return globalInst
-}
-
-// function to set logger level based on env.
 func SetLoggerLevel(level string) {
 	parsedLevel, err := zerolog.ParseLevel(strings.ToLower(level))
 	if err != nil {
-		parsedLevel = zerolog.InfoLevel // Default to info level if parsing fails
+		parsedLevel = zerolog.InfoLevel
 	}
 	logLevel = parsedLevel
 }
@@ -124,50 +101,6 @@ func addFields(event *zerolog.Event, keyvals ...interface{}) *zerolog.Event {
 	}
 
 	return event
-}
-
-func NewSubLogger(name string) *SubLogger {
-	inst := getLoggersInst()
-	sl := &SubLogger{
-		logger: zerolog.New(inst.writer).With().Timestamp().Logger(),
-		name:   name,
-	}
-
-	inst.subs[name] = sl
-
-	return sl
-}
-
-func (sl *SubLogger) logObj(event *zerolog.Event, msg string, keyvals ...interface{}) {
-	addFields(event, keyvals...).Msg(msg)
-}
-
-func (sl *SubLogger) Trace(msg string, keyvals ...interface{}) {
-	sl.logObj(sl.logger.Trace(), msg, keyvals...)
-}
-
-func (sl *SubLogger) Debug(msg string, keyvals ...interface{}) {
-	sl.logObj(sl.logger.Debug(), msg, keyvals...)
-}
-
-func (sl *SubLogger) Info(msg string, keyvals ...interface{}) {
-	sl.logObj(sl.logger.Info(), msg, keyvals...)
-}
-
-func (sl *SubLogger) Warn(msg string, keyvals ...interface{}) {
-	sl.logObj(sl.logger.Warn(), msg, keyvals...)
-}
-
-func (sl *SubLogger) Error(msg string, keyvals ...interface{}) {
-	sl.logObj(sl.logger.Error(), msg, keyvals...)
-}
-
-func (sl *SubLogger) Fatal(msg string, keyvals ...interface{}) {
-	sl.logObj(sl.logger.Fatal(), msg, keyvals...)
-}
-
-func (sl *SubLogger) Panic(msg string, keyvals ...interface{}) {
-	sl.logObj(sl.logger.Panic(), msg, keyvals...)
 }
 
 func Trace(msg string, keyvals ...interface{}) {

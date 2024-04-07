@@ -99,7 +99,7 @@ func LoadConfig() (*Config, error) {
 }
 
 func (c *Config) basicCheck() error {
-	if c.Environment != "dev" && c.Environment != "prod" { //nolint
+	if c.Environment != "dev" && c.Environment != "prod" {
 		return InvalidEnvironmentError{
 			Environment: c.Environment,
 		}
