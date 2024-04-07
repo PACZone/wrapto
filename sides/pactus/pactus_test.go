@@ -10,34 +10,34 @@ import (
 
 func TestParseMemo(t *testing.T) {
 	memos := []struct {
-		memo string
-		addr string
-		dest bypass.Name
-		err  bool
+		memo        string
+		addr        string
+		dest        bypass.Name
+		expectError bool
 	}{
 		{
-			memo: "0x890189B78F2639a2A407C5F089481DB92A028608@POLYGON",
-			addr: "0x890189B78F2639a2A407C5F089481DB92A028608",
-			dest: bypass.POLYGON,
-			err:  false,
+			memo:        "0x890189B78F2639a2A407C5F089481DB92A028608@POLYGON",
+			addr:        "0x890189B78F2639a2A407C5F089481DB92A028608",
+			dest:        bypass.POLYGON,
+			expectError: false,
 		},
 		{
-			memo: "sergijwerpgij8",
-			addr: "",
-			dest: "",
-			err:  true,
+			memo:        "sergijwerpgij8",
+			addr:        "",
+			dest:        "",
+			expectError: true,
 		},
 		{
-			memo: "a@2@r",
-			addr: "",
-			dest: "",
-			err:  true,
+			memo:        "a@2@r",
+			addr:        "",
+			dest:        "",
+			expectError: true,
 		},
 	}
 
 	for _, m := range memos {
 		d, err := pactus.ParseMemo(m.memo)
-		if m.err {
+		if m.expectError {
 			assert.Error(t, err)
 			assert.Nil(t, d)
 

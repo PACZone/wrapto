@@ -16,7 +16,7 @@ type Client struct {
 	ctx context.Context
 }
 
-func newClient(c context.Context, endpoint string) (*Client, error) {
+func newClient(ctx context.Context, endpoint string) (*Client, error) {
 	conn, err := grpc.Dial(endpoint,
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -27,7 +27,7 @@ func newClient(c context.Context, endpoint string) (*Client, error) {
 		blockchainClient:  pactus.NewBlockchainClient(conn),
 		transactionClient: pactus.NewTransactionClient(conn),
 		conn:              conn,
-		ctx:               c,
+		ctx:               ctx,
 	}, nil
 }
 

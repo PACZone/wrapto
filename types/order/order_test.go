@@ -32,7 +32,7 @@ func TestBasicCheck(t *testing.T) {
 }
 
 func TestFee(t *testing.T) {
-	feeAndAmts := []struct { // better name?
+	feeAndAmounts := []struct { // better name?
 		Fee    float64
 		Amount float64
 	}{
@@ -50,7 +50,7 @@ func TestFee(t *testing.T) {
 		},
 	}
 
-	for _, fa := range feeAndAmts {
+	for _, fa := range feeAndAmounts {
 		ord, err := order.NewOrder("", "", "", fa.Amount)
 		assert.NoError(t, err)
 
@@ -59,7 +59,7 @@ func TestFee(t *testing.T) {
 }
 
 func TestAmount(t *testing.T) {
-	feeAndAmts := []struct { // better name?
+	feeAndAmounts := []struct { // better name?
 		Fee    float64
 		Amount float64
 	}{
@@ -77,7 +77,7 @@ func TestAmount(t *testing.T) {
 		},
 	}
 
-	for _, fa := range feeAndAmts {
+	for _, fa := range feeAndAmounts {
 		ord, err := order.NewOrder("", "", "", fa.Amount)
 		assert.NoError(t, err)
 

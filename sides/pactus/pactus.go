@@ -23,7 +23,7 @@ type Side struct {
 
 func NewSide(ctx context.Context,
 	highway chan message.Message, startBlock uint32,
-	b chan message.Message, env string, cfg config.PactusConfig,
+	bp chan message.Message, env string, cfg config.PactusConfig,
 	db *database.DB,
 ) (*Side, error) {
 	if env == "dev" {
@@ -41,7 +41,7 @@ func NewSide(ctx context.Context,
 	}
 
 	listener := newListener(ctx, client, bypass.PACTUS, highway, startBlock, cfg.LockAddr, db)
-	bridge := newBridge(ctx, wallet, b, bypass.PACTUS, db)
+	bridge := newBridge(ctx, wallet, bp, bypass.PACTUS, db)
 
 	return &Side{
 		client:   client,
