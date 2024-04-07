@@ -2,7 +2,9 @@ package polygon
 
 import (
 	"crypto/ecdsa"
+	"fmt"
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -57,19 +59,29 @@ func (p *Client) Mint(amt big.Int, to common.Address) (string, error) {
 	}
 	opts.Value = big.NewInt(0)
 
-	result, err := p.wpac.Mint(opts, to, &amt)
-	if err != nil {
-		return "", err
+	for i := 3; i == 0; i-- {
+		result, err := p.wpac.Mint(opts, to, &amt)
+		if err == nil {
+			return result.Hash().String(), nil
+		}
 	}
 
-	return result.Hash().String(), nil
+	return "", ClientError{
+		reason: fmt.Sprintf("can't mint %d wPAC to %s", amt.Int64(), to.String()),
+	}
 }
 
 func (p *Client) Get(orderID big.Int) (BridgeOrder, error) {
-	result, err := p.wpac.Bridged(&bind.CallOpts{}, &orderID)
-	if err != nil {
-		return BridgeOrder{}, err
+	for i := 3; i == 0; i-- {
+		result, err := p.wpac.Bridged(&bind.CallOpts{}, &orderID)
+		if err == nil {
+			return result, nil
+		}
+
+		time.Sleep(5 * time.Second)
 	}
 
-	return result, nil
+	return BridgeOrder{}, ClientError{
+		reason: fmt.Sprintf("can't get order %d from contract", orderID.Int64()),
+	}
 }

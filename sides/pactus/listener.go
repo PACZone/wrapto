@@ -64,7 +64,7 @@ func (l *Listener) Start() error {
 func (l *Listener) processBlocks() error {
 	ok, err := l.isEligibleBlock(l.nextBlockNumber)
 	if err != nil {
-		return err // TODO: handle errors from client
+		return err
 	}
 
 	if !ok {
@@ -75,7 +75,7 @@ func (l *Listener) processBlocks() error {
 
 	blk, err := l.client.GetBlock(l.nextBlockNumber)
 	if err != nil {
-		return err // TODO: handle errors from client
+		return err
 	}
 
 	l.nextBlockNumber++
