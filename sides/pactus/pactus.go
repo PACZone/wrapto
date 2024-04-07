@@ -30,7 +30,7 @@ func NewSide(ctx context.Context,
 		crypto.AddressHRP = "pc" // TODO: FIX ME!!!!!
 	}
 
-	client, err := newClient(ctx, cfg.RPCNode)
+	client, err := newClient(context.Background(), cfg.RPCNode)
 	if err != nil {
 		return nil, err
 	}
@@ -68,9 +68,9 @@ func (s *Side) Start() {
 				From:    s.bridge.bypassName,
 				Payload: nil,
 			}
+			logger.Error("error starting listener", "actor", bypass.PACTUS, "err", err)
 		}
 
-		logger.Error("error starting listener", "actor", bypass.PACTUS, "err", err)
 
 		wg.Done()
 	}()
@@ -83,14 +83,14 @@ func (s *Side) Start() {
 				From:    s.bridge.bypassName,
 				Payload: nil,
 			}
+			logger.Error("error starting bridge", "actor", bypass.PACTUS, "err", err)
 		}
 
-		logger.Error("error starting bridge", "actor", bypass.PACTUS, "err", err)
-
+		
 		wg.Done()
 	}()
 
 	wg.Wait()
 
-	logger.Info("stopping pactus actor")
+	logger.Info("pactus actor stopped")
 }

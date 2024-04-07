@@ -153,3 +153,52 @@ func TestIsOrderExist(t *testing.T) {
 
 	assert.Equal(t, ord.ID, ordID)
 }
+
+func TestUpdatePactusState(t *testing.T) {
+    db := setup(t)
+
+    state := database.State{
+        Pactus:  0,
+        Polygon: 0,
+    }
+    assert.NoError(t, db.Create(&state).Error)
+
+    err := db.UpdatePactusState(42)
+    assert.NoError(t, err)
+
+    var updatedState database.State
+    assert.NoError(t, db.First(&updatedState).Error)
+    assert.Equal(t, uint32(42), updatedState.Pactus)
+}
+
+func TestUpdatePolygonState(t *testing.T) {
+    db := setup(t)
+
+    state := database.State{
+        Pactus:  0,
+        Polygon: 0,
+    }
+    assert.NoError(t, db.Create(&state).Error)
+
+    err := db.UpdatePolygonState(100)
+    assert.NoError(t, err)
+
+    var updatedState database.State
+    assert.NoError(t, db.First(&updatedState).Error)
+    assert.Equal(t, uint32(100), updatedState.Polygon)
+}
+
+func TestGetState(t *testing.T) {
+    db := setup(t)
+
+    err := db.UpdatePolygonState(100)
+    assert.NoError(t, err)
+
+    err = db.UpdatePactusState(42)
+    assert.NoError(t, err)
+
+    retrievedState, err := db.GetState()
+    assert.NoError(t, err)
+    assert.Equal(t, uint32(42), retrievedState.Pactus)
+    assert.Equal(t, uint32(100), retrievedState.Polygon)
+}

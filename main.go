@@ -3,6 +3,11 @@ package main
 import (
 	"context"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	// "time"
 
 	"github.com/PACZone/wrapto/core"
 	logger "github.com/PACZone/wrapto/log"
@@ -10,14 +15,16 @@ import (
 )
 
 func run(cmd *cobra.Command, _ []string) {
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	c, err := core.NewCore(ctx, cancel)
 	kill(cmd, err)
 
-	c.Start()
+	go c.Start()
 
 	<-ctx.Done()
+	<-time.After(time.Second * 5)
 	logger.Info("shutdown")
+
 }
 
 func main() {

@@ -49,3 +49,13 @@ type Log struct {
 
 	gorm.Model
 }
+
+type State struct {
+	Pactus uint32
+
+	Polygon uint32
+
+	gorm.Model
+}
+
+

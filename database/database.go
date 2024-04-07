@@ -21,16 +21,29 @@ func NewDB(path string) (*DB, error) {
 		}
 	}
 
-	if !db.Migrator().HasTable(&Order{}) || !db.Migrator().HasTable(&Log{}) {
+	if !db.Migrator().HasTable(&Order{}) || !db.Migrator().HasTable(&Log{}) || !db.Migrator().HasTable(&State{}) {
 		if err := db.AutoMigrate(
 			&Order{},
 			&Log{},
+			&State{},
 		); err != nil {
 			return nil, DBError{
 				DBPath: path,
 				Reason: err.Error(),
 			}
 		}
+
+		defaultState := &State{
+			Pactus:  638364,
+			Polygon: 1,
+		}
+		if err := db.Create(defaultState).Error; err != nil {
+			return nil, DBError{
+				TableName: "State",
+				Reason:    err.Error(),
+			}
+		}
+
 	}
 
 	return &DB{
@@ -136,4 +149,41 @@ func (db *DB) GetOrderLogs(orderID string) ([]Log, error) {
 	}
 
 	return logs, nil
+}
+
+func (db *DB) UpdatePactusState(pactus uint32) error {
+	var state State
+	if err := db.First(&state).Error; err != nil {
+		return err
+	}
+
+	state.Pactus = pactus
+	if err := db.Save(&state).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) UpdatePolygonState(polygon uint32) error {
+	var state State
+	if err := db.First(&state).Error; err != nil {
+		return err
+	}
+
+	state.Polygon = polygon
+	if err := db.Save(&state).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) GetState() (*State, error) {
+	var state State
+	if err := db.First(&state).Error; err != nil {
+		return nil, err
+	}
+
+	return &state, nil
 }
