@@ -84,12 +84,7 @@ func (l *Listener) processOrder() error {
 			return dbErr
 		}
 
-		dbErr = l.db.AddLog(&database.Log{
-			Actor:       string(l.bypassName),
-			Description: fmt.Sprintf("failed to create order: %s", id),
-			Trace:       err.Error(),
-		})
-
+		dbErr = l.db.AddLog("", string(l.bypassName), fmt.Sprintf("failed to create order: %s", id), err.Error())
 		if dbErr != nil {
 			return dbErr
 		}
@@ -102,11 +97,7 @@ func (l *Listener) processOrder() error {
 		return err
 	}
 
-	err = l.db.AddLog(&database.Log{
-		Actor:       string(l.bypassName),
-		Description: "order created",
-		OrderID:     id,
-	})
+	err = l.db.AddLog(id, string(l.bypassName), "order created", "")
 	if err != nil {
 		return err
 	}
@@ -116,11 +107,7 @@ func (l *Listener) processOrder() error {
 
 	logger.Info("new message passed to pactus", "actor", l.bypassName, "orderID", ord.ID)
 
-	err = l.db.AddLog(&database.Log{
-		Actor:       string(l.bypassName),
-		Description: "sent order to highway",
-		OrderID:     id,
-	})
+	err = l.db.AddLog(id, string(l.bypassName), "sent order to highway", "")
 	if err != nil {
 		return err
 	}
