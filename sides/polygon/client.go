@@ -64,6 +64,8 @@ func (p *Client) Mint(amt big.Int, to common.Address) (string, error) {
 		if err == nil {
 			return result.Hash().String(), nil
 		}
+
+		time.Sleep(5 * time.Second)
 	}
 
 	return "", ClientError{
