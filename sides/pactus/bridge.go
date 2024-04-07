@@ -41,7 +41,7 @@ func (b Bridge) Start() error {
 
 			return nil
 		case msg := <-b.bypass:
-			err := b.processMsg(msg)
+			err := b.processMessage(msg)
 			if err != nil {
 				logger.Error("error while processing message in bridge",
 					"actor", b.bypassName, "orderID", msg.Payload.ID)
@@ -52,7 +52,7 @@ func (b Bridge) Start() error {
 	}
 }
 
-func (b Bridge) processMsg(msg message.Message) error {
+func (b Bridge) processMessage(msg message.Message) error {
 	logger.Info("new message received for process", "actor", b.bypassName, "orderID", msg.Payload.ID)
 
 	err := b.db.AddLog(msg.Payload.ID, string(b.bypassName), "order received as message", "")

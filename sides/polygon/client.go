@@ -50,14 +50,14 @@ func newClient(rpcURL, pk, cAddr string, chainID int64) (*Client, error) {
 	}, nil
 }
 
-func (p *Client) Mint(amount big.Int, to common.Address) (string, error) {
+func (p *Client) Mint(amt big.Int, to common.Address) (string, error) {
 	opts, err := bind.NewKeyedTransactorWithChainID(p.pk, &p.chainID)
 	if err != nil {
 		return "", err
 	}
 	opts.Value = big.NewInt(0)
 
-	result, err := p.wpac.Mint(opts, to, &amount)
+	result, err := p.wpac.Mint(opts, to, &amt)
 	if err != nil {
 		return "", err
 	}

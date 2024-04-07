@@ -15,12 +15,12 @@ import (
 )
 
 type Listener struct {
-	client     *Client
-	db         *database.DB
-	nextBlock  uint32
-	bypassName bypass.Name
-	highway    chan message.Message
-	lockAddr   string
+	client          *Client
+	db              *database.DB
+	nextBlockNumber uint32
+	bypassName      bypass.Name
+	highway         chan message.Message
+	lockAddr        string
 
 	ctx context.Context
 }
@@ -31,12 +31,12 @@ func newListener(ctx context.Context,
 	db *database.DB,
 ) *Listener {
 	return &Listener{
-		client:     client,
-		db:         db,
-		bypassName: bp,
-		highway:    highway,
-		nextBlock:  startBlock,
-		lockAddr:   lockAddr,
+		client:          client,
+		db:              db,
+		bypassName:      bp,
+		highway:         highway,
+		nextBlockNumber: startBlock,
+		lockAddr:        lockAddr,
 
 		ctx: ctx,
 	}
@@ -47,7 +47,7 @@ func (l *Listener) Start() error {
 	for {
 		select {
 		case <-l.ctx.Done():
-			logger.Info("stopping listener", "actor", l.bypassName, "nextBlock", l.nextBlock)
+			logger.Info("stopping listener", "actor", l.bypassName, "nextBlock", l.nextBlockNumber)
 			_ = l.client.Close()
 
 			return nil
@@ -62,7 +62,7 @@ func (l *Listener) Start() error {
 }
 
 func (l *Listener) processBlocks() error {
-	ok, err := l.isEligibleBlock(l.nextBlock)
+	ok, err := l.isEligibleBlock(l.nextBlockNumber)
 	if err != nil {
 		return err // TODO: handle errors from client
 	}
@@ -73,14 +73,14 @@ func (l *Listener) processBlocks() error {
 		return nil
 	}
 
-	blk, err := l.client.GetBlock(l.nextBlock)
+	blk, err := l.client.GetBlock(l.nextBlockNumber)
 	if err != nil {
 		return err // TODO: handle errors from client
 	}
 
-	l.nextBlock++
+	l.nextBlockNumber++
 
-	validTxs := l.filterValidTxs(blk.Txs)
+	validTxs := l.filterValidTransactions(blk.Txs)
 
 	logger.Info("start processing new block", "actor", l.bypassName, "height", blk.Height)
 	for _, tx := range validTxs {
@@ -91,7 +91,7 @@ func (l *Listener) processBlocks() error {
 		logger.Info("processing new tx", "actor", l.bypassName, "height", blk.Height, "txID", txHash,
 			"amount", amt, "sender", sender)
 
-		dest, err := ParseMemo(tx.Memo)
+		destInfo, err := ParseMemo(tx.Memo)
 		if err != nil {
 			logger.Info("invalid memo", "memo", tx.Memo)
 
@@ -127,14 +127,14 @@ func (l *Listener) processBlocks() error {
 			continue
 		}
 
-		msg := message.NewMessage(dest.BypassName, l.bypassName, ord)
+		msg := message.NewMessage(destInfo.BypassName, l.bypassName, ord)
 		l.highway <- msg
 
 		logger.Info("sending order message to highway", "actor", l.bypassName, "height",
 			blk.Height, "txID", txHash, "orderID", ord.ID)
-		dbErr := l.db.AddLog(ord.ID, "PACTUS", "sent order to highway", "")
-		if dbErr != nil {
-			return dbErr
+		err = l.db.AddLog(ord.ID, "PACTUS", "sent order to highway", "")
+		if err != nil {
+			return err
 		}
 	}
 
@@ -142,15 +142,15 @@ func (l *Listener) processBlocks() error {
 }
 
 func (l *Listener) isEligibleBlock(h uint32) (bool, error) {
-	lst, err := l.client.GetLastBlockHeight()
+	lbh, err := l.client.GetLastBlockHeight()
 	if err != nil {
 		return false, err
 	}
 
-	return h < lst, nil
+	return h < lbh, nil
 }
 
-func (l *Listener) filterValidTxs(txs []*pactus.TransactionInfo) []*pactus.TransactionInfo {
+func (l *Listener) filterValidTransactions(txs []*pactus.TransactionInfo) []*pactus.TransactionInfo {
 	validTxs := make([]*pactus.TransactionInfo, 0)
 
 	for _, tx := range txs {

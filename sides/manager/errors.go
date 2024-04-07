@@ -11,5 +11,5 @@ type BypassNotFoundError struct {
 }
 
 func (e BypassNotFoundError) Error() string {
-	return fmt.Sprintf("%s not found", e.BypassName)
+	return fmt.Sprintf("bypass %s not found", e.BypassName)
 }

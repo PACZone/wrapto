@@ -25,19 +25,19 @@ func setup(t *testing.T) *database.DB {
 func TestAddOrder(t *testing.T) {
 	db := setup(t)
 
-	ordID, err := order.NewOrder("aaa", "sendet", "rec", 20e9)
+	ord, err := order.NewOrder("aaa", "sendet", "rec", 20e9)
 	assert.NoError(t, err)
 
-	o, err := db.AddOrder(ordID)
+	ordID, err := db.AddOrder(ord)
 	assert.NoError(t, err)
 
-	assert.Equal(t, ordID.ID, o)
+	assert.Equal(t, ord.ID, ordID)
 }
 
 func TestAddLog(t *testing.T) {
 	db := setup(t)
 
-	err := db.AddLog("dnslkn", "POLYGON", "this is abcd", "")
+	err := db.AddLog("1", "POLYGON", "this is test desc", "trace")
 	assert.NoError(t, err)
 }
 
@@ -47,20 +47,20 @@ func TestAddLogForOrder(t *testing.T) {
 	ord, err := order.NewOrder("aaa", "sendet", "rec", 20e9)
 	assert.NoError(t, err)
 
-	o, err := db.AddOrder(ord)
+	ordID, err := db.AddOrder(ord)
 	assert.NoError(t, err)
 
-	err = db.AddLog(o, "POLYGON", "descriptivjerijw", "trace")
+	err = db.AddLog(ordID, "POLYGON", "desc", "trace")
 	assert.NoError(t, err)
 }
 
 func TestUpdateOrderStatus(t *testing.T) {
 	db := setup(t)
 
-	newOrd, err := order.NewOrder("aaa", "sendet", "rec", 20e9)
+	ord, err := order.NewOrder("0xFFFF", "sender", "receiver", 2e9)
 	require.NoError(t, err)
 
-	ordID, err := db.AddOrder(newOrd)
+	ordID, err := db.AddOrder(ord)
 	require.NoError(t, err)
 
 	err = db.UpdateOrderStatus(ordID, order.COMPLETE)
@@ -75,20 +75,20 @@ func TestUpdateOrderStatus(t *testing.T) {
 func TestGetOrder(t *testing.T) {
 	db := setup(t)
 
-	newOrd, err := order.NewOrder("aaa", "sendet", "rec", 20e9)
+	ord, err := order.NewOrder("aaa", "sendet", "rec", 20e9)
 	require.NoError(t, err)
 
-	o, err := db.AddOrder(newOrd)
+	ordID, err := db.AddOrder(ord)
 	require.NoError(t, err)
 
-	retOrd, err := db.GetOrder(o)
+	retrievedOrd, err := db.GetOrder(ordID)
 	require.NoError(t, err)
-	assert.Equal(t, retOrd.ID, newOrd.ID)
-	assert.Equal(t, retOrd.TxHash, newOrd.TxHash)
-	assert.Equal(t, retOrd.Amount, newOrd.OriginalAmount())
-	assert.Equal(t, retOrd.Fee, newOrd.Fee())
-	assert.Equal(t, retOrd.Sender, newOrd.Sender)
-	assert.Equal(t, retOrd.Receiver, newOrd.Receiver)
+	assert.Equal(t, retrievedOrd.ID, ord.ID)
+	assert.Equal(t, retrievedOrd.TxHash, ord.TxHash)
+	assert.Equal(t, retrievedOrd.Amount, ord.OriginalAmount())
+	assert.Equal(t, retrievedOrd.Fee, ord.Fee())
+	assert.Equal(t, retrievedOrd.Sender, ord.Sender)
+	assert.Equal(t, retrievedOrd.Receiver, ord.Receiver)
 }
 
 func TestGetOrderWithLogs(t *testing.T) {

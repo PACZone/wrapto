@@ -17,11 +17,11 @@ import (
 )
 
 type Listener struct {
-	client     *Client
-	db         *database.DB
-	bypassName bypass.Name
-	nextOrder  uint32
-	highway    chan message.Message
+	client          *Client
+	db              *database.DB
+	bypassName      bypass.Name
+	nextOrderNumber uint32
+	highway         chan message.Message
 
 	ctx context.Context
 }
@@ -30,12 +30,12 @@ func newListener(ctx context.Context,
 	client *Client, bp bypass.Name, highway chan message.Message, startOrder uint32, db *database.DB,
 ) *Listener {
 	return &Listener{
-		client:     client,
-		db:         db,
-		bypassName: bp,
-		nextOrder:  startOrder,
-		highway:    highway,
-		ctx:        ctx,
+		client:          client,
+		db:              db,
+		bypassName:      bp,
+		nextOrderNumber: startOrder,
+		highway:         highway,
+		ctx:             ctx,
 	}
 }
 
@@ -45,7 +45,7 @@ func (l *Listener) Start() error {
 	for {
 		select {
 		case <-l.ctx.Done():
-			logger.Info("stopping listener", "actor", l.bypassName, "nextOrder", l.nextOrder)
+			logger.Info("stopping listener", "actor", l.bypassName, "nextOrder", l.nextOrderNumber)
 
 			return nil
 		default:
@@ -59,7 +59,7 @@ func (l *Listener) Start() error {
 }
 
 func (l *Listener) processOrder() error {
-	o, err := l.client.Get(*big.NewInt(int64(l.nextOrder)))
+	o, err := l.client.Get(*big.NewInt(int64(l.nextOrderNumber)))
 	if err != nil {
 		return err // TODO: retry 3 time
 	}
@@ -81,13 +81,13 @@ func (l *Listener) processOrder() error {
 		return nil
 	}
 	
-	l.nextOrder++
+	l.nextOrderNumber++
 
-	logger.Info("processing new message on listener", "actor", l.bypassName, "orderNumber", l.nextOrder)
+	logger.Info("processing new message on listener", "actor", l.bypassName, "orderNumber", l.nextOrderNumber)
 
 	amt, _ := o.Amount.Float64()
 	sender := o.Sender.Hex()
-	id := strconv.FormatUint(uint64(l.nextOrder), 10)
+	id := strconv.FormatUint(uint64(l.nextOrderNumber), 10)
 	ord, err := order.NewOrder(id, sender, o.DestinationAddress, amt)
 	if err != nil {
 		dbErr := l.db.UpdateOrderStatus(ord.ID, order.FAILED)
