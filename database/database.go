@@ -1,6 +1,8 @@
 package database
 
 import (
+	"errors"
+
 	"github.com/PACZone/wrapto/types/order"
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
@@ -95,6 +97,21 @@ func (db *DB) GetOrder(id string) (*Order, error) {
 	}
 
 	return ord, nil
+}
+
+func (db *DB) IsOrderExist(txHash string) (bool, error) {
+	var ord Order
+	err := db.Where("tx_hash = ?", txHash).First(&ord).Error
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, nil
+	} else if err != nil {
+		return false, DBError{
+			TableName: "Orders",
+			Reason:    err.Error(),
+		}
+	}
+
+	return true, nil
 }
 
 func (db *DB) GetOrderWithLogs(id string) (*Order, error) {

@@ -8,6 +8,7 @@ import (
 	"github.com/PACZone/wrapto/types/order"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
 )
 
 func setup(t *testing.T) *database.DB {
@@ -131,4 +132,24 @@ func TestGetOrderLogs(t *testing.T) {
 	assert.Equal(t, l.Description, "abcd")
 	assert.Equal(t, l.Trace, "traceAbcd")
 	assert.Equal(t, l.OrderID, ordID)
+}
+
+func TestIsOrderExist(t *testing.T) {
+	db := setup(t)
+
+	ord, err := order.NewOrder("aaa", "sendet", "rec", 20e9)
+	assert.NoError(t, err)
+
+	ordID, err := db.AddOrder(ord)
+	assert.NoError(t, err)
+
+	isExist, err := db.IsOrderExist("bbb")
+	assert.Equal(t, isExist, false)
+	assert.Error(t, gorm.ErrRecordNotFound, err)
+
+	isExist, err = db.IsOrderExist("aaa")
+	assert.Equal(t, isExist, true)
+	assert.NoError(t, err)
+
+	assert.Equal(t, ord.ID, ordID)
 }
