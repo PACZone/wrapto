@@ -102,15 +102,13 @@ func (l *Listener) processBlocks() error {
 		if err != nil {
 			return err
 		}
-
-		logger.Error("Duplicated", "actor", l.bypassName, "err", err)
 		if isExist {
 			logger.Warn("error repetitive transaction", "actor", l.bypassName, "txHash", txHash)
-			
+
 			continue
 		}
 
-		ord, err := order.NewOrder(txHash, sender, dest.Addr, amt)
+		ord, err := order.NewOrder(txHash, sender, destInfo.Addr, amt)
 		if err != nil {
 			logger.Error("error while making new order", "actor", l.bypassName, "err", err,
 				"height", blk.Height, "txID", txHash)

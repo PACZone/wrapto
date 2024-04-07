@@ -69,25 +69,25 @@ func (l *Listener) processOrder() error {
 
 		return nil
 	}
-	isExist, err := l.db.IsOrderExist(strconv.FormatUint(uint64(l.nextOrder), 10))
+
+	id := strconv.FormatUint(uint64(l.nextOrderNumber), 10)
+
+	isExist, err := l.db.IsOrderExist(id)
 	if err != nil {
 		return err
 	}
-
-	logger.Error("Duplicated", "actor", l.bypassName, "err", err)
 	if isExist {
-		logger.Warn("error repetitive transaction", "actor", l.bypassName, "txHash", strconv.FormatUint(uint64(l.nextOrder), 10))
-		
+		logger.Warn("error repetitive transaction", "actor", l.bypassName, "txHash", id)
+
 		return nil
 	}
-	
+
 	l.nextOrderNumber++
 
 	logger.Info("processing new message on listener", "actor", l.bypassName, "orderNumber", l.nextOrderNumber)
 
 	amt, _ := o.Amount.Float64()
 	sender := o.Sender.Hex()
-	id := strconv.FormatUint(uint64(l.nextOrderNumber), 10)
 	ord, err := order.NewOrder(id, sender, o.DestinationAddress, amt)
 	if err != nil {
 		dbErr := l.db.UpdateOrderStatus(ord.ID, order.FAILED)
