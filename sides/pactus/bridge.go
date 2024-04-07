@@ -55,11 +55,7 @@ func (b Bridge) Start() error {
 func (b Bridge) processMsg(msg message.Message) error {
 	logger.Info("new message received for process", "actor", b.bypassName, "orderID", msg.Payload.ID)
 
-	err := b.db.AddLog(&database.Log{
-		OrderID:     msg.Payload.ID,
-		Actor:       string(b.bypassName),
-		Description: "order received as message",
-	})
+	err := b.db.AddLog(msg.Payload.ID,string(b.bypassName),"order received as message","")
 	if err != nil {
 		return err
 	}
@@ -68,12 +64,7 @@ func (b Bridge) processMsg(msg message.Message) error {
 	if err != nil {
 		logger.Warn("received an invalid message", "actor", b.bypassName, "err", err)
 
-		dbErr := b.db.AddLog(&database.Log{
-			OrderID:     msg.Payload.ID,
-			Actor:       string(b.bypassName),
-			Description: "invalid message",
-			Trace:       err.Error(),
-		})
+		dbErr := b.db.AddLog(msg.Payload.ID,string(b.bypassName),"invalid message",err.Error(),)
 		if dbErr != nil {
 			return err
 		}
@@ -90,12 +81,7 @@ func (b Bridge) processMsg(msg message.Message) error {
 
 	amt, err := amount.NewAmount((payload.Amount() / 1e9)) // TODO: FIX ME!!!!!!!!!!!!!!!!!!!
 	if err != nil {
-		dbErr := b.db.AddLog(&database.Log{
-			OrderID:     msg.Payload.ID,
-			Actor:       string(b.bypassName),
-			Description: "failed to cast amount",
-			Trace:       err.Error(),
-		})
+		dbErr := b.db.AddLog(msg.Payload.ID,string(b.bypassName),"failed to cast amount",err.Error(),)
 		if dbErr != nil {
 			return err
 		}
@@ -114,12 +100,7 @@ func (b Bridge) processMsg(msg message.Message) error {
 	if err != nil {
 		logger.Error("can't send transaction to pactus network", "actor", b.bypassName, "err", err, "payload", payload)
 
-		dbErr := b.db.AddLog(&database.Log{
-			OrderID:     msg.Payload.ID,
-			Actor:       string(b.bypassName),
-			Description: "bridge failed",
-			Trace:       err.Error(),
-		})
+		dbErr := b.db.AddLog(msg.Payload.ID,string(b.bypassName),"bridge failed",err.Error())
 		if dbErr != nil {
 			return err
 		}
@@ -133,12 +114,7 @@ func (b Bridge) processMsg(msg message.Message) error {
 	}
 
 	logger.Info("successful bridge", "actor", b.bypassName, "txID", txID, "orderID", msg.Payload.ID)
-	err = b.db.AddLog(&database.Log{
-		OrderID:     msg.Payload.ID,
-		Actor:       string(b.bypassName),
-		Description: "successfully bridged",
-		Trace:       txID,
-	})
+	err = b.db.AddLog(msg.Payload.ID,string(b.bypassName),"successfully bridged",txID)
 	if err != nil {
 		return err
 	}

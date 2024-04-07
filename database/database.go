@@ -56,7 +56,15 @@ func (db *DB) AddOrder(ord *order.Order) (string, error) {
 	return ord.ID, nil
 }
 
-func (db *DB) AddLog(log *Log) error {
+func (db *DB) AddLog(orderID string,actor string, desc string,trace string) error {
+
+	log := &Log{
+		OrderID:     orderID,
+		Actor:       actor,
+		Description: desc,
+		Trace: trace,
+	}
+
 	if err := db.Create(log).Error; err != nil {
 		return DBError{
 			TableName: "Logs",
