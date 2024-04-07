@@ -56,7 +56,7 @@ func (b Bridge) Start() error {
 func (b *Bridge) processMsg(msg message.Message) error {
 	logger.Info("received new message on bridge", "actor", b.bypassName, "orderID", msg.Payload.ID)
 
-	err := b.db.AddLog(msg.Payload.ID,"POLYGON","order received as message","")
+	err := b.db.AddLog(msg.Payload.ID, "POLYGON", "order received as message", "")
 	if err != nil {
 		return err
 	}
@@ -64,7 +64,7 @@ func (b *Bridge) processMsg(msg message.Message) error {
 	if err != nil {
 		logger.Warn("received message was invalid", "actor", b.bypassName, "err", err)
 
-		dbErr := b.db.AddLog(msg.Payload.ID,string(b.bypassName),"invalid message",err.Error())
+		dbErr := b.db.AddLog(msg.Payload.ID, string(b.bypassName), "invalid message", err.Error())
 		if dbErr != nil {
 			return err
 		}
@@ -83,7 +83,7 @@ func (b *Bridge) processMsg(msg message.Message) error {
 
 	hash, err := b.client.Mint(*amountBigInt, common.HexToAddress(payload.Receiver))
 	if err != nil {
-		dbErr := b.db.AddLog(msg.Payload.ID,string(b.bypassName),"tx failed",err.Error())
+		dbErr := b.db.AddLog(msg.Payload.ID, string(b.bypassName), "tx failed", err.Error())
 		if dbErr != nil {
 			return err
 		}
@@ -98,7 +98,7 @@ func (b *Bridge) processMsg(msg message.Message) error {
 
 	logger.Info("wPAC minted successfully", "actor", b.bypassName, "txHahs", hash, "orderID", msg.Payload.ID)
 
-	err = b.db.AddLog(msg.Payload.ID,"POLYGON",fmt.Sprintf("tx success with tx hash: %s", hash),hash)
+	err = b.db.AddLog(msg.Payload.ID, "POLYGON", fmt.Sprintf("tx success with tx hash: %s", hash), hash)
 	if err != nil {
 		return err
 	}

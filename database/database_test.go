@@ -37,7 +37,7 @@ func TestAddOrder(t *testing.T) {
 func TestAddLog(t *testing.T) {
 	db := setup(t)
 
-	err := db.AddLog("dnslkn","POLYGON","this is abcd","")
+	err := db.AddLog("dnslkn", "POLYGON", "this is abcd", "")
 	assert.NoError(t, err)
 }
 
@@ -50,7 +50,7 @@ func TestAddLogForOrder(t *testing.T) {
 	o, err := db.AddOrder(ord)
 	assert.NoError(t, err)
 
-	err = db.AddLog(o,"POLYGON","descriptivjerijw","trace")
+	err = db.AddLog(o, "POLYGON", "descriptivjerijw", "trace")
 	assert.NoError(t, err)
 }
 
@@ -100,7 +100,7 @@ func TestGetOrderWithLogs(t *testing.T) {
 	ordID, err := db.AddOrder(ord)
 	assert.NoError(t, err)
 
-	err = db.AddLog(ordID,"POLYGON","descriptivjerijw","trace")
+	err = db.AddLog(ordID, "POLYGON", "descriptivjerijw", "trace")
 
 	assert.NoError(t, err)
 
@@ -119,7 +119,7 @@ func TestGetOrderLogs(t *testing.T) {
 	ordID, err := db.AddOrder(ord)
 	assert.NoError(t, err)
 
-	err = db.AddLog(ordID,"POLYGON","abcd","traceAbcd")
+	err = db.AddLog(ordID, "POLYGON", "abcd", "traceAbcd")
 
 	assert.NoError(t, err)
 

@@ -107,7 +107,7 @@ func (l *Listener) processBlocks() error {
 			if dbErr != nil {
 				return dbErr
 			}
-			dbErr = l.db.AddLog("","PACTUS",fmt.Sprintf("failed to create order: %s", txHash),err.Error())
+			dbErr = l.db.AddLog("", "PACTUS", fmt.Sprintf("failed to create order: %s", txHash), err.Error())
 			if dbErr != nil {
 				return dbErr
 			}
@@ -120,7 +120,7 @@ func (l *Listener) processBlocks() error {
 
 		logger.Info("sending order message to highway", "actor", l.bypassName, "height",
 			blk.Height, "txID", txHash, "orderID", ord.ID)
-		dbErr := l.db.AddLog(ord.ID,"PACTUS","sent order to highway","")
+		dbErr := l.db.AddLog(ord.ID, "PACTUS", "sent order to highway", "")
 		if dbErr != nil {
 			return dbErr
 		}
