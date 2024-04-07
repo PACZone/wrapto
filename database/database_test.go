@@ -134,7 +134,6 @@ func TestGetOrderLogs(t *testing.T) {
 	assert.Equal(t, l.OrderID, ordID)
 }
 
-
 func TestIsOrderExist(t *testing.T) {
 	db := setup(t)
 
@@ -144,12 +143,12 @@ func TestIsOrderExist(t *testing.T) {
 	ordID, err := db.AddOrder(ord)
 	assert.NoError(t, err)
 
-	isExist,err := db.IsOrderExist("bbb")
-	assert.Equal(t,isExist,false)
-	assert.Error(t,gorm.ErrRecordNotFound,err)
+	isExist, err := db.IsOrderExist("bbb")
+	assert.Equal(t, isExist, false)
+	assert.Error(t, gorm.ErrRecordNotFound, err)
 
-	isExist,err = db.IsOrderExist("aaa")
-	assert.Equal(t,isExist,true)
+	isExist, err = db.IsOrderExist("aaa")
+	assert.Equal(t, isExist, true)
 	assert.NoError(t, err)
 
 	assert.Equal(t, ord.ID, ordID)
