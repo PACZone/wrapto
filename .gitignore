@@ -22,3 +22,7 @@ go.work
 test_wallet
 /build
 teleq.sqlite
+.idea
+.code
+/.idea
+/.code

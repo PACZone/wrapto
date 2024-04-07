@@ -31,7 +31,7 @@ func newBridge(ctx context.Context, w *Wallet, b chan message.Message, bn bypass
 	}
 }
 
-func (b Bridge) Start() error {
+func (b *Bridge) Start() error {
 	logger.Info("starting bridge", "actor", b.bypassName)
 	for {
 		select {
@@ -52,7 +52,7 @@ func (b Bridge) Start() error {
 	}
 }
 
-func (b Bridge) processMessage(msg message.Message) error {
+func (b *Bridge) processMessage(msg message.Message) error {
 	logger.Info("new message received for process", "actor", b.bypassName, "orderID", msg.Payload.ID)
 
 	err := b.db.AddLog(msg.Payload.ID, string(b.bypassName), "order received as message", "")
@@ -79,7 +79,7 @@ func (b Bridge) processMessage(msg message.Message) error {
 
 	payload := msg.Payload
 
-	amt, err := amount.NewAmount((payload.Amount() / 1e9)) // TODO: FIX ME!!!!!!!!!!!!!!!!!!!
+	amt, err := amount.NewAmount(payload.Amount() / 1e9) // TODO: FIX ME!!!!!!!!!!!!!!!!!!!
 	if err != nil {
 		dbErr := b.db.AddLog(msg.Payload.ID, string(b.bypassName), "failed to cast amount", err.Error())
 		if dbErr != nil {
