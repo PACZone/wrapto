@@ -14,7 +14,7 @@ const (
 	CREATED  Status = "CREATED"
 	PENDING  Status = "PENDING"
 	COMPLETE Status = "COMPLETE"
-	FAILED   Status = "FAILED"
+	FAILED   Status = "FAILED" 
 )
 
 type Order struct {
