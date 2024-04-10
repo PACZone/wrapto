@@ -115,7 +115,6 @@ func (l *Listener) processBlocks() error {
 
 		msg := message.NewMessage(destInfo.BypassName, l.bypassName, ord)
 
-
 		logger.Info("sending order message to highway", "actor", l.bypassName, "height",
 			blk.Height, "txID", txHash, "orderID", ord.ID)
 
@@ -164,11 +163,11 @@ func (l *Listener) checkOrderExist(id string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	
 	return isExist, nil
 }
 
 func (l *Listener) createOrder(tx *pactus.TransactionInfo, dest string) (*order.Order, error) {
-
 	sender := tx.GetTransfer().Sender
 	amt := float64(tx.GetTransfer().Amount)
 	txHash := hex.EncodeToString(tx.Id)
