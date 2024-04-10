@@ -13,10 +13,6 @@ require (
 )
 
 require (
-	github.com/klauspost/compress v1.17.6 // indirect
-	github.com/labstack/gommon v0.4.2 // indirect
-	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/NathanBaulch/protoc-gen-cobra v1.2.1 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
@@ -46,6 +42,8 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/joho/godotenv v1.5.1
 	github.com/kilic/bls12-381 v0.1.0 // indirect
+	github.com/klauspost/compress v1.17.6 // indirect
+	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/matoous/go-nanoid v1.5.0
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -61,6 +59,8 @@ require (
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/tyler-smith/go-bip39 v1.1.0 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/crypto v0.19.0 // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
