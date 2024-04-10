@@ -157,11 +157,8 @@ func (db *DB) UpdatePactusState(pactus uint32) error {
 	}
 
 	state.Pactus = pactus
-	if err := db.Save(&state).Error; err != nil {
-		return err
-	}
 
-	return nil
+	return db.Save(&state).Error
 }
 
 func (db *DB) UpdatePolygonState(polygon uint32) error {
@@ -171,11 +168,8 @@ func (db *DB) UpdatePolygonState(polygon uint32) error {
 	}
 
 	state.Polygon = polygon
-	if err := db.Save(&state).Error; err != nil {
-		return err
-	}
 
-	return nil
+	return db.Save(&state).Error
 }
 
 func (db *DB) GetState() (*State, error) {
