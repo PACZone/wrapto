@@ -11,6 +11,7 @@ import (
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 	"github.com/PACZone/wrapto/types/order"
+	"github.com/pactus-project/pactus/types/amount"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 )
 
@@ -86,7 +87,7 @@ func (l *Listener) processBlocks() error {
 	for _, tx := range validTxs {
 		txHash := hex.EncodeToString(tx.Id)
 		sender := tx.GetTransfer().Sender
-		amt := float64(tx.GetTransfer().Amount)
+		amt := tx.GetTransfer().Amount
 
 		logger.Info("processing new tx", "actor", l.bypassName, "height", blk.Height, "txID", txHash,
 			"amount", amt, "sender", sender)
@@ -108,7 +109,7 @@ func (l *Listener) processBlocks() error {
 			continue
 		}
 
-		ord, err := order.NewOrder(txHash, sender, destInfo.Addr, amt)
+		ord, err := order.NewOrder(txHash, sender, destInfo.Addr, amount.Amount(amt))
 		if err != nil {
 			logger.Error("error while making new order", "actor", l.bypassName, "err", err,
 				"height", blk.Height, "txID", txHash)

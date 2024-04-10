@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/PACZone/wrapto/types/order"
+	"github.com/pactus-project/pactus/types/amount"
 	"gorm.io/gorm"
 )
 
@@ -19,10 +20,10 @@ type Order struct {
 	Sender string
 
 	// * amount of PAC to be bridged, **including fee**.
-	Amount float64
+	Amount amount.Amount
 
 	// * fee of order on wrapto system
-	Fee float64
+	Fee amount.Amount
 
 	// * status of order on wrapto system.
 	Status order.Status

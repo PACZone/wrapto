@@ -9,7 +9,6 @@ import (
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 	"github.com/PACZone/wrapto/types/order"
-	"github.com/pactus-project/pactus/types/amount"
 )
 
 type Bridge struct {
@@ -78,27 +77,11 @@ func (b *Bridge) processMessage(msg message.Message) error {
 	}
 
 	payload := msg.Payload
-
-	amt, err := amount.NewAmount(payload.Amount() / 1e9) // TODO: FIX ME!!!!!!!!!!!!!!!!!!!
-	if err != nil {
-		dbErr := b.db.AddLog(msg.Payload.ID, string(b.bypassName), "failed to cast amount", err.Error())
-		if dbErr != nil {
-			return err
-		}
-
-		dbErr = b.db.UpdateOrderStatus(msg.Payload.ID, order.FAILED)
-		if dbErr != nil {
-			return err
-		}
-
-		return nil
-	}
-
 	memo := fmt.Sprintf("bridge from %s to %s by wrapto.app", msg.From, msg.To)
 
-	txID, err := b.wallet.transferTx(payload.Receiver, memo, amt)
+	txID, err := b.wallet.transferTx(payload.Receiver, memo, payload.Amount())
 	if err != nil {
-		logger.Error("can't send transaction to pactus network", "actor", b.bypassName, "err", err, "payload", payload)
+		logger.Error("can't send transaction to Pactus network", "actor", b.bypassName, "err", err, "payload", payload)
 
 		dbErr := b.db.AddLog(msg.Payload.ID, string(b.bypassName), "bridge failed", err.Error())
 		if dbErr != nil {
