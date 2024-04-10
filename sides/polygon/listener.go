@@ -14,6 +14,7 @@ import (
 	"github.com/PACZone/wrapto/types/order"
 	"github.com/PACZone/wrapto/types/params"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/pactus-project/pactus/types/amount"
 )
 
 type Listener struct {
@@ -74,19 +75,19 @@ func (l *Listener) processOrder() error {
 
 	id := strconv.FormatUint(uint64(l.nextOrderNumber), 10)
 
-    if exist, err := l.checkOrderExist(id); err != nil {
-        return err
-    } else if exist {
-        logger.Warn("error repetitive transaction", "actor", l.bypassName, "txHash", id)
+	if exist, err := l.checkOrderExist(id); err != nil {
+		return err
+	} else if exist {
+		logger.Warn("error repetitive transaction", "actor", l.bypassName, "txHash", id)
 
         return nil
     }
 
 	logger.Info("processing new message on listener", "actor", l.bypassName, "orderNumber", l.nextOrderNumber)
 
-	amt, _ := o.Amount.Float64()
+	amt := o.Amount.Int64()
 	sender := o.Sender.Hex()
-	ord, err := order.NewOrder(id, sender, o.DestinationAddress, amt)
+	ord, err := order.NewOrder(id, sender, o.DestinationAddress, amount.Amount(amt))
 	if err != nil {
 		dbErr := l.db.UpdateOrderStatus(ord.ID, order.FAILED)
 		if dbErr != nil {
@@ -112,7 +113,6 @@ func (l *Listener) processOrder() error {
 	}
 
 	msg := message.NewMessage(params.MainBypass, l.bypassName, ord)
-	
 	l.highway <- msg
 
 	logger.Info("new message passed to pactus", "actor", l.bypassName, "orderID", ord.ID)
@@ -130,11 +130,11 @@ func (l *Listener) processOrder() error {
 	return nil
 }
 
-
 func (l *Listener) checkOrderExist(id string) (bool, error) {
-    isExist, err := l.db.IsOrderExist(id)
-    if err != nil {
-        return false, err
-    }
-    return isExist, nil
+	isExist, err := l.db.IsOrderExist(id)
+	if err != nil {
+		return false, err
+	}
+
+	return isExist, nil
 }
