@@ -6,16 +6,20 @@ import (
 	"strings"
 	"time"
 
+	"github.com/PACZone/wrapto/config"
 	"github.com/PACZone/wrapto/database"
-	logger "github.com/PACZone/wrapto/log"
+	"github.com/PACZone/wrapto/types/bypass"
+	"github.com/PACZone/wrapto/types/message"
 	"github.com/PACZone/wrapto/types/order"
 	"github.com/labstack/echo/v4"
 )
 
-type HttpServer struct {
-	echo *echo.Echo
-	db   *database.DB
-	ctx  context.Context
+type Server struct {
+	echo    *echo.Echo
+	db      *database.DB
+	ctx     context.Context
+	cfg     config.HTTPServerConfig
+	highway chan message.Message
 }
 
 type Response struct {
@@ -30,42 +34,46 @@ type StateResponse struct {
 }
 
 type SearchRequest struct {
-	Q  string `query:"q"`
+	Q string `query:"q"`
 }
 
 type RecentTxsResponse struct {
-	From   string        `json:"from"`
-	To     string        `json:"to"`
-	Amount float64 `json:"amount"`
-	Fee    float64 `json:"fee"`
-	Date   time.Time     `json:"date"`
-	Status order.Status  `json:"status"`
-	TxID   string        `json:"tx_id"`
+	From   string       `json:"from"`
+	To     string       `json:"to"`
+	Amount float64      `json:"amount"`
+	Fee    float64      `json:"fee"`
+	Date   time.Time    `json:"date"`
+	Status order.Status `json:"status"`
+	TxID   string       `json:"tx_id"`
 }
 
-func NewHttp(ctx context.Context, db *database.DB) *HttpServer {
+func NewHTTP(ctx context.Context, cfg config.HTTPServerConfig, db *database.DB, highway chan message.Message) *Server {
 	app := echo.New()
 
-	return &HttpServer{
-		echo: app,
-		db:   db,
-		ctx:  ctx,
+	return &Server{
+		echo:    app,
+		db:      db,
+		ctx:     ctx,
+		cfg:     cfg,
+		highway: highway,
 	}
 }
 
-func (h *HttpServer) Start() {
-
+func (h *Server) Start() {
 	h.echo.GET("/state/latest", h.latestState)
 	h.echo.GET("/health", h.health)
 	h.echo.GET("/transactions/recent", h.recentTxs)
 	h.echo.GET("/search", h.searchTx)
 
-	h.echo.Start(":3000")
-	logger.Info("http start on 3000")
+	err := h.echo.Start(h.cfg.Port)
+	if err != nil {
+		h.highway <- message.NewMessage(bypass.MANAGER, bypass.HTTP, nil)
+	}
+
 	<-h.ctx.Done()
 }
 
-func (h *HttpServer) latestState(c echo.Context) (err error) {
+func (h *Server) latestState(c echo.Context) error {
 	s, err := h.db.GetState()
 	if err != nil {
 		res := Response{
@@ -73,6 +81,7 @@ func (h *HttpServer) latestState(c echo.Context) (err error) {
 			Message: "Error",
 			Data:    nil,
 		}
+
 		return c.JSON(http.StatusInternalServerError, res)
 	}
 	res := Response{
@@ -87,7 +96,7 @@ func (h *HttpServer) latestState(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *HttpServer) health(c echo.Context) (err error) {
+func (h *Server) health(c echo.Context) error {
 	res := Response{
 		Status:  http.StatusOK,
 		Message: "Ok",
@@ -97,8 +106,7 @@ func (h *HttpServer) health(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *HttpServer) recentTxs(c echo.Context) (err error) {
-
+func (h *Server) recentTxs(c echo.Context) error {
 	txs, err := h.db.GetLatestOrders(10)
 	if err != nil {
 		res := Response{
@@ -106,6 +114,7 @@ func (h *HttpServer) recentTxs(c echo.Context) (err error) {
 			Message: "Error",
 			Data:    nil,
 		}
+
 		return c.JSON(http.StatusInternalServerError, res)
 	}
 
@@ -133,35 +142,38 @@ func (h *HttpServer) recentTxs(c echo.Context) (err error) {
 	return c.JSON(http.StatusOK, res)
 }
 
-func (h *HttpServer) searchTx(c echo.Context) (err error) {
-
+func (h *Server) searchTx(c echo.Context) error {
 	var q SearchRequest
 
-	err = c.Bind(&q); if err != nil {
+	err := c.Bind(&q)
+	if err != nil {
 		res := Response{
 			Status:  http.StatusBadRequest,
 			Message: "Error",
 			Data:    nil,
 		}
+
 		return c.JSON(http.StatusBadRequest, res)
 	}
 
-	if strings.Trim(q.Q," ") == "" {
+	if strings.Trim(q.Q, " ") == "" {
 		res := Response{
 			Status:  http.StatusBadRequest,
 			Message: "Error",
 			Data:    nil,
 		}
+
 		return c.JSON(http.StatusBadRequest, res)
 	}
 
-	txs,err:=h.db.SearchOrders(q.Q)
+	txs, err := h.db.SearchOrders(q.Q)
 	if err != nil {
 		res := Response{
 			Status:  http.StatusInternalServerError,
 			Message: "Error",
 			Data:    nil,
 		}
+
 		return c.JSON(http.StatusInternalServerError, res)
 	}
 
@@ -187,5 +199,4 @@ func (h *HttpServer) searchTx(c echo.Context) (err error) {
 	}
 
 	return c.JSON(http.StatusOK, res)
-
 }

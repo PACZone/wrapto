@@ -2,7 +2,6 @@ package pactus
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
@@ -39,8 +38,6 @@ func (c *Client) GetLastBlockHeight() (uint32, error) {
 		if err == nil {
 			return blockchainInfo.LastBlockHeight, nil
 		}
-
-		fmt.Println("AAAAAAAAA")
 
 		time.Sleep(5 * time.Second)
 	}

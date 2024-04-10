@@ -4,7 +4,7 @@ go 1.22.2
 
 require (
 	github.com/ethereum/go-ethereum v1.13.14
-	github.com/gofiber/fiber/v3 v3.0.0-beta.2
+	github.com/labstack/echo/v4 v4.11.4
 	github.com/pactus-project/pactus v1.0.1-0.20240404174554-d68f43459d48
 	github.com/rs/zerolog v1.30.0
 	github.com/stretchr/testify v1.9.0
@@ -13,15 +13,10 @@ require (
 )
 
 require (
-	github.com/andybalholm/brotli v1.1.0 // indirect
-	github.com/gofiber/utils/v2 v2.0.0-beta.4 // indirect
 	github.com/klauspost/compress v1.17.6 // indirect
-	github.com/labstack/echo/v4 v4.11.4 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.52.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	github.com/valyala/tcplisten v1.0.0 // indirect
 )
 
 require (

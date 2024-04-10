@@ -14,6 +14,7 @@ type Config struct {
 	Pactus      PactusConfig
 	Polygon     PolygonConfig
 	Database    DatabaseConfig
+	HTTPServer  HTTPServerConfig
 }
 
 type PactusConfig struct {
@@ -31,6 +32,10 @@ type PolygonConfig struct {
 
 type DatabaseConfig struct {
 	Path string
+}
+
+type HTTPServerConfig struct {
+	Port string
 }
 
 type LoggerConfig struct {
@@ -88,6 +93,10 @@ func LoadConfig() (*Config, error) {
 		},
 		Database: DatabaseConfig{
 			os.Getenv("DATABASE_PATH"),
+		},
+
+		HTTPServer: HTTPServerConfig{
+			Port: os.Getenv("HTTP_PORT"),
 		},
 	}
 

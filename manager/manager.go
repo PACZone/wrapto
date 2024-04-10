@@ -26,7 +26,7 @@ type actors struct {
 	pactus  *pactus.Side
 	polygon *polygon.Side
 
-	http *http.HttpServer
+	http *http.Server
 }
 
 func NewManager(ctx context.Context, cancel context.CancelFunc, cfg *config.Config, db *database.DB) (*Mgr, error) {
@@ -53,7 +53,7 @@ func NewManager(ctx context.Context, cancel context.CancelFunc, cfg *config.Conf
 		return nil, err
 	}
 
-	httpSide := http.NewHttp(ctx, db)
+	httpSide := http.NewHTTP(ctx, cfg.HTTPServer, db, highway)
 
 	actors := &actors{
 		pactus:  pactusSide,

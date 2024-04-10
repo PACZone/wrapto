@@ -80,8 +80,8 @@ func (l *Listener) processOrder() error {
 	} else if exist {
 		logger.Warn("error repetitive transaction", "actor", l.bypassName, "txHash", id)
 
-        return nil
-    }
+		return nil
+	}
 
 	logger.Info("processing new message on listener", "actor", l.bypassName, "orderNumber", l.nextOrderNumber)
 
