@@ -113,7 +113,6 @@ func (l *Listener) processOrder() error {
 	}
 
 	msg := message.NewMessage(params.MainBypass, l.bypassName, ord)
-
 	l.highway <- msg
 
 	logger.Info("new message passed to pactus", "actor", l.bypassName, "orderID", ord.ID)
