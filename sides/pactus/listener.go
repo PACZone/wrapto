@@ -166,16 +166,16 @@ func (l *Listener) checkOrderExist(id string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	
+
 	return isExist, nil
 }
 
-func (l *Listener) createOrder(tx *pactus.TransactionInfo, dest string) (*order.Order, error) {
+func (l *Listener) createOrder(tx *pactus.TransactionInfo, dest string) (*order.Order, error) { //nolint
 	sender := tx.GetTransfer().Sender
-	amt := float64(tx.GetTransfer().Amount)
+	amt := tx.GetTransfer().Amount
 	txHash := hex.EncodeToString(tx.Id)
 
-	ord, err := order.NewOrder(txHash, sender, dest, amt)
+	ord, err := order.NewOrder(txHash, sender, dest, amount.Amount(amt))
 	if err != nil {
 		logger.Error("error while making new order", "actor", l.bypassName, "err", err, "txID", txHash)
 

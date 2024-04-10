@@ -11,8 +11,6 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
-require github.com/mattn/go-colorable v0.1.13 // indirect
-
 require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/NathanBaulch/protoc-gen-cobra v1.2.1 // indirect
@@ -44,6 +42,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/kilic/bls12-381 v0.1.0 // indirect
 	github.com/matoous/go-nanoid v1.5.0
+	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect

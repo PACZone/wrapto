@@ -10,7 +10,7 @@ endif
 ### Tools needed for development
 devtools:
 	@echo "Installing devtools"
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.56.2
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 	go install mvdan.cc/gofumpt@latest
 	go install github.com/ethereum/go-ethereum/cmd/abigen@latest
 
