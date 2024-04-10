@@ -13,7 +13,7 @@ import (
 	"github.com/PACZone/wrapto/www/http"
 )
 
-type Mgr struct {
+type Manager struct {
 	ctx      context.Context
 	cancel   context.CancelFunc
 	highway  chan message.Message
@@ -29,7 +29,7 @@ type actors struct {
 	http *http.Server
 }
 
-func NewManager(ctx context.Context, cancel context.CancelFunc, cfg *config.Config, db *database.DB) (*Mgr, error) {
+func NewManager(ctx context.Context, cancel context.CancelFunc, cfg *config.Config, db *database.DB) (*Manager, error) {
 	highway := make(chan message.Message, 10)                  // TODO: what should we use as size?
 	bypasses := make(map[bypass.Name]chan message.Message, 10) // TODO: what should we use as size?
 
@@ -53,19 +53,19 @@ func NewManager(ctx context.Context, cancel context.CancelFunc, cfg *config.Conf
 		return nil, err
 	}
 
-	httpSide := http.NewHTTP(ctx, cfg.HTTPServer, db, highway)
+	httpServer := http.NewHTTP(ctx, cfg.HTTPServer, db, highway)
 
 	actors := &actors{
 		pactus:  pactusSide,
 		polygon: polygonSide,
 
-		http: httpSide,
+		http: httpServer,
 	}
 
 	bypasses[bypass.POLYGON] = polygonCh
 	bypasses[bypass.PACTUS] = pactusCh
 
-	return &Mgr{
+	return &Manager{
 		ctx:      ctx,
 		cancel:   cancel,
 		highway:  highway,
@@ -75,7 +75,7 @@ func NewManager(ctx context.Context, cancel context.CancelFunc, cfg *config.Conf
 	}, nil
 }
 
-func (m *Mgr) Start() {
+func (m *Manager) Start() {
 	logger.Info("manager actor spawned")
 
 	go m.actors.pactus.Start()
@@ -95,7 +95,7 @@ func (m *Mgr) Start() {
 	}
 }
 
-func (m *Mgr) routing(msg message.Message) error {
+func (m *Manager) routing(msg message.Message) error {
 	if msg.To == bypass.MANAGER && msg.Payload == nil {
 		m.cancel()
 
@@ -111,7 +111,7 @@ func (m *Mgr) routing(msg message.Message) error {
 	return nil
 }
 
-func (m *Mgr) isRegistered(name bypass.Name) (chan message.Message, bool) {
+func (m *Manager) isRegistered(name bypass.Name) (chan message.Message, bool) {
 	v, ok := m.bypasses[name]
 
 	return v, ok

@@ -11,7 +11,7 @@ import (
 )
 
 type Core struct {
-	mgr *manager.Mgr
+	mgr *manager.Manager
 }
 
 func NewCore(ctx context.Context, cancel context.CancelFunc) (*Core, error) {
