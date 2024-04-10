@@ -3,6 +3,7 @@ package pactus
 import (
 	"context"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"time"
 
@@ -89,8 +90,15 @@ func (l *Listener) processBlocks() error {
 		sender := tx.GetTransfer().Sender
 		amt := tx.GetTransfer().Amount
 
-		logger.Info("processing new tx", "actor", l.bypassName, "height", blk.Height, "txID", txHash,
-			"amount", amt, "sender", sender)
+		logger.Info("processing new tx", "actor", l.bypassName, "height", blk.Height, "txID", txHash)
+
+		if exist, err := l.checkOrderExist(txHash); err != nil {
+			return err
+		} else if exist {
+			logger.Warn("error repetitive transaction", "actor", l.bypassName, "txHash", txHash)
+
+			return nil
+		}
 
 		destInfo, err := ParseMemo(tx.Memo)
 		if err != nil {
@@ -99,38 +107,22 @@ func (l *Listener) processBlocks() error {
 			continue
 		}
 
-		isExist, err := l.db.IsOrderExist(txHash)
-		if err != nil {
-			return err
-		}
-		if isExist {
-			logger.Warn("error repetitive transaction", "actor", l.bypassName, "txHash", txHash)
-
-			continue
-		}
-
 		ord, err := order.NewOrder(txHash, sender, destInfo.Addr, amount.Amount(amt))
 		if err != nil {
-			logger.Error("error while making new order", "actor", l.bypassName, "err", err,
-				"height", blk.Height, "txID", txHash)
-
-			dbErr := l.db.UpdateOrderStatus(ord.ID, order.FAILED)
-			if dbErr != nil {
-				return dbErr
-			}
-			dbErr = l.db.AddLog("", "PACTUS", fmt.Sprintf("failed to create order: %s", txHash), err.Error())
-			if dbErr != nil {
-				return dbErr
+			if errors.Is(err, database.DBError{}) {
+				return err
 			}
 
 			continue
 		}
 
 		msg := message.NewMessage(destInfo.BypassName, l.bypassName, ord)
-		l.highway <- msg
 
 		logger.Info("sending order message to highway", "actor", l.bypassName, "height",
 			blk.Height, "txID", txHash, "orderID", ord.ID)
+
+		l.highway <- msg
+
 		err = l.db.AddLog(ord.ID, "PACTUS", "sent order to highway", "")
 		if err != nil {
 			return err
@@ -167,4 +159,31 @@ func (l *Listener) filterValidTransactions(txs []*pactus.TransactionInfo) []*pac
 	}
 
 	return validTxs
+}
+
+func (l *Listener) checkOrderExist(id string) (bool, error) {
+	isExist, err := l.db.IsOrderExist(id)
+	if err != nil {
+		return false, err
+	}
+	
+	return isExist, nil
+}
+
+func (l *Listener) createOrder(tx *pactus.TransactionInfo, dest string) (*order.Order, error) {
+	sender := tx.GetTransfer().Sender
+	amt := float64(tx.GetTransfer().Amount)
+	txHash := hex.EncodeToString(tx.Id)
+
+	ord, err := order.NewOrder(txHash, sender, dest, amt)
+	if err != nil {
+		logger.Error("error while making new order", "actor", l.bypassName, "err", err, "txID", txHash)
+
+		dbErr := l.db.AddLog("", "PACTUS", fmt.Sprintf("failed to create order: %s", txHash), err.Error())
+		if dbErr != nil {
+			return nil, dbErr
+		}
+	}
+
+	return ord, nil
 }

@@ -75,11 +75,9 @@ func (l *Listener) processOrder() error {
 
 	id := strconv.FormatUint(uint64(l.nextOrderNumber), 10)
 
-	isExist, err := l.db.IsOrderExist(id)
-	if err != nil {
+	if exist, err := l.checkOrderExist(id); err != nil {
 		return err
-	}
-	if isExist {
+	} else if exist {
 		logger.Warn("error repetitive transaction", "actor", l.bypassName, "txHash", id)
 
 		return nil
@@ -115,6 +113,7 @@ func (l *Listener) processOrder() error {
 	}
 
 	msg := message.NewMessage(params.MainBypass, l.bypassName, ord)
+
 	l.highway <- msg
 
 	logger.Info("new message passed to pactus", "actor", l.bypassName, "orderID", ord.ID)
@@ -130,4 +129,13 @@ func (l *Listener) processOrder() error {
 	}
 
 	return nil
+}
+
+func (l *Listener) checkOrderExist(id string) (bool, error) {
+	isExist, err := l.db.IsOrderExist(id)
+	if err != nil {
+		return false, err
+	}
+	
+	return isExist, nil
 }
