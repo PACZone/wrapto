@@ -1,6 +1,8 @@
 package database
 
 import (
+	"time"
+
 	"github.com/PACZone/wrapto/types/order"
 	"github.com/pactus-project/pactus/types/amount"
 	"gorm.io/gorm"
@@ -33,6 +35,8 @@ type Order struct {
 
 	// * will be filled if order failed.
 	Reason string
+
+	CreatedAt time.Time `gorm:"autoCreateTime"`
 
 	Logs []Log `gorm:"foreignKey:OrderID"`
 

@@ -2,6 +2,7 @@ package pactus
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
@@ -33,11 +34,13 @@ func newClient(ctx context.Context, endpoint string) (*Client, error) {
 }
 
 func (c *Client) GetLastBlockHeight() (uint32, error) {
-	for i := 3; i == 0; i-- {
+	for i := 0; i <= 3; i++ {
 		blockchainInfo, err := c.blockchainClient.GetBlockchainInfo(c.ctx, &pactus.GetBlockchainInfoRequest{})
 		if err == nil {
 			return blockchainInfo.LastBlockHeight, nil
 		}
+
+		fmt.Println("AAAAAAAAA")
 
 		time.Sleep(5 * time.Second)
 	}
@@ -48,7 +51,7 @@ func (c *Client) GetLastBlockHeight() (uint32, error) {
 }
 
 func (c *Client) GetBlock(h uint32) (*pactus.GetBlockResponse, error) {
-	for i := 3; i == 0; i-- {
+	for i := 0; i <= 3; i++ {
 		block, err := c.blockchainClient.GetBlock(c.ctx, &pactus.GetBlockRequest{
 			Height:    h,
 			Verbosity: pactus.BlockVerbosity_BLOCK_TRANSACTIONS,

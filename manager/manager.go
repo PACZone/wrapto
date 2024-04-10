@@ -10,6 +10,7 @@ import (
 	"github.com/PACZone/wrapto/sides/polygon"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
+	"github.com/PACZone/wrapto/www/http"
 )
 
 type Mgr struct {
@@ -18,12 +19,14 @@ type Mgr struct {
 	highway  chan message.Message
 	bypasses map[bypass.Name]chan message.Message
 
-	sides *sides
+	actors *actors
 }
 
-type sides struct {
+type actors struct {
 	pactus  *pactus.Side
 	polygon *polygon.Side
+
+	http *http.HttpServer
 }
 
 func NewManager(ctx context.Context, cancel context.CancelFunc, cfg *config.Config, db *database.DB) (*Mgr, error) {
@@ -50,9 +53,13 @@ func NewManager(ctx context.Context, cancel context.CancelFunc, cfg *config.Conf
 		return nil, err
 	}
 
-	sides := &sides{
+	httpSide := http.NewHttp(ctx, db)
+
+	actors := &actors{
 		pactus:  pactusSide,
 		polygon: polygonSide,
+
+		http: httpSide,
 	}
 
 	bypasses[bypass.POLYGON] = polygonCh
@@ -64,15 +71,16 @@ func NewManager(ctx context.Context, cancel context.CancelFunc, cfg *config.Conf
 		highway:  highway,
 		bypasses: bypasses,
 
-		sides: sides,
+		actors: actors,
 	}, nil
 }
 
 func (m *Mgr) Start() {
 	logger.Info("manager actor spawned")
 
-	go m.sides.pactus.Start()
-	go m.sides.polygon.Start()
+	go m.actors.pactus.Start()
+	go m.actors.polygon.Start()
+	go m.actors.http.Start()
 
 	for {
 		select {

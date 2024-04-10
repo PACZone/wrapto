@@ -1,6 +1,7 @@
 package database_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
@@ -201,4 +202,47 @@ func TestGetState(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, uint32(42), retrievedState.Pactus)
 	assert.Equal(t, uint32(100), retrievedState.Polygon)
+}
+
+func TestGetLatestOrders(t *testing.T) {
+    db := setup(t)
+
+    for i := 0; i < 15; i++ {
+        ord, err := order.NewOrder(fmt.Sprintf("tx%d", i), fmt.Sprintf("sender%d", i), fmt.Sprintf("receiver%d", i), 20e9)
+        require.NoError(t, err)
+        _, err = db.AddOrder(ord)
+        require.NoError(t, err)
+    }
+
+    orders, err := db.GetLatestOrders(10)
+    require.NoError(t, err)
+
+    require.Len(t, orders, 10)
+
+    for i := 0; i < 10; i++ {
+        assert.Equal(t, fmt.Sprintf("tx%d", 14-i), orders[i].TxHash)
+    }
+}
+
+func TestSearchOrders(t *testing.T) {
+    db := setup(t)
+
+    for i := 0; i < 5; i++ {
+        ord, err := order.NewOrder(fmt.Sprintf("tx%d", i), fmt.Sprintf("sender%d", i), fmt.Sprintf("receiver%d", i), 20e9)
+        require.NoError(t, err)
+        _, err = db.AddOrder(ord)
+        require.NoError(t, err)
+    }
+
+    orders, err := db.SearchOrders("tx2")
+    require.NoError(t, err)
+
+    require.Len(t, orders, 1)
+    assert.Equal(t, "tx2", orders[0].TxHash)
+
+    orders, err = db.SearchOrders("receiver3")
+    require.NoError(t, err)
+
+    require.Len(t, orders, 1)
+    assert.Equal(t, "receiver3", orders[0].Receiver)
 }

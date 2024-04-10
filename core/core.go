@@ -7,7 +7,7 @@ import (
 	"github.com/PACZone/wrapto/config"
 	"github.com/PACZone/wrapto/database"
 	logger "github.com/PACZone/wrapto/log"
-	"github.com/PACZone/wrapto/sides/manager"
+	"github.com/PACZone/wrapto/manager"
 )
 
 type Core struct {

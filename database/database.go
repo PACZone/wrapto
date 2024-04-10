@@ -180,3 +180,28 @@ func (db *DB) GetState() (*State, error) {
 
 	return &state, nil
 }
+
+func (db *DB) GetLatestOrders(limit int) ([]*Order, error) {
+    var orders []*Order
+    if err := db.Order("created_at desc").Limit(limit).Find(&orders).Error; err != nil {
+        return nil, DBError{
+            TableName: "Orders",
+            Reason:    err.Error(),
+        }
+    }
+
+    return orders, nil
+}
+
+func (db *DB) SearchOrders(q string) ([]*Order, error) {
+    var orders []*Order
+    if err := db.Where("tx_hash = ? OR receiver = ? OR sender = ? OR dest_network_tx_hash = ?", q, q, q, q).Find(&orders).Error; err != nil {
+        return nil, DBError{
+            TableName: "Orders",
+            Reason:    err.Error(),
+        }
+    }
+
+    return orders, nil
+
+}
