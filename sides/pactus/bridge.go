@@ -55,7 +55,7 @@ func (b *Bridge) Start() error {
 func (b *Bridge) processMessage(msg message.Message) error {
 	logger.Info("new message received for process", "actor", b.bypassName, "orderID", msg.Payload.ID)
 
-	err := b.db.AddLog(msg.Payload.ID, string(b.bypassName), "order received as message", "")
+	err := b.db.AddLog(msg.Payload.ID, string(b.bypassName), "order received", "")
 	if err != nil {
 		return err
 	}
