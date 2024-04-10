@@ -97,7 +97,7 @@ func (l *Listener) processBlocks() error {
 		} else if exist {
 			logger.Warn("error repetitive transaction", "actor", l.bypassName, "txHash", txHash)
 
-			return nil
+			continue
 		}
 
 		destInfo, err := ParseMemo(tx.Memo)
@@ -129,7 +129,7 @@ func (l *Listener) processBlocks() error {
 		}
 	}
 
-	err = l.db.UpdatePactusState((l.nextBlockNumber - 1))
+	err = l.db.UpdatePactusState(l.nextBlockNumber - 1)
 	if err != nil {
 		return err
 	}

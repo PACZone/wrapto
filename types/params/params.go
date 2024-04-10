@@ -10,5 +10,5 @@ const (
 	MinimumFee  amount.Amount = 1e9 // 1 PAC
 	MaximumFee  amount.Amount = 5e9 // 5 PAC
 
-	MainBypass bypass.Name = bypass.PACTUS
+	MainBypass = bypass.PACTUS
 )

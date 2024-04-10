@@ -23,7 +23,7 @@ type logger struct {
 
 func InitGlobalLogger(cfg *config.LoggerConfig) {
 	if globalInst == nil {
-		writers := []io.Writer{}
+		var writers []io.Writer
 
 		if slices.Contains(cfg.Targets, "file") {
 			fw := &lumberjack.Logger{
