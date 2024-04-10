@@ -14,6 +14,7 @@ import (
 	"github.com/PACZone/wrapto/types/order"
 	"github.com/PACZone/wrapto/types/params"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/pactus-project/pactus/types/amount"
 )
 
 type Listener struct {
@@ -84,9 +85,9 @@ func (l *Listener) processOrder() error {
 
 	logger.Info("processing new message on listener", "actor", l.bypassName, "orderNumber", l.nextOrderNumber)
 
-	amt, _ := o.Amount.Float64()
+	amt := o.Amount.Int64()
 	sender := o.Sender.Hex()
-	ord, err := order.NewOrder(id, sender, o.DestinationAddress, amt)
+	ord, err := order.NewOrder(id, sender, o.DestinationAddress, amount.Amount(amt))
 	if err != nil {
 		dbErr := l.db.UpdateOrderStatus(ord.ID, order.FAILED)
 		if dbErr != nil {

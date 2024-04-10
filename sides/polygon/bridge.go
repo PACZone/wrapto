@@ -80,7 +80,6 @@ func (b *Bridge) processMsg(msg message.Message) error {
 	}
 
 	payload := msg.Payload
-
 	bigIntAmt := new(big.Int).SetUint64(uint64(payload.Amount()))
 
 	hash, err := b.client.Mint(*bigIntAmt, common.HexToAddress(payload.Receiver))

@@ -15,10 +15,7 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-var (
-	globalInst *logger
-	logLevel   zerolog.Level
-)
+var globalInst *logger
 
 type logger struct {
 	writer io.Writer
@@ -54,22 +51,6 @@ func InitGlobalLogger(cfg *config.LoggerConfig) {
 
 		log.Logger = zerolog.New(globalInst.writer).With().Timestamp().Logger()
 	}
-}
-
-func NewLoggerLevel(level zerolog.Level) {
-	logLevel = level
-}
-
-func SetLoggerLevel(level string) {
-	parsedLevel, err := zerolog.ParseLevel(strings.ToLower(level))
-	if err != nil {
-		parsedLevel = zerolog.InfoLevel
-	}
-	logLevel = parsedLevel
-}
-
-func GetCurrentLogLevel() zerolog.Level {
-	return logLevel
 }
 
 func addFields(event *zerolog.Event, keyvals ...interface{}) *zerolog.Event {
