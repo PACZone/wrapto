@@ -12,7 +12,7 @@ import (
 func TestNewOrder(t *testing.T) {
 	ord, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", 10e9)
 	assert.NoError(t, err)
-	assert.Equal(t, order.CREATED, ord.Status)
+	assert.Equal(t, order.PENDING, ord.Status)
 }
 
 func TestBasicCheck(t *testing.T) {
@@ -82,6 +82,6 @@ func TestAmount(t *testing.T) {
 		ord, err := order.NewOrder("", "", "", fa.Amount)
 		assert.NoError(t, err)
 
-		assert.Equal(t, (fa.Amount - fa.Fee), ord.Amount())
+		assert.Equal(t, fa.Amount-fa.Fee, ord.Amount())
 	}
 }
