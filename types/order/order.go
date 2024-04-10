@@ -11,7 +11,6 @@ import (
 type Status string
 
 const (
-	CREATED  Status = "CREATED"
 	PENDING  Status = "PENDING"
 	COMPLETE Status = "COMPLETE"
 	FAILED   Status = "FAILED"
@@ -49,7 +48,7 @@ func NewOrder(txHash, sender, receiver string, amt amount.Amount) (*Order, error
 		Receiver: receiver,
 		Sender:   sender,
 		amount:   amt,
-		Status:   CREATED,
+		Status:   PENDING,
 	}
 
 	if err := ord.basicCheck(); err != nil {

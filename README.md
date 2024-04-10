@@ -1,5 +1,5 @@
 <p align="center">
-    <img alt="Wrapto" src="./assets/Wrapto-transparent.png" width="150" height="150" />
+    <img alt="Wrapto" src="./.img/logo.svg" width="150" height="150" />
 </p>
 
 <h3 align="center">
