@@ -5,6 +5,7 @@ import (
 
 	"github.com/PACZone/wrapto/types/order"
 	"github.com/PACZone/wrapto/types/params"
+	"github.com/pactus-project/pactus/types/amount"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,8 +34,8 @@ func TestBasicCheck(t *testing.T) {
 
 func TestFee(t *testing.T) {
 	feeAndAmounts := []struct { // better name?
-		Fee    float64
-		Amount float64
+		Fee    amount.Amount
+		Amount amount.Amount
 	}{
 		{
 			Amount: 1_903_076_060_983,
@@ -60,8 +61,8 @@ func TestFee(t *testing.T) {
 
 func TestAmount(t *testing.T) {
 	feeAndAmounts := []struct { // better name?
-		Fee    float64
-		Amount float64
+		Fee    amount.Amount
+		Amount amount.Amount
 	}{
 		{
 			Amount: 1_903_076_060_983,

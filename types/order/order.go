@@ -2,10 +2,10 @@ package order
 
 import (
 	"fmt"
-	"math"
 
 	"github.com/PACZone/wrapto/types/params"
 	gonanoid "github.com/matoous/go-nanoid"
+	"github.com/pactus-project/pactus/types/amount"
 )
 
 type Status string
@@ -18,7 +18,7 @@ const (
 )
 
 type Order struct {
-	// * unique ID on wrapto system.
+	// * unique ID on Wrapto system.
 	ID string
 
 	// * transaction or contract call that user made on source network.
@@ -31,13 +31,13 @@ type Order struct {
 	Sender string
 
 	// * amount of PAC to be bridged, **including fee**.
-	amount float64
+	amount amount.Amount
 
-	// * status of order on wrapto system.
+	// * status of order on Wrapto system.
 	Status Status
 }
 
-func NewOrder(txHash, sender, receiver string, amount float64) (*Order, error) {
+func NewOrder(txHash, sender, receiver string, amt amount.Amount) (*Order, error) {
 	ID, err := gonanoid.ID(10)
 	if err != nil {
 		return nil, err // ? panic
@@ -48,7 +48,7 @@ func NewOrder(txHash, sender, receiver string, amount float64) (*Order, error) {
 		TxHash:   txHash,
 		Receiver: receiver,
 		Sender:   sender,
-		amount:   amount,
+		amount:   amt,
 		Status:   CREATED,
 	}
 
@@ -59,26 +59,25 @@ func NewOrder(txHash, sender, receiver string, amount float64) (*Order, error) {
 	return ord, nil
 }
 
-func (o *Order) Fee() float64 {
-	fee := o.amount * params.FeeFraction
-	ceiledFee := math.Ceil(fee)
+func (o *Order) Fee() amount.Amount {
+	fee := o.amount / params.FeeFraction // 0.5% of amount
 
-	if ceiledFee <= params.MinimumFee {
+	if fee <= params.MinimumFee {
 		return params.MinimumFee
 	}
 
-	if ceiledFee >= params.MaximumFee {
+	if fee >= params.MaximumFee {
 		return params.MaximumFee
 	}
 
-	return ceiledFee
+	return fee
 }
 
-func (o *Order) Amount() float64 {
+func (o *Order) Amount() amount.Amount {
 	return o.amount - o.Fee()
 }
 
-func (o *Order) OriginalAmount() float64 {
+func (o *Order) OriginalAmount() amount.Amount {
 	return o.amount
 }
 
