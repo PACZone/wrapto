@@ -136,6 +136,11 @@ func (l *Listener) processBlocks() error {
 		}
 	}
 
+	err = l.db.UpdatePactusState((l.nextBlockNumber - 1))
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

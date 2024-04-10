@@ -33,14 +33,19 @@ func NewManager(ctx context.Context, cancel context.CancelFunc, cfg *config.Conf
 	pactusCh := make(chan message.Message, 10)
 	polygonCh := make(chan message.Message, 10)
 
-	pactusSide, err := pactus.NewSide(ctx, highway, 622508, pactusCh,
-		cfg.Environment, cfg.Pactus, db) // TODO: retrieve the number from database.
+	lastState, err := db.GetState()
 	if err != nil {
 		return nil, err
 	}
 
-	polygonSide, err := polygon.NewSide(ctx, highway, 6, polygonCh,
-		cfg.Environment, cfg.Polygon, db) // TODO: retrieve the number from database.
+	pactusSide, err := pactus.NewSide(ctx, highway, lastState.Pactus, pactusCh,
+		cfg.Environment, cfg.Pactus, db)
+	if err != nil {
+		return nil, err
+	}
+
+	polygonSide, err := polygon.NewSide(ctx, highway, lastState.Polygon, polygonCh,
+		cfg.Environment, cfg.Polygon, db)
 	if err != nil {
 		return nil, err
 	}

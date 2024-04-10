@@ -40,7 +40,7 @@ func newListener(ctx context.Context,
 }
 
 func (l *Listener) Start() error {
-	logger.Info("listener started", "actor", l.bypassName)
+	logger.Info("starting listener", "actor", l.bypassName)
 
 	for {
 		select {
@@ -65,10 +65,12 @@ func (l *Listener) processOrder() error {
 	}
 
 	if o.Sender == common.HexToAddress("0x0000000000000000000000000000000000000000") {
-		time.Sleep(20 * time.Second)
+		time.Sleep(3 * time.Second)
 
 		return nil
 	}
+
+	l.nextOrderNumber++
 
 	id := strconv.FormatUint(uint64(l.nextOrderNumber), 10)
 
@@ -81,8 +83,6 @@ func (l *Listener) processOrder() error {
 
 		return nil
 	}
-
-	l.nextOrderNumber++
 
 	logger.Info("processing new message on listener", "actor", l.bypassName, "orderNumber", l.nextOrderNumber)
 
@@ -119,6 +119,11 @@ func (l *Listener) processOrder() error {
 	logger.Info("new message passed to pactus", "actor", l.bypassName, "orderID", ord.ID)
 
 	err = l.db.AddLog(id, string(l.bypassName), "sent order to highway", "")
+	if err != nil {
+		return err
+	}
+
+	err = l.db.UpdatePolygonState((l.nextOrderNumber - 1))
 	if err != nil {
 		return err
 	}
