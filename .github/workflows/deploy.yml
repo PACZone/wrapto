@@ -30,7 +30,8 @@ jobs:
             cd ~/projects/wrapto
             git pull
             git status
-            docker build -t wrapto .  
             docker stop wrapto-cont || true
             docker rm wrapto-cont || true
+            docker rmi wrapto || true
+            docker build -t wrapto .  
             docker run -p 3000:3000 -d --name wrapto-cont wrapto
