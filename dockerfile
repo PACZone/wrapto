@@ -4,9 +4,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN go build -o build/wrapto .
-
-RUN cd ./build
+RUN go build -o wrapto .
 
 EXPOSE 3000
 
