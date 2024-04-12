@@ -16,7 +16,6 @@ func NewDB(dsn string) (*DB, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, DBError{
-			DBPath: dsn,
 			Reason: err.Error(),
 		}
 	}
@@ -28,7 +27,6 @@ func NewDB(dsn string) (*DB, error) {
 			&State{},
 		); err != nil {
 			return nil, DBError{
-				DBPath: dsn,
 				Reason: err.Error(),
 			}
 		}

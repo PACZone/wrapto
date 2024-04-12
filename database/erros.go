@@ -8,6 +8,6 @@ type DBError struct { // ? should we make separated errors such as migration err
 }
 
 func (e DBError) Error() string {
-	return fmt.Sprintf("database error occurred on db path %s table %s with error: %s",
+	return fmt.Sprintf("database error occurred on table %s with error: %s",
 		e.TableName, e.Reason)
 }
