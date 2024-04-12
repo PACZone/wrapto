@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/PACZone/wrapto/types/order"
-	"github.com/glebarez/sqlite"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -12,11 +12,10 @@ type DB struct {
 	*gorm.DB
 }
 
-func NewDB(path string) (*DB, error) {
-	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
+func NewDB(dsn string) (*DB, error) {
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, DBError{
-			DBPath: path,
 			Reason: err.Error(),
 		}
 	}
@@ -28,7 +27,6 @@ func NewDB(path string) (*DB, error) {
 			&State{},
 		); err != nil {
 			return nil, DBError{
-				DBPath: path,
 				Reason: err.Error(),
 			}
 		}

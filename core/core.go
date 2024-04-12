@@ -24,7 +24,7 @@ func NewCore(ctx context.Context, cancel context.CancelFunc) (*Core, error) {
 
 	logger.InitGlobalLogger(&cfg.Logger)
 
-	db, err := database.NewDB(cfg.Database.Path)
+	db, err := database.NewDB(cfg.Database.DSN)
 	if err != nil {
 		cancel()
 
