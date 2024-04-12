@@ -31,7 +31,7 @@ type PolygonConfig struct {
 }
 
 type DatabaseConfig struct {
-	Path string
+	DSN string
 }
 
 type HTTPServerConfig struct {
@@ -92,7 +92,7 @@ func LoadConfig() (*Config, error) {
 			RPCNode:      os.Getenv("POLYGON_RPC"),
 		},
 		Database: DatabaseConfig{
-			os.Getenv("DATABASE_PATH"),
+			os.Getenv("DATABASE_DSN"),
 		},
 
 		HTTPServer: HTTPServerConfig{

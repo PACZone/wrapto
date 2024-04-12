@@ -1,0 +1,36 @@
+
+name: CD
+
+# Controls when the action will run. 
+on:
+  workflow_run:
+    workflows: ["Run Tests","Lint and format check"]
+    types:
+      - completed
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Deploy using ssh
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd ~/projects/wrapto
+            git pull
+            git status
+            docker build -t wrapto .  
+            docker stop wrapto-cont || true
+            docker rm wrapto-cont || true
+            docker run -p 3000:3000 -d --name wrapto-cont wrapto
