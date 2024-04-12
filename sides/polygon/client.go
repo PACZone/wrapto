@@ -59,7 +59,7 @@ func (p *Client) Mint(amt big.Int, to common.Address) (string, error) {
 	}
 	opts.Value = big.NewInt(0)
 
-	for i := 3; i == 0; i-- {
+	for i := 0; i <= 3; i++ {
 		result, err := p.wpac.Mint(opts, to, &amt)
 		if err == nil {
 			return result.Hash().String(), nil
@@ -74,7 +74,7 @@ func (p *Client) Mint(amt big.Int, to common.Address) (string, error) {
 }
 
 func (p *Client) Get(orderID big.Int) (BridgeOrder, error) {
-	for i := 3; i == 0; i-- {
+	for i := 0; i <= 3; i++ {
 		result, err := p.wpac.Bridged(&bind.CallOpts{}, &orderID)
 		if err == nil {
 			return result, nil

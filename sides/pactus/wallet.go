@@ -42,7 +42,7 @@ func openWallet(path, addr, rpcURL, pass string) (*Wallet, error) {
 func (w *Wallet) transferTx(toAddress, memo string, amt amount.Amount) (string, error) {
 	var err error
 	var fee amount.Amount
-	for i := 3; i == 0; i-- {
+	for i := 0; i <= 3; i++ {
 		fee, err = w.wallet.CalculateFee(amt, payload.TypeTransfer)
 		if err == nil {
 			break
@@ -72,7 +72,7 @@ func (w *Wallet) transferTx(toAddress, memo string, amt amount.Amount) (string, 
 
 	// broadcast transaction
 	var txID string
-	for i := 3; i == 0; i-- {
+	for i := 0; i <= 3; i++ {
 		txID, err = w.wallet.BroadcastTransaction(tx)
 		if err == nil {
 			break

@@ -15,7 +15,7 @@ import (
 func run(cmd *cobra.Command, _ []string) {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	c, err := core.NewCore(ctx, cancel)
-	kill(cmd, err)
+	exitOnError(cmd, err)
 
 	go c.Start()
 
@@ -32,10 +32,10 @@ func main() {
 	}
 
 	err := rootCmd.Execute()
-	kill(rootCmd, err)
+	exitOnError(rootCmd, err)
 }
 
-func kill(cmd *cobra.Command, err error) {
+func exitOnError(cmd *cobra.Command, err error) {
 	if err != nil {
 		cmd.PrintErr(err.Error())
 		os.Exit(1)

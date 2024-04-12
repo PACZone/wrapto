@@ -4,6 +4,7 @@ go 1.22.2
 
 require (
 	github.com/ethereum/go-ethereum v1.13.14
+	github.com/labstack/echo/v4 v4.11.4
 	github.com/pactus-project/pactus v1.0.1-0.20240404174554-d68f43459d48
 	github.com/rs/zerolog v1.30.0
 	github.com/stretchr/testify v1.9.0
@@ -41,6 +42,8 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/joho/godotenv v1.5.1
 	github.com/kilic/bls12-381 v0.1.0 // indirect
+	github.com/klauspost/compress v1.17.6 // indirect
+	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/matoous/go-nanoid v1.5.0
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -56,11 +59,13 @@ require (
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/tyler-smith/go-bip39 v1.1.0 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
-	golang.org/x/crypto v0.18.0 // indirect
+	golang.org/x/crypto v0.19.0 // indirect
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
 	golang.org/x/mod v0.14.0 // indirect
-	golang.org/x/net v0.20.0 // indirect
+	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect

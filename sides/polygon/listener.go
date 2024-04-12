@@ -122,7 +122,7 @@ func (l *Listener) processOrder() error {
 		return err
 	}
 
-	err = l.db.UpdatePolygonState((l.nextOrderNumber - 1))
+	err = l.db.UpdatePolygonState(l.nextOrderNumber - 1)
 	if err != nil {
 		return err
 	}
