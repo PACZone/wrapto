@@ -15,19 +15,14 @@ type Wallet struct {
 	wallet   pWallet.Wallet
 }
 
-func openWallet(path, addr, rpcURL, pass string) (*Wallet, error) {
+func openWallet(path, addr, pass string) (*Wallet, error) {
 	if !doesWalletExist(path) {
 		return nil, WalletNotExistError{
 			path: path,
 		}
 	}
 
-	wt, err := pWallet.Open(path, true)
-	if err != nil {
-		return nil, err
-	}
-
-	err = wt.Connect(rpcURL)
+	wt, err := pWallet.Open(path, false)
 	if err != nil {
 		return nil, err
 	}

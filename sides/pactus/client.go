@@ -18,7 +18,7 @@ type Client struct {
 }
 
 func newClient(ctx context.Context, endpoint string) (*Client, error) {
-	conn, err := grpc.Dial(endpoint,
+	conn, err := grpc.NewClient(endpoint,
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
