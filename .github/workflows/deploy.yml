@@ -1,13 +1,15 @@
-
 name: CD
 
 # Controls when the action will run. 
 on:
   workflow_run:
-    workflows: ["Run Tests","Lint and format check"]
+    workflows: 
+      - "Run Tests"
+      - "Lint and format check"
+    branches:
+      - main
     types:
       - completed
-
 
 jobs:
   build:
