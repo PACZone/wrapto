@@ -1,0 +1,10 @@
+.gitignore
+.golangci.yml
+.env.example
+LICENSE
+Makefile
+.gitignore
+.idea
+.img
+abis
+build
