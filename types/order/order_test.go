@@ -10,24 +10,24 @@ import (
 )
 
 func TestNewOrder(t *testing.T) {
-	ord, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", 10e9)
+	ord, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", 10e9,order.PACTUS_POLYGON)
 	assert.NoError(t, err)
 	assert.Equal(t, order.PENDING, ord.Status)
 }
 
 func TestBasicCheck(t *testing.T) {
 	t.Run("everything ok", func(t *testing.T) {
-		_, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", 10e9)
+		_, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", 10e9,order.PACTUS_POLYGON)
 		assert.NoError(t, err)
 	})
 
 	t.Run("amount less than minium fee", func(t *testing.T) {
-		_, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", 0)
+		_, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", 0,order.PACTUS_POLYGON)
 		assert.Error(t, err)
 	})
 
 	t.Run("amount equal to minium fee", func(t *testing.T) {
-		_, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", params.MinimumFee)
+		_, err := order.NewOrder("0x1234567", "pc1z123", "0xuoip", params.MinimumFee,order.PACTUS_POLYGON)
 		assert.Error(t, err)
 	})
 }
@@ -52,7 +52,7 @@ func TestFee(t *testing.T) {
 	}
 
 	for _, fa := range feeAndAmounts {
-		ord, err := order.NewOrder("", "", "", fa.Amount)
+		ord, err := order.NewOrder("", "", "", fa.Amount,order.PACTUS_POLYGON)
 		assert.NoError(t, err)
 
 		assert.Equal(t, fa.Fee, ord.Fee())
@@ -79,7 +79,7 @@ func TestAmount(t *testing.T) {
 	}
 
 	for _, fa := range feeAndAmounts {
-		ord, err := order.NewOrder("", "", "", fa.Amount)
+		ord, err := order.NewOrder("", "", "", fa.Amount,order.PACTUS_POLYGON)
 		assert.NoError(t, err)
 
 		assert.Equal(t, fa.Amount-fa.Fee, ord.Amount())

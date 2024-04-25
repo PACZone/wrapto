@@ -57,6 +57,7 @@ func (db *DB) AddOrder(ord *order.Order) (string, error) {
 		Amount:   ord.OriginalAmount(),
 		Fee:      ord.Fee(),
 		Status:   ord.Status,
+		BrgType: ord.BrgType,
 	}
 	if err := db.Create(o).Error; err != nil {
 		return "", DBError{
