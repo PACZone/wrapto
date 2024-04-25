@@ -29,13 +29,11 @@ Currently, Wrapto is a semi-centralized protocol (half decentralized) since ther
 
 All V1(semi-centralized), V2(decentralizes using multi-signature), and V3(decentralizes smart-contract) [Wrapped Tokens](https://github.com/PACZone/TeleWrapped) minted on different networks, will be compatible with Wrapto.
 
-# How does it work?
+# Documentation
 
 ## Wrapto Protocol V1
 
-This part is a description of how our V1 works (semi-centralized)
-
-<!-- TODO -->
+You can find all V1 documentations [here](./docs/V1)
 
 # Contribution
 
