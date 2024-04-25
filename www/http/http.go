@@ -11,6 +11,7 @@ import (
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 	"github.com/PACZone/wrapto/types/order"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/echo/v4"
 )
 
@@ -61,6 +62,7 @@ func NewHTTP(ctx context.Context, cfg config.HTTPServerConfig, db *database.DB, 
 }
 
 func (h *Server) Start() {
+	h.echo.Use(middleware.CORS())
 	h.echo.GET("/state/latest", h.latestState)
 	h.echo.GET("/health", h.health)
 	h.echo.GET("/transactions/recent", h.recentTxs)
