@@ -50,13 +50,14 @@ func NewDB(dsn string) (*DB, error) {
 
 func (db *DB) AddOrder(ord *order.Order) (string, error) {
 	o := &Order{
-		ID:       ord.ID,
-		TxHash:   ord.TxHash,
-		Receiver: ord.Receiver,
-		Sender:   ord.Sender,
-		Amount:   ord.OriginalAmount(),
-		Fee:      ord.Fee(),
-		Status:   ord.Status,
+		ID:         ord.ID,
+		TxHash:     ord.TxHash,
+		Receiver:   ord.Receiver,
+		Sender:     ord.Sender,
+		Amount:     ord.OriginalAmount(),
+		Fee:        ord.Fee(),
+		Status:     ord.Status,
+		BridgeType: ord.BridgeType,
 	}
 	if err := db.Create(o).Error; err != nil {
 		return "", DBError{

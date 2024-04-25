@@ -36,6 +36,8 @@ type Order struct {
 	// * will be filled if order failed.
 	Reason string
 
+	BridgeType order.BridgeType
+
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 
 	Logs []Log `gorm:"foreignKey:OrderID"`
