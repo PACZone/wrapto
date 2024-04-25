@@ -87,7 +87,7 @@ func (l *Listener) processOrder() error {
 
 	amt := o.Amount.Int64()
 	sender := o.Sender.Hex()
-	ord, err := order.NewOrder(id, sender, o.DestinationAddress, amount.Amount(amt),order.POLYGON_PACTUS)
+	ord, err := order.NewOrder(id, sender, o.DestinationAddress, amount.Amount(amt), order.POLYGON_PACTUS)
 	if err != nil {
 		dbErr := l.db.UpdateOrderStatus(ord.ID, order.FAILED)
 		if dbErr != nil {

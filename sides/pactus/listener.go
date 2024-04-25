@@ -118,7 +118,7 @@ func (l *Listener) processBlocks() error {
 		if err != nil {
 			return err
 		}
-	
+
 		err = l.db.AddLog(id, string(l.bypassName), "order created", "")
 		if err != nil {
 			return err
@@ -183,7 +183,7 @@ func (l *Listener) createOrder(tx *pactus.TransactionInfo, dest string) (*order.
 	amt := tx.GetTransfer().Amount
 	txHash := hex.EncodeToString(tx.Id)
 
-	ord, err := order.NewOrder(txHash, sender, dest, amount.Amount(amt),order.PACTUS_POLYGON)
+	ord, err := order.NewOrder(txHash, sender, dest, amount.Amount(amt), order.PACTUS_POLYGON)
 	if err != nil {
 		logger.Error("error while making new order", "actor", l.bypassName, "err", err, "txID", txHash)
 

@@ -36,7 +36,7 @@ type Order struct {
 	// * will be filled if order failed.
 	Reason string
 
-	BrgType order.BrgType
+	BridgeType order.BridgeType
 
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 

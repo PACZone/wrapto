@@ -16,11 +16,11 @@ const (
 	FAILED   Status = "FAILED"
 )
 
-type BrgType string
+type BridgeType string
 
 const (
-	PACTUS_POLYGON  BrgType = "PACTUS_POLYGON"
-	POLYGON_PACTUS BrgType = "POLYGON_PACTUS"
+	PACTUS_POLYGON BridgeType = "PACTUS_POLYGON"
+	POLYGON_PACTUS BridgeType = "POLYGON_PACTUS"
 )
 
 type Order struct {
@@ -43,23 +43,23 @@ type Order struct {
 	Status Status
 
 	// * type of bridge.
-	BrgType BrgType
+	BridgeType BridgeType
 }
 
-func NewOrder(txHash, sender, receiver string, amt amount.Amount, t BrgType) (*Order, error) {
+func NewOrder(txHash, sender, receiver string, amt amount.Amount, t BridgeType) (*Order, error) {
 	ID, err := gonanoid.ID(10)
 	if err != nil {
 		return nil, err // ? panic
 	}
 
 	ord := &Order{
-		ID:       ID,
-		TxHash:   txHash,
-		Receiver: receiver,
-		Sender:   sender,
-		amount:   amt,
-		Status:   PENDING,
-		BrgType: t,
+		ID:         ID,
+		TxHash:     txHash,
+		Receiver:   receiver,
+		Sender:     sender,
+		amount:     amt,
+		Status:     PENDING,
+		BridgeType: t,
 	}
 
 	if err := ord.basicCheck(); err != nil {
