@@ -16,6 +16,13 @@ const (
 	FAILED   Status = "FAILED"
 )
 
+type BridgeType string
+
+const (
+	PACTUS_POLYGON BridgeType = "PACTUS_POLYGON"
+	POLYGON_PACTUS BridgeType = "POLYGON_PACTUS"
+)
+
 type Order struct {
 	// * unique ID on Wrapto system.
 	ID string
@@ -34,21 +41,25 @@ type Order struct {
 
 	// * status of order on Wrapto system.
 	Status Status
+
+	// * type of bridge.
+	BridgeType BridgeType
 }
 
-func NewOrder(txHash, sender, receiver string, amt amount.Amount) (*Order, error) {
+func NewOrder(txHash, sender, receiver string, amt amount.Amount, t BridgeType) (*Order, error) {
 	ID, err := gonanoid.ID(10)
 	if err != nil {
 		return nil, err // ? panic
 	}
 
 	ord := &Order{
-		ID:       ID,
-		TxHash:   txHash,
-		Receiver: receiver,
-		Sender:   sender,
-		amount:   amt,
-		Status:   PENDING,
+		ID:         ID,
+		TxHash:     txHash,
+		Receiver:   receiver,
+		Sender:     sender,
+		amount:     amt,
+		Status:     PENDING,
+		BridgeType: t,
 	}
 
 	if err := ord.basicCheck(); err != nil {
