@@ -107,5 +107,10 @@ func (b *Bridge) processMessage(msg message.Message) error {
 		return err
 	}
 
+	err = b.db.UpdateOrderSTxHash(payload.ID, txID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

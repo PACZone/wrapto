@@ -101,6 +101,17 @@ func (db *DB) UpdateOrderStatus(id string, status order.Status) error {
 	return nil
 }
 
+func (db *DB) UpdateOrderSTxHash(id string, hash string) error {
+	if err := db.Model(&Order{}).Where("id = ?", id).Update("dest_network_tx_hash", hash).Error; err != nil {
+		return DBError{
+			TableName: "Orders",
+			Reason:    err.Error(),
+		}
+	}
+
+	return nil
+}
+
 func (db *DB) GetOrder(id string) (*Order, error) {
 	var ord *Order
 	if err := db.First(&ord, "id = ?", id).Error; err != nil {
