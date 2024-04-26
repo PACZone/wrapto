@@ -53,6 +53,7 @@ func newClient(rpcURL, pk, cAddr string, chainID int64) (*Client, error) {
 }
 
 func (p *Client) Mint(amt big.Int, to common.Address) (string, error) {
+	var err error
 	opts, err := bind.NewKeyedTransactorWithChainID(p.pk, &p.chainID)
 	if err != nil {
 		return "", err
@@ -69,7 +70,7 @@ func (p *Client) Mint(amt big.Int, to common.Address) (string, error) {
 	}
 
 	return "", ClientError{
-		reason: fmt.Sprintf("can't mint %d wPAC to %s", amt.Int64(), to.String()),
+		reason: fmt.Sprintf("can't mint %d wPAC to %s, ::: %s", amt.Int64(), to.String(), err),
 	}
 }
 

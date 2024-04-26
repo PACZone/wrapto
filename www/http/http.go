@@ -13,6 +13,7 @@ import (
 	"github.com/PACZone/wrapto/types/order"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type Server struct {
@@ -39,14 +40,14 @@ type SearchRequest struct {
 }
 
 type RecentTxsResponse struct {
-	From   string       `json:"from"`
-	To     string       `json:"to"`
-	Amount float64      `json:"amount"`
-	Fee    float64      `json:"fee"`
-	Date   time.Time    `json:"date"`
-	Status order.Status `json:"status"`
-	TxID   string       `json:"tx_id"`
-	BridgeType   string       `json:"bridge_type"`
+	From       string       `json:"from"`
+	To         string       `json:"to"`
+	Amount     float64      `json:"amount"`
+	Fee        float64      `json:"fee"`
+	Date       time.Time    `json:"date"`
+	Status     order.Status `json:"status"`
+	TxID       string       `json:"tx_id"`
+	BridgeType string       `json:"bridge_type"`
 }
 
 func NewHTTP(ctx context.Context, cfg config.HTTPServerConfig, db *database.DB, highway chan message.Message) *Server {
@@ -125,13 +126,13 @@ func (h *Server) recentTxs(c echo.Context) error {
 
 	for _, tx := range txs {
 		a := RecentTxsResponse{
-			From:   tx.Receiver,
-			To:     tx.Sender,
-			Fee:    tx.Fee.ToPAC(),
-			Date:   tx.CreatedAt,
-			Status: tx.Status,
-			TxID:   tx.DestNetworkTxHash,
-			Amount: tx.Amount.ToPAC(),
+			From:       tx.Receiver,
+			To:         tx.Sender,
+			Fee:        tx.Fee.ToPAC(),
+			Date:       tx.CreatedAt,
+			Status:     tx.Status,
+			TxID:       tx.DestNetworkTxHash,
+			Amount:     tx.Amount.ToPAC(),
 			BridgeType: string(tx.BridgeType),
 		}
 		dto = append(dto, a)
@@ -185,13 +186,13 @@ func (h *Server) searchTx(c echo.Context) error {
 
 	for _, tx := range txs {
 		a := RecentTxsResponse{
-			From:   tx.Receiver,
-			To:     tx.Sender,
-			Fee:    tx.Fee.ToPAC(),
-			Date:   tx.CreatedAt,
-			Status: tx.Status,
-			TxID:   tx.DestNetworkTxHash,
-			Amount: tx.Amount.ToPAC(),
+			From:       tx.Receiver,
+			To:         tx.Sender,
+			Fee:        tx.Fee.ToPAC(),
+			Date:       tx.CreatedAt,
+			Status:     tx.Status,
+			TxID:       tx.DestNetworkTxHash,
+			Amount:     tx.Amount.ToPAC(),
 			BridgeType: string(tx.BridgeType),
 		}
 		dto = append(dto, a)
