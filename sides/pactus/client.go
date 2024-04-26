@@ -33,8 +33,11 @@ func newClient(ctx context.Context, endpoint string) (*Client, error) {
 }
 
 func (c *Client) GetLastBlockHeight() (uint32, error) {
+	var err error
+	var blockchainInfo *pactus.GetBlockchainInfoResponse
+
 	for i := 0; i <= 3; i++ {
-		blockchainInfo, err := c.blockchainClient.GetBlockchainInfo(c.ctx, &pactus.GetBlockchainInfoRequest{})
+		blockchainInfo, err = c.blockchainClient.GetBlockchainInfo(c.ctx, &pactus.GetBlockchainInfoRequest{})
 		if err == nil {
 			return blockchainInfo.LastBlockHeight, nil
 		}
@@ -43,13 +46,16 @@ func (c *Client) GetLastBlockHeight() (uint32, error) {
 	}
 
 	return 0, ClientError{
-		reason: "can't get lastBlockHeight from network",
+		reason: err.Error(),
 	}
 }
 
 func (c *Client) GetBlock(h uint32) (*pactus.GetBlockResponse, error) {
+	var err error
+	var block *pactus.GetBlockResponse
+
 	for i := 0; i <= 3; i++ {
-		block, err := c.blockchainClient.GetBlock(c.ctx, &pactus.GetBlockRequest{
+		block, err = c.blockchainClient.GetBlock(c.ctx, &pactus.GetBlockRequest{
 			Height:    h,
 			Verbosity: pactus.BlockVerbosity_BLOCK_TRANSACTIONS,
 		})
@@ -61,7 +67,7 @@ func (c *Client) GetBlock(h uint32) (*pactus.GetBlockResponse, error) {
 	}
 
 	return nil, ClientError{
-		reason: "can't get block from network",
+		reason: err.Error(),
 	}
 }
 

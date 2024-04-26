@@ -70,11 +70,12 @@ func (p *Client) Mint(amt big.Int, to common.Address) (string, error) {
 	}
 
 	return "", ClientError{
-		reason: fmt.Sprintf("can't mint %d wPAC to %s, ::: %s", amt.Int64(), to.String(), err),
+		reason: fmt.Sprintf("can't mint %d wPAC to %s, ::: %v", amt.Int64(), to.String(), err),
 	}
 }
 
 func (p *Client) Get(orderID big.Int) (BridgeOrder, error) {
+	var err error
 	for i := 0; i <= 3; i++ {
 		result, err := p.wpac.Bridged(&bind.CallOpts{}, &orderID)
 		if err == nil {
@@ -85,6 +86,6 @@ func (p *Client) Get(orderID big.Int) (BridgeOrder, error) {
 	}
 
 	return BridgeOrder{}, ClientError{
-		reason: fmt.Sprintf("can't get order %d from contract", orderID.Int64()),
+		reason: fmt.Sprintf("can't get order %d from contract, ::: %v", orderID.Int64(), err),
 	}
 }

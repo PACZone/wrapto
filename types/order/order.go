@@ -19,8 +19,8 @@ const (
 type BridgeType string
 
 const (
-	PACTUS_POLYGON BridgeType = "PACTUS_POLYGON"
-	POLYGON_PACTUS BridgeType = "POLYGON_PACTUS"
+	PACTUS_POLYGON BridgeType = "PACTUS_POLYGON" //nolint
+	POLYGON_PACTUS BridgeType = "POLYGON_PACTUS" //nolint
 )
 
 type Order struct {
