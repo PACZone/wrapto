@@ -8,6 +8,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
@@ -54,14 +55,17 @@ func newClient(rpcURL, pk, cAddr string, chainID int64) (*Client, error) {
 
 func (p *Client) Mint(amt big.Int, to common.Address) (string, error) {
 	var err error
-	opts, err := bind.NewKeyedTransactorWithChainID(p.pk, &p.chainID)
+	var opts *bind.TransactOpts
+
+	opts, err = bind.NewKeyedTransactorWithChainID(p.pk, &p.chainID)
 	if err != nil {
 		return "", err
 	}
 	opts.Value = big.NewInt(0)
 
+	var result *types.Transaction
 	for i := 0; i <= 3; i++ {
-		result, err := p.wpac.Mint(opts, to, &amt)
+		result, err = p.wpac.Mint(opts, to, &amt)
 		if err == nil {
 			return result.Hash().String(), nil
 		}
@@ -76,8 +80,15 @@ func (p *Client) Mint(amt big.Int, to common.Address) (string, error) {
 
 func (p *Client) Get(orderID big.Int) (BridgeOrder, error) {
 	var err error
+	var result struct {
+		Sender             common.Address
+		Amount             *big.Int
+		DestinationAddress string
+		Fee                *big.Int
+	}
+
 	for i := 0; i <= 3; i++ {
-		result, err := p.wpac.Bridged(&bind.CallOpts{}, &orderID)
+		result, err = p.wpac.Bridged(&bind.CallOpts{}, &orderID)
 		if err == nil {
 			return result, nil
 		}
