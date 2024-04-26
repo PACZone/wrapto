@@ -37,6 +37,7 @@ func openWallet(path, addr, pass string) (*Wallet, error) {
 func (w *Wallet) transferTx(toAddress, memo string, amt amount.Amount) (string, error) {
 	var err error
 	var fee amount.Amount
+
 	for i := 0; i <= 3; i++ {
 		fee, err = w.wallet.CalculateFee(amt, payload.TypeTransfer)
 		if err == nil {
