@@ -13,7 +13,7 @@ import (
 
 const (
 	mainChainID   int64 = 137
-	mumbaiChainID int64 = 80001
+	mumbaiChainID int64 = 80002
 )
 
 type Side struct {
