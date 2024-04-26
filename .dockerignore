@@ -8,3 +8,4 @@ Makefile
 .img
 abis
 build
+/docs
