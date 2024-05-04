@@ -16,10 +16,16 @@ func TestParseMemo(t *testing.T) {
 		expectError bool
 	}{
 		{
-			memo:        "0x890189B78F2639a2A407C5F089481DB92A028608@POLYGON",
-			addr:        "0x890189B78F2639a2A407C5F089481DB92A028608",
+			memo:        "0x682F5c4Bc85fEeC8D042D324960318553a47B24D@POLYGON",
+			addr:        "0x682F5c4Bc85fEeC8D042D324960318553a47B24D",
 			dest:        bypass.POLYGON,
 			expectError: false,
+		},
+		{
+			memo:        "0x682F5c4Bc85fEeC8D042D324960318553a47B24D@POLYGONN",
+			addr:        "0x682F5c4Bc85fEeC8D042D324960318553a47B24D",
+			dest:        bypass.POLYGON,
+			expectError: true,
 		},
 		{
 			memo:        "sergijwerpgij8",

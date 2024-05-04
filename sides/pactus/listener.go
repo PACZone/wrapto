@@ -94,6 +94,7 @@ func (l *Listener) processBlocks() error {
 			return err
 		} else if exist {
 			logger.Warn("error repetitive transaction", "actor", l.bypassName, "txHash", txHash)
+
 			continue
 		}
 

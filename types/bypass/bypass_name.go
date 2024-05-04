@@ -10,3 +10,5 @@ const (
 	MANAGER Name = "MANAGER"
 	HTTP    Name = "HTTP"
 )
+
+var ValidDestinations = []Name{POLYGON}
