@@ -88,6 +88,11 @@ func (b *Bridge) processMessage(msg message.Message) error {
 			return err
 		}
 
+		dbErr = b.db.UpdateOrderReason(msg.Payload.ID, err.Error())
+		if dbErr != nil {
+			return err
+		}
+
 		dbErr = b.db.UpdateOrderStatus(payload.ID, order.FAILED)
 		if dbErr != nil {
 			return err
@@ -107,7 +112,7 @@ func (b *Bridge) processMessage(msg message.Message) error {
 		return err
 	}
 
-	err = b.db.UpdateOrderSTxHash(payload.ID, txID)
+	err = b.db.UpdateOrderDestTxHash(payload.ID, txID)
 	if err != nil {
 		return err
 	}

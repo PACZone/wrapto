@@ -47,6 +47,7 @@ type RecentTxsResponse struct {
 	Status     order.Status `json:"status"`
 	TxID       string       `json:"tx_id"`
 	BridgeType string       `json:"bridge_type"`
+	Reason     string       `json:"reason"`
 }
 
 func NewHTTP(ctx context.Context, cfg config.HTTPServerConfig, db *database.DB, highway chan message.Message) *Server {
@@ -133,6 +134,7 @@ func (h *Server) recentTxs(c echo.Context) error {
 			TxID:       tx.DestNetworkTxHash,
 			Amount:     tx.Amount.ToPAC(),
 			BridgeType: string(tx.BridgeType),
+			Reason:     tx.Reason,
 		}
 		dto = append(dto, a)
 	}
@@ -193,6 +195,7 @@ func (h *Server) searchTx(c echo.Context) error {
 			TxID:       tx.DestNetworkTxHash,
 			Amount:     tx.Amount.ToPAC(),
 			BridgeType: string(tx.BridgeType),
+			Reason:     tx.Reason,
 		}
 		dto = append(dto, a)
 	}

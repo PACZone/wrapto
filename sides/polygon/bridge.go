@@ -71,6 +71,11 @@ func (b *Bridge) processMsg(msg message.Message) error {
 			return err
 		}
 
+		dbErr = b.db.UpdateOrderReason(msg.Payload.ID, err.Error())
+		if dbErr != nil {
+			return err
+		}
+
 		dbErr = b.db.UpdateOrderStatus(msg.Payload.ID, order.FAILED)
 		if dbErr != nil {
 			return err
@@ -85,6 +90,11 @@ func (b *Bridge) processMsg(msg message.Message) error {
 	hash, err := b.client.Mint(*bigIntAmt, common.HexToAddress(payload.Receiver))
 	if err != nil {
 		dbErr := b.db.AddLog(msg.Payload.ID, string(b.bypassName), "tx failed", err.Error())
+		if dbErr != nil {
+			return err
+		}
+
+		dbErr = b.db.UpdateOrderReason(msg.Payload.ID, err.Error())
 		if dbErr != nil {
 			return err
 		}
@@ -109,7 +119,7 @@ func (b *Bridge) processMsg(msg message.Message) error {
 		return err
 	}
 
-	err = b.db.UpdateOrderSTxHash(payload.ID, hash)
+	err = b.db.UpdateOrderDestTxHash(payload.ID, hash)
 	if err != nil {
 		return err
 	}

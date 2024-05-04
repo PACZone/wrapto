@@ -24,7 +24,7 @@ func NewMessage(to, from bypass.Name, payload *order.Order) Message {
 func (m Message) Validate(to bypass.Name) error {
 	if m.To != to {
 		return InvalidMessageError{
-			Reason: fmt.Sprintf("invalid to value: %s", to),
+			Reason: fmt.Sprintf("invalid destination(to) value: %s", to),
 		}
 	}
 
