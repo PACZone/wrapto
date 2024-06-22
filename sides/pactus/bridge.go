@@ -79,7 +79,7 @@ func (b *Bridge) processMessage(msg message.Message) error {
 	payload := msg.Payload
 	memo := fmt.Sprintf("bridge from %s to %s by wrapto.app", msg.From, msg.To)
 
-	txID, err := b.wallet.transferTx(payload.Receiver, memo, payload.Amount())
+	txID, err := b.wallet.transferTx(payload.Receiver, memo, payload.OriginalAmount())
 	if err != nil {
 		logger.Error("can't send transaction to Pactus network", "actor", b.bypassName, "err", err, "payload", payload)
 
