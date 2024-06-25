@@ -40,11 +40,14 @@ To bridge your wPAC to Pactus network, you have to call bridge/burn function of 
 provide a Pactus address on the call.
 
 You can find contract address on website and you are free to make direct call or use or website.
+The EVM contracts ABI is available [here](../../abis/WrappedPac.json).
 
 
 ## Notes & Disclaimers
 
-There is a minimum amount of 1 w/PAC for bridge. The address on contract calls and Pactus transaction MUST be walid.
+There is a minimum amount of 1 w/PAC for bridge. The address on contract calls and Pactus transaction MUST be valid.
 
 Any bridge attempt with wrong info that we warned about will be counted as donations. if everything was following the
 correct instructions and you got errors and failures, we will return your funds safely back to you!
+
+> For this purpose you can contact us by [hi@dezh.tech](mailto:hi@dezh.tech), make sure you provide all data is needed to track the issue.
