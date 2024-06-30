@@ -1,17 +1,17 @@
 # Wrapto Protocol V1
 
-In this document we will talk about how Wrapto protocol V1 works.
+In this document, we will talk about how Wrapto protocol V1 works.
 
 ## Semi-centralized model
 
-The Wrapto V1 is a semi-centralized protocol because the lack of smart contract support in Pactus blockchain. Minting new wPAC on other networks are centralized same as unlocking locked PACs. It's planned to make it fully decentralized after Pactus updates.
+The Wrapto V1 is a semi-centralized protocol because of the lack of smart contract support in the Pactus blockchain. Minting new wPAC on other networks is centralized same as unlocking locked PACs. It's planned to make it fully decentralized after Pactus updates.
 
 ## Workflow
 
 Here is a simple workflow of how Wrapto works:
 
-[!IMPORTANT]
-> The term listener is same as actor in this [document](./design.md).
+> [!IMPORTANT]
+> The term listener is the same as an actor in this [document](./design.md).
 
 ```mermaid
 stateDiagram-v2
@@ -29,10 +29,10 @@ stateDiagram-v2
     PolygonListener --> PactusListener
 ```
 
-[!NOTE]
-> This mermaid diagram need improvements.
+> [!NOTE]
+> This mermaid diagram needs improvements.
 
-Based on the chart we saw, a module listens to each transaction with this structure on Pactus network:
+Based on the chart we saw, a module listens to each transaction with this structure on the Pactus network:
 
 The memo:
 ```
@@ -51,22 +51,22 @@ more than 1 PAC
 
 Destination:
 
-The Wrapto lock address on Pactus network. it's available at [Wrapto website](https://wrapto.app).
+The Wrapto lock address on the Pactus network. it's available at [Wrapto website](https://wrapto.app).
 
-Later Pactus listener fins the destination based on memo and send a message to specified listener ([actors](./design.md)). Invalid memos will be counted as donations.
+Later Pactus listener finds the destination based on the memo and sends a message to the specified listener ([actors](./design.md)). Invalid memos will be counted as donations.
 
-Other networks will listen token smart contract and check burn/bridge functions, if there was any, they will send a message to Pactus listener to unlock PAC on Pactus network. The Pactus unlock address must br provided in contract call otherwise its burning tokens and locked PACs on Pactus will be counted as fees.
+Other networks will listen to token smart contracts and check burn/bridge functions, if there are any, they will send a message to the Pactus listener to unlock PAC on the Pactus network. The Pactus unlock address must be provided in the contract call otherwise its burning tokens and locked PACs on Pactus will be counted as fees.
 
 ### Rate and Health
 
-The rate of PAC and wPAC is always 1:1 constantly. To check whether the bridge is healthy or not, you can check the `l >= (m + f)`, where the `l` is balance of Wrapto lock address in Pactus network and `m` is total wPAC minted in all of networks anf f is the fee needed to bridge all tokens on other networks to Pactus in worst case. If it was true, bridge is healthy.
+The rate of PAC and wPAC is always 1:1 constantly. To check whether the bridge is healthy or not, you can check the `l >= (m + f)`, where the `l` is the balance of the Wrapto lock address in the Pactus network and `m` is the total wPAC minted in all of the networks and f is the fee needed to bridge all tokens on other networks to Pactus in the worst case. If it was true, the bridge is healthy.
 
-> To calculate f: divided total of wPAC by 2. `t = m / 2` and calculate the fee of t transactions with 1 PAC amount on Pactus network.
-That means if you make most bridges you can with 2 PACs the lock address has enough fee to pay for it and unlock tokens. which has a very low possibility yo happen. more stuff like fee for minting wPAC is needed in Wrapto service, but here we considered only Pactus. Decentralized version of Wrapto will make this health check much easier.  
+> To calculate f: divide the total of wPAC by 2. `t = m / 2` and calculate the fee of t transactions with 1 PAC amount on the Pactus network.
+That means if you make most bridges you can with 2 PACs the lock address has enough fee to pay for it and unlock tokens. which has a very low possibility of happening. more stuff like the fee for minting wPAC is needed in Wrapto service, but here we considered only Pactus. A decentralized version of Wrapto will make this health check much easier.  
 
-Fees are exclusive for example consider fee 1 PAC (find the fee detail [here](./design.md)), if you bridge 10 PAC to polygon you will receive 9 wPAC then. 10 PAC is PAC is balance of lock address and can be collected by team without hurting the health of bridge.
+Fees are exclusive for example consider fee 1 PAC (find the fee detail [here](./design.md)), if you bridge 10 PAC to polygon you will receive 9 wPAC then. 10 PAC is the balance of the lock address and can be collected by the team without hurting the health of bridge.
 
-So, sending invalid TX in lock address or burning wPAC means making more balance on lock address with no token on the other networks and they are fees and donations.
+So, sending invalid TX in the lock address or burning wPAC means making more balance on the lock address with no token on the other networks and they are fees and donations.
 
 ## Structures
 
