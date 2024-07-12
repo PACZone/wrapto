@@ -1,4 +1,4 @@
-<p align="center">
+<p align="center"> 
     <img alt="Wrapto" src="./.img/logo.svg" width="150" height="150" />
 </p>
 
