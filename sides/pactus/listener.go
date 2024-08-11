@@ -2,7 +2,6 @@ package pactus
 
 import (
 	"context"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"time"
@@ -86,14 +85,12 @@ func (l *Listener) processBlocks() error {
 
 	logger.Info("start processing new block", "actor", l.bypassName, "height", blk.Height)
 	for _, tx := range validTxs {
-		txHash := hex.EncodeToString(tx.Id)
+		logger.Info("processing new tx", "actor", l.bypassName, "height", blk.Height, "txID", tx.Id)
 
-		logger.Info("processing new tx", "actor", l.bypassName, "height", blk.Height, "txID", txHash)
-
-		if exist, err := l.checkOrderExist(txHash); err != nil {
+		if exist, err := l.checkOrderExist(tx.Id); err != nil {
 			return err
 		} else if exist {
-			logger.Warn("error repetitive transaction", "actor", l.bypassName, "txHash", txHash)
+			logger.Warn("error repetitive transaction", "actor", l.bypassName, "txHash", tx.Id)
 
 			continue
 		}
@@ -127,7 +124,7 @@ func (l *Listener) processBlocks() error {
 		msg := message.NewMessage(destInfo.BypassName, l.bypassName, ord)
 
 		logger.Info("sending order message to highway", "actor", l.bypassName, "height",
-			blk.Height, "txID", txHash, "orderID", ord.ID)
+			blk.Height, "txID", tx.Id, "orderID", ord.ID)
 
 		l.highway <- msg
 
@@ -181,13 +178,12 @@ func (l *Listener) checkOrderExist(id string) (bool, error) {
 func (l *Listener) createOrder(tx *pactus.TransactionInfo, dest string) (*order.Order, error) { //nolint
 	sender := tx.GetTransfer().Sender
 	amt := tx.GetTransfer().Amount
-	txHash := hex.EncodeToString(tx.Id)
 
-	ord, err := order.NewOrder(txHash, sender, dest, amount.Amount(amt), order.PACTUS_POLYGON)
+	ord, err := order.NewOrder(tx.Id, sender, dest, amount.Amount(amt), order.PACTUS_POLYGON)
 	if err != nil {
-		logger.Error("error while making new order", "actor", l.bypassName, "err", err, "txID", txHash)
+		logger.Error("error while making new order", "actor", l.bypassName, "err", err, "txID", tx.Id)
 
-		dbErr := l.db.AddLog("", "PACTUS", fmt.Sprintf("failed to create order: %s", txHash), err.Error())
+		dbErr := l.db.AddLog("", "PACTUS", fmt.Sprintf("failed to create order: %s", tx.Id), err.Error())
 		if dbErr != nil {
 			return nil, dbErr
 		}
