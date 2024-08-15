@@ -1,4 +1,4 @@
-FROM golang:1.22.2-alpine3.19 as builder
+FROM golang:1.23.0-alpine3.19 as builder
 
 # Set necessary environment variables for Go proxy
 ENV GO111MODULE=on
