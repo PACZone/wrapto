@@ -4,8 +4,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -48,10 +46,6 @@ type LoggerConfig struct {
 }
 
 func LoadConfig() (*Config, error) {
-	if err := godotenv.Load(); err != nil {
-		return nil, err
-	}
-
 	maxSizeStr := os.Getenv("LOG_MAX_SIZE")
 	maxSize, err := strconv.Atoi(maxSizeStr)
 	if err != nil {
