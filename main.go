@@ -37,7 +37,7 @@ func main() {
 
 func exitOnError(cmd *cobra.Command, err error) {
 	if err != nil {
-		cmd.PrintErr(err.Error())
+		cmd.PrintErrln(err.Error())
 		os.Exit(1)
 	}
 }

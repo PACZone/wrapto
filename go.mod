@@ -43,7 +43,6 @@ require (
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/joho/godotenv v1.5.1
 	github.com/kilic/bls12-381 v0.1.0 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/matoous/go-nanoid v1.5.0
