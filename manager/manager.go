@@ -29,7 +29,9 @@ type actors struct {
 	http *http.Server
 }
 
-func NewManager(ctx context.Context, cancel context.CancelFunc, cfg *config.Config, db *database.DB) (*Manager, error) {
+func NewManager(ctx context.Context, cancel context.CancelFunc,
+	cfg *config.Config, db *database.Database,
+) (*Manager, error) {
 	highway := make(chan message.Message, 10)                  // TODO: what should we use as size?
 	bypasses := make(map[bypass.Name]chan message.Message, 10) // TODO: what should we use as size?
 

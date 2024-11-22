@@ -13,14 +13,14 @@ import (
 
 type Bridge struct {
 	wallet     *Wallet
-	db         *database.DB
+	db         *database.Database
 	bypassName bypass.Name
 	bypass     chan message.Message
 
 	ctx context.Context
 }
 
-func newBridge(ctx context.Context, w *Wallet, b chan message.Message, bn bypass.Name, db *database.DB) Bridge {
+func newBridge(ctx context.Context, w *Wallet, b chan message.Message, bn bypass.Name, db *database.Database) Bridge {
 	return Bridge{
 		wallet:     w,
 		bypass:     b,

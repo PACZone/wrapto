@@ -15,7 +15,7 @@ import (
 
 type Bridge struct {
 	client     *Client
-	db         *database.DB
+	db         *database.Database
 	bypassName bypass.Name
 	bypass     chan message.Message
 
@@ -23,7 +23,7 @@ type Bridge struct {
 }
 
 func newBridge(ctx context.Context, bp chan message.Message,
-	bn bypass.Name, client *Client, db *database.DB,
+	bn bypass.Name, client *Client, db *database.Database,
 ) Bridge {
 	return Bridge{
 		bypass:     bp,

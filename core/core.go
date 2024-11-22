@@ -14,8 +14,8 @@ type Core struct {
 	mgr *manager.Manager
 }
 
-func NewCore(ctx context.Context, cancel context.CancelFunc) (*Core, error) {
-	cfg, err := config.LoadConfig()
+func NewCore(ctx context.Context, cancel context.CancelFunc, path string) (*Core, error) {
+	cfg, err := config.LoadConfig(path)
 	if err != nil {
 		cancel()
 
@@ -24,7 +24,7 @@ func NewCore(ctx context.Context, cancel context.CancelFunc) (*Core, error) {
 
 	logger.InitGlobalLogger(&cfg.Logger)
 
-	db, err := database.NewDB(cfg.Database.DSN)
+	db, err := database.Connect(cfg.Database) //nolint
 	if err != nil {
 		cancel()
 

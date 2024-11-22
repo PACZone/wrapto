@@ -12,9 +12,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func run(cmd *cobra.Command, _ []string) {
+func run(cmd *cobra.Command, args []string) {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-	c, err := core.NewCore(ctx, cancel)
+	c, err := core.NewCore(ctx, cancel, args[0])
 	exitOnError(cmd, err)
 
 	go c.Start()

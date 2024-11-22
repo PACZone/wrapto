@@ -2,103 +2,63 @@ package config
 
 import (
 	"os"
-	"strconv"
-	"strings"
+
+	"github.com/PACZone/wrapto/database"
+	logger "github.com/PACZone/wrapto/log"
+	"github.com/PACZone/wrapto/sides/pactus"
+	"github.com/PACZone/wrapto/sides/polygon"
+	"github.com/PACZone/wrapto/www/http"
+	"github.com/joho/godotenv"
+	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
-	Environment string
-	Logger      LoggerConfig
-	Pactus      PactusConfig
-	Polygon     PolygonConfig
-	Database    DatabaseConfig
-	HTTPServer  HTTPServerConfig
+	Environment string `yaml:"environment"`
+	Logger      logger.Config
+	Pactus      pactus.Config
+	Polygon     polygon.Config
+	Database    database.Config
+	HTTPServer  http.Config
 }
 
-type PactusConfig struct {
-	WalletPath string
-	WalletPass string
-	LockAddr   string
-	RPCNode    string
-}
-
-type PolygonConfig struct {
-	PrivateKey   string
-	ContractAddr string
-	RPCNode      string
-}
-
-type DatabaseConfig struct {
-	DSN string
-}
-
-type HTTPServerConfig struct {
-	Port string
-}
-
-type LoggerConfig struct {
-	Filename   string
-	LogLevel   string
-	Targets    []string
-	MaxSize    int
-	MaxBackups int
-	Compress   bool
-}
-
-func LoadConfig() (*Config, error) {
-	maxSizeStr := os.Getenv("LOG_MAX_SIZE")
-	maxSize, err := strconv.Atoi(maxSizeStr)
+func LoadConfig(path string) (*Config, error) {
+	file, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return nil, Error{
+			reason: err.Error(),
+		}
+	}
+	defer file.Close()
+
+	config := &Config{}
+
+	decoder := yaml.NewDecoder(file)
+
+	if err := decoder.Decode(config); err != nil {
+		return nil, Error{
+			reason: err.Error(),
+		}
 	}
 
-	maxBackupsStr := os.Getenv("LOG_MAX_BACKUPS")
-	maxBackups, err := strconv.Atoi(maxBackupsStr)
-	if err != nil {
-		return nil, err
+	if config.Environment != "prod" {
+		if err := godotenv.Load(); err != nil {
+			return nil, Error{
+				reason: err.Error(),
+			}
+		}
 	}
 
-	compressStr := os.Getenv("LOG_COMPRESS")
-	compress, err := strconv.ParseBool(compressStr)
-	if err != nil {
-		return nil, err
+	config.Database.URI = os.Getenv("WRAPTO_MONGO_URI")
+	config.Pactus.WalletPass = os.Getenv("WRAPTO_PACTUS_WALLET_PASSWORD")
+	config.Polygon.PrivateKey = os.Getenv("WRAPTO_POLYGON_PRIVATE_KEY")
+
+	if err = config.basicCheck(); err != nil {
+		return nil, Error{
+			reason: err.Error(),
+		}
 	}
 
-	cfg := &Config{
-		Environment: os.Getenv("ENVIRONMENT"),
-		Logger: LoggerConfig{
-			Filename:   os.ExpandEnv("LOG_FILENAME"),
-			LogLevel:   os.Getenv("LOG_LEVEL"),
-			Targets:    strings.Split(os.Getenv("LOG_TARGETS"), ","),
-			MaxSize:    maxSize,
-			MaxBackups: maxBackups,
-			Compress:   compress,
-		},
-		Pactus: PactusConfig{
-			WalletPath: os.Getenv("PACTUS_WALLET_PATH"),
-			WalletPass: os.Getenv("PACTUS_WALLET_PASSWORD"),
-			LockAddr:   os.Getenv("PACTUS_WALLET_ADDRESS"),
-			RPCNode:    os.Getenv("PACTUS_RPC"),
-		},
-		Polygon: PolygonConfig{
-			PrivateKey:   os.Getenv("POLYGON_PRIVATE_KEY"),
-			ContractAddr: os.Getenv("POLYGON_CONTRACT_ADDRESS"),
-			RPCNode:      os.Getenv("POLYGON_RPC"),
-		},
-		Database: DatabaseConfig{
-			os.Getenv("DATABASE_DSN"),
-		},
-
-		HTTPServer: HTTPServerConfig{
-			Port: os.Getenv("HTTP_PORT"),
-		},
-	}
-
-	if err := cfg.basicCheck(); err != nil {
-		return nil, err
-	}
-
-	return cfg, nil
+	return config, nil
 }
 
 func (c *Config) basicCheck() error {

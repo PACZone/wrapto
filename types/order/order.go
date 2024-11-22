@@ -2,6 +2,7 @@ package order
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/PACZone/wrapto/types/params"
 	gonanoid "github.com/matoous/go-nanoid"
@@ -25,25 +26,28 @@ const (
 
 type Order struct {
 	// * unique ID on Wrapto system.
-	ID string
+	ID string `bson:"id"`
 
 	// * transaction or contract call that user made on source network.
-	TxHash string
+	TxHash string `bson:"tx_hash"`
 
 	// * address of receiver account on destination network.
-	Receiver string
+	Receiver string `bson:"receiver"`
 
 	// * address of sender on source network (account that made bridge transaction).
-	Sender string
+	Sender string `bson:"sender"`
 
 	// * amount of PAC to be bridged, **including fee**.
-	amount amount.Amount
+	amount amount.Amount `bson:"amount"`
+
+	// * amount of PAC to be bridged, **including fee**.
+	CreatedAt time.Time `bson:"created_at"`
 
 	// * status of order on Wrapto system.
-	Status Status
+	Status Status `bson:"status"`
 
 	// * type of bridge.
-	BridgeType BridgeType
+	BridgeType BridgeType `bson:"bridge_type"`
 }
 
 func NewOrder(txHash, sender, receiver string, amt amount.Amount, t BridgeType) (*Order, error) {

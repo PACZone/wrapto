@@ -17,7 +17,7 @@ import (
 
 type Listener struct {
 	client          *Client
-	db              *database.DB
+	db              *database.Database
 	nextBlockNumber uint32
 	bypassName      bypass.Name
 	highway         chan message.Message
@@ -29,7 +29,7 @@ type Listener struct {
 func newListener(ctx context.Context,
 	client *Client, bp bypass.Name, highway chan message.Message,
 	startBlock uint32, lockAddr string,
-	db *database.DB,
+	db *database.Database,
 ) *Listener {
 	return &Listener{
 		client:          client,
