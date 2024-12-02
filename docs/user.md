@@ -1,6 +1,6 @@
 # Wrapto Bridge User Documentation
 
-This documentation contains all that a user needs to interact and work with Wrapto protocol V1.
+This documentation contains all that a user needs to interact and work with Wrapto protocol.
 
 ## How to Bridge?
 
@@ -49,5 +49,7 @@ There is a minimum amount of 1 w/PAC for bridge. The address on contract calls a
 
 Any bridge attempt with wrong info that we warned about will be counted as donations. if everything was following the
 correct instructions and you got errors and failures, we will return your funds safely back to you!
+
+The Wrapto protocol utilizes a multi-sig model and a warm and cold wallet system with the Pactus foundation. warm waller always keeps 10% of bridge liquidity in itself and the rest will be kept in cold wallet (a multisig wallet) so if you want to bridge more than 10% of whole bridge liquidity you probably need to contact email below and perform it manually.
 
 > For this purpose you can contact us by [hi@dezh.tech](mailto:hi@dezh.tech), make sure you provide all data is needed to track the issue.

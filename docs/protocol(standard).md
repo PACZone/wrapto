@@ -4,7 +4,7 @@ In this document, we will talk about how Wrapto protocol V1 works.
 
 ## Semi-centralized model
 
-The Wrapto V1 is a semi-centralized protocol because of the lack of smart contract support in the Pactus blockchain. Minting new wPAC on other networks is centralized same as unlocking locked PACs. It's planned to make it fully decentralized after Pactus updates.
+The Wrapto is a semi-centralized protocol because of the lack of smart contract support in the Pactus blockchain. Minting new wPAC on other networks is centralized same as unlocking locked PACs. It's planned to make it fully decentralized after Pactus updates.
 
 ## Workflow
 

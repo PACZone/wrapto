@@ -26,8 +26,7 @@ func Connect(cfg Config) (*Database, error) {
 		SetServerAPIOptions(serverAPI).
 		SetConnectTimeout(time.Duration(cfg.ConnectionTimeout) * time.Millisecond).
 		SetBSONOptions(&options.BSONOptions{
-			UseJSONStructTags: true,
-			NilSliceAsEmpty:   true,
+			NilSliceAsEmpty: true,
 		})
 
 	client, err := mongo.Connect(ctx, opts)
@@ -40,6 +39,23 @@ func Connect(cfg Config) (*Database, error) {
 
 	if err := client.Ping(qCtx, nil); err != nil {
 		return nil, err
+	}
+
+	stateColl := client.Database(cfg.DBName).Collection("state")
+	count, err := stateColl.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		return nil, fmt.Errorf("error checking state collection: %w", err)
+	}
+
+	if count == 0 {
+		defaultState := bson.M{
+			"pactus":  2_000_000,
+			"polygon": 8,
+		}
+		_, err := stateColl.InsertOne(ctx, defaultState)
+		if err != nil {
+			return nil, fmt.Errorf("error inserting default state: %w", err)
+		}
 	}
 
 	return &Database{
@@ -180,6 +196,9 @@ func (db *Database) IsOrderExist(id string) (bool, error) {
 
 	err := coll.FindOne(ctx, filter).Decode(&result)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return false, nil
+		}
 		return false, err
 	}
 

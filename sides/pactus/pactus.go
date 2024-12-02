@@ -8,7 +8,6 @@ import (
 	logger "github.com/PACZone/wrapto/log"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
-	"github.com/pactus-project/pactus/crypto"
 )
 
 type Side struct {
@@ -25,10 +24,6 @@ func NewSide(ctx context.Context,
 	bp chan message.Message, env string, cfg Config,
 	db *database.Database,
 ) (*Side, error) {
-	if env == "dev" {
-		crypto.AddressHRP = "tpc" // TODO: FIX ME!!!!!
-	}
-
 	client, err := newClient(context.Background(), cfg.RPCNode) //nolint
 	if err != nil {
 		return nil, err

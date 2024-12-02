@@ -27,7 +27,7 @@ func run(cmd *cobra.Command, args []string) {
 func main() {
 	rootCmd := &cobra.Command{
 		Use:     "wrapto",
-		Version: "",
+		Version: StringVersion(),
 		Run:     run,
 	}
 
