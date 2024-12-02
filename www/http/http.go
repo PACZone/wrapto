@@ -125,15 +125,15 @@ func (h *Server) recentTxs(c echo.Context) error {
 
 	for _, tx := range txs {
 		a := RecentTxsResponse{
-			From:   tx.Receiver,
-			To:     tx.Sender,
-			Fee:    tx.Fee().ToPAC(),
-			Date:   tx.CreatedAt,
-			Status: tx.Status,
-			// TxID:       tx.DestNetworkTxHash,
+			From:       tx.Receiver,
+			To:         tx.Sender,
+			Fee:        tx.Fee().ToPAC(),
+			Date:       tx.CreatedAt,
+			Status:     tx.Status,
+			TxID:       tx.DestNetworkTxHash,
 			Amount:     tx.Amount().ToPAC(),
 			BridgeType: string(tx.BridgeType),
-			// Reason:     tx.Reason,
+			Reason:     tx.Reason,
 		}
 		dto = append(dto, a)
 	}
@@ -186,15 +186,15 @@ func (h *Server) searchTx(c echo.Context) error {
 
 	for _, tx := range txs {
 		a := RecentTxsResponse{
-			From:   tx.Receiver,
-			To:     tx.Sender,
-			Fee:    tx.Fee().ToPAC(),
-			Date:   tx.CreatedAt,
-			Status: tx.Status,
-			// TxID:       tx.DestNetworkTxHash,
+			From:       tx.Receiver,
+			To:         tx.Sender,
+			Fee:        tx.Fee().ToPAC(),
+			Date:       tx.CreatedAt,
+			Status:     tx.Status,
+			TxID:       tx.DestNetworkTxHash,
 			Amount:     tx.Amount().ToPAC(),
 			BridgeType: string(tx.BridgeType),
-			// Reason:     tx.Reason,
+			Reason:     tx.Reason,
 		}
 		dto = append(dto, a)
 	}

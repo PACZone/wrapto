@@ -38,7 +38,7 @@ func NewManager(ctx context.Context, cancel context.CancelFunc,
 	pactusCh := make(chan message.Message, 10)
 	polygonCh := make(chan message.Message, 10)
 
-	lastState, err := db.GetState()
+	lastState, err := db.GetState() //nolint
 	if err != nil {
 		return nil, err
 	}

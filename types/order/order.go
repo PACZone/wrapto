@@ -46,6 +46,12 @@ type Order struct {
 	// * status of order on Wrapto system.
 	Status Status `bson:"status"`
 
+	// * once status got COMPLETE, this will be filled with destination network transaction hash made by wrapto.
+	DestNetworkTxHash string `bson:"destination_tx_hash"`
+
+	// * will be filled if order failed.
+	Reason string `bson:"reason"`
+
 	// * type of bridge.
 	BridgeType BridgeType `bson:"bridge_type"`
 }
