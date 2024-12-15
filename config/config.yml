@@ -1,0 +1,29 @@
+environment: dev # or prod.
+
+logger:
+  file_name: wrapto.log
+  log_level: info
+  targets:
+    - console
+    - file
+  max_size: 100
+  max_backups: 10
+  compress: true
+
+pactus:
+  wallet_path: ./wallet
+  lock_address: pc1zgp0x33hehvczq6dggs04gywfqpzl9fea5039gh
+  wallet_address: pc1rtc6cgpa7zys7gv3pn5mvt2dln6u28ws2v7qqat
+  rpc_url: bootstrap1.pactus.org:50051
+
+polygon:
+  contract_address: 0x2f77E0afAEE06970Bf860B8267b5aFECFFF6F216
+  rpc_url: https://polygon.drpc.org
+
+database:
+  db_name: wrapto
+  connection_timeout_in_ms: 5000
+  query_timeout_in_ms: 3000
+
+http:
+  port: ":3000"

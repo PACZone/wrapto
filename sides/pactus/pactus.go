@@ -4,12 +4,10 @@ import (
 	"context"
 	"sync"
 
-	"github.com/PACZone/wrapto/config"
 	"github.com/PACZone/wrapto/database"
 	logger "github.com/PACZone/wrapto/log"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
-	"github.com/pactus-project/pactus/crypto"
 )
 
 type Side struct {
@@ -23,13 +21,9 @@ type Side struct {
 
 func NewSide(ctx context.Context,
 	highway chan message.Message, startBlock uint32,
-	bp chan message.Message, env string, cfg config.PactusConfig,
-	db *database.DB,
+	bp chan message.Message, env string, cfg Config,
+	db *database.Database,
 ) (*Side, error) {
-	if env == "dev" {
-		crypto.AddressHRP = "tpc" // TODO: FIX ME!!!!!
-	}
-
 	client, err := newClient(context.Background(), cfg.RPCNode) //nolint
 	if err != nil {
 		return nil, err

@@ -4,7 +4,6 @@ import (
 	"context"
 	"sync"
 
-	"github.com/PACZone/wrapto/config"
 	"github.com/PACZone/wrapto/database"
 	logger "github.com/PACZone/wrapto/log"
 	"github.com/PACZone/wrapto/types/bypass"
@@ -20,7 +19,7 @@ type Side struct {
 	client   *Client
 	listener *Listener
 	bridge   Bridge
-	db       *database.DB
+	db       *database.Database
 	highway  chan message.Message
 	bypass   chan message.Message
 
@@ -28,7 +27,7 @@ type Side struct {
 }
 
 func NewSide(ctx context.Context, highway chan message.Message, startOrder uint32,
-	bp chan message.Message, env string, cfg config.PolygonConfig, db *database.DB,
+	bp chan message.Message, env string, cfg Config, db *database.Database,
 ) (*Side, error) {
 	chainID := mainChainID
 	if env == "dev" {

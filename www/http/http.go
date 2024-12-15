@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/PACZone/wrapto/config"
 	"github.com/PACZone/wrapto/database"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
@@ -17,9 +16,9 @@ import (
 
 type Server struct {
 	echo    *echo.Echo
-	db      *database.DB
+	db      *database.Database
 	ctx     context.Context
-	cfg     config.HTTPServerConfig
+	cfg     Config
 	highway chan message.Message
 }
 
@@ -50,7 +49,7 @@ type RecentTxsResponse struct {
 	Reason     string       `json:"reason"`
 }
 
-func NewHTTP(ctx context.Context, cfg config.HTTPServerConfig, db *database.DB, highway chan message.Message) *Server {
+func NewHTTP(ctx context.Context, cfg Config, db *database.Database, highway chan message.Message) *Server {
 	app := echo.New()
 
 	return &Server{
@@ -128,11 +127,11 @@ func (h *Server) recentTxs(c echo.Context) error {
 		a := RecentTxsResponse{
 			From:       tx.Receiver,
 			To:         tx.Sender,
-			Fee:        tx.Fee.ToPAC(),
+			Fee:        tx.Fee().ToPAC(),
 			Date:       tx.CreatedAt,
 			Status:     tx.Status,
 			TxID:       tx.DestNetworkTxHash,
-			Amount:     tx.Amount.ToPAC(),
+			Amount:     tx.Amount().ToPAC(),
 			BridgeType: string(tx.BridgeType),
 			Reason:     tx.Reason,
 		}
@@ -189,11 +188,11 @@ func (h *Server) searchTx(c echo.Context) error {
 		a := RecentTxsResponse{
 			From:       tx.Receiver,
 			To:         tx.Sender,
-			Fee:        tx.Fee.ToPAC(),
+			Fee:        tx.Fee().ToPAC(),
 			Date:       tx.CreatedAt,
 			Status:     tx.Status,
 			TxID:       tx.DestNetworkTxHash,
-			Amount:     tx.Amount.ToPAC(),
+			Amount:     tx.Amount().ToPAC(),
 			BridgeType: string(tx.BridgeType),
 			Reason:     tx.Reason,
 		}

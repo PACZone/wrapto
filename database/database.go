@@ -1,78 +1,90 @@
 package database
 
 import (
-	"errors"
+	"context"
+	"fmt"
+	"time"
 
 	"github.com/PACZone/wrapto/types/order"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type DB struct {
-	*gorm.DB
+type Database struct {
+	DBName       string
+	QueryTimeout time.Duration
+	Client       *mongo.Client
 }
 
-func NewDB(dsn string) (*DB, error) {
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Error),
-	})
+func Connect(cfg Config) (*Database, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.ConnectionTimeout)*time.Millisecond)
+	defer cancel()
+
+	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+	opts := options.Client().ApplyURI(cfg.URI).
+		SetServerAPIOptions(serverAPI).
+		SetConnectTimeout(time.Duration(cfg.ConnectionTimeout) * time.Millisecond).
+		SetBSONOptions(&options.BSONOptions{
+			NilSliceAsEmpty: true,
+		})
+
+	client, err := mongo.Connect(ctx, opts)
 	if err != nil {
-		return nil, DBError{
-			Reason: err.Error(),
+		return nil, err
+	}
+
+	qCtx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.QueryTimeout)*time.Millisecond)
+	defer cancel()
+
+	if err := client.Ping(qCtx, nil); err != nil {
+		return nil, err
+	}
+
+	stateColl := client.Database(cfg.DBName).Collection("state")
+	count, err := stateColl.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		return nil, fmt.Errorf("error checking state collection: %w", err)
+	}
+
+	if count == 0 {
+		defaultState := bson.M{
+			"pactus":  2_000_000,
+			"polygon": 8,
+		}
+		_, err := stateColl.InsertOne(ctx, defaultState)
+		if err != nil {
+			return nil, fmt.Errorf("error inserting default state: %w", err)
 		}
 	}
 
-	if !db.Migrator().HasTable(&Order{}) || !db.Migrator().HasTable(&Log{}) || !db.Migrator().HasTable(&State{}) {
-		if err := db.AutoMigrate(
-			&Order{},
-			&Log{},
-			&State{},
-		); err != nil {
-			return nil, DBError{
-				Reason: err.Error(),
-			}
-		}
-
-		defaultState := &State{
-			Pactus:  638364,
-			Polygon: 1,
-		}
-		if err := db.Create(defaultState).Error; err != nil {
-			return nil, DBError{
-				TableName: "State",
-				Reason:    err.Error(),
-			}
-		}
-	}
-
-	return &DB{
-		DB: db,
+	return &Database{
+		Client:       client,
+		DBName:       cfg.DBName,
+		QueryTimeout: time.Duration(cfg.QueryTimeout) * time.Millisecond,
 	}, nil
 }
 
-func (db *DB) AddOrder(ord *order.Order) (string, error) {
-	o := &Order{
-		ID:         ord.ID,
-		TxHash:     ord.TxHash,
-		Receiver:   ord.Receiver,
-		Sender:     ord.Sender,
-		Amount:     ord.OriginalAmount(),
-		Fee:        ord.Fee(),
-		Status:     ord.Status,
-		BridgeType: ord.BridgeType,
-	}
-	if err := db.Create(o).Error; err != nil {
-		return "", DBError{
-			TableName: "Orders",
-			Reason:    err.Error(),
-		}
+func (db *Database) AddOrder(ord *order.Order) (string, error) {
+	coll := db.Client.Database(db.DBName).Collection("orders")
+
+	ctx, cancel := context.WithTimeout(context.Background(), db.QueryTimeout)
+	defer cancel()
+
+	_, err := coll.InsertOne(ctx, ord)
+	if err != nil {
+		return "", err
 	}
 
 	return ord.ID, nil
 }
 
-func (db *DB) AddLog(orderID, actor, desc, trace string) error {
+func (db *Database) AddLog(orderID, actor, desc, trace string) error {
+	coll := db.Client.Database(db.DBName).Collection("logs")
+
+	ctx, cancel := context.WithTimeout(context.Background(), db.QueryTimeout)
+	defer cancel()
+
 	log := &Log{
 		OrderID:     orderID,
 		Actor:       actor,
@@ -80,151 +92,247 @@ func (db *DB) AddLog(orderID, actor, desc, trace string) error {
 		Trace:       trace,
 	}
 
-	if err := db.Create(log).Error; err != nil {
-		return DBError{
-			TableName: "Logs",
-			Reason:    err.Error(),
-		}
+	_, err := coll.InsertOne(ctx, log)
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (db *DB) UpdateOrderStatus(id string, status order.Status) error {
-	if err := db.Model(&Order{}).Where("id = ?", id).Update("status", status).Error; err != nil {
-		return DBError{
-			TableName: "Orders",
-			Reason:    err.Error(),
-		}
+func (db *Database) UpdateOrderStatus(id string, status order.Status) error {
+	coll := db.Client.Database(db.DBName).Collection("orders")
+
+	ctx, cancel := context.WithTimeout(context.Background(), db.QueryTimeout)
+	defer cancel()
+
+	filter := bson.M{"id": id}
+
+	update := bson.M{"$set": bson.M{"status": status}}
+
+	result, err := coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("no order found with id: %s", id)
 	}
 
 	return nil
 }
 
-func (db *DB) UpdateOrderDestTxHash(id, hash string) error {
-	if err := db.Model(&Order{}).Where("id = ?", id).Update("dest_network_tx_hash", hash).Error; err != nil {
-		return DBError{
-			TableName: "Orders",
-			Reason:    err.Error(),
-		}
+func (db *Database) UpdateOrderDestTxHash(id, hash string) error {
+	coll := db.Client.Database(db.DBName).Collection("orders")
+
+	ctx, cancel := context.WithTimeout(context.Background(), db.QueryTimeout)
+	defer cancel()
+
+	filter := bson.M{"id": id}
+
+	update := bson.M{"$set": bson.M{"destination_tx_hash": hash}}
+
+	result, err := coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("no order found with id: %s", id)
 	}
 
 	return nil
 }
 
-func (db *DB) UpdateOrderReason(id, reason string) error {
-	if err := db.Model(&Order{}).Where("id = ?", id).Update("reason", reason).Error; err != nil {
-		return DBError{
-			TableName: "Orders",
-			Reason:    err.Error(),
-		}
+func (db *Database) UpdateOrderReason(id, reason string) error {
+	coll := db.Client.Database(db.DBName).Collection("orders")
+
+	ctx, cancel := context.WithTimeout(context.Background(), db.QueryTimeout)
+	defer cancel()
+
+	filter := bson.M{"id": id}
+
+	update := bson.M{"$set": bson.M{"reason": reason}}
+
+	result, err := coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("no order found with id: %s", id)
 	}
 
 	return nil
 }
 
-func (db *DB) GetOrder(id string) (*Order, error) {
-	var ord *Order
-	if err := db.First(&ord, "id = ?", id).Error; err != nil {
-		return nil, DBError{
-			TableName: "Orders",
-			Reason:    err.Error(),
-		}
+func (db *Database) GetOrder(id string) (*order.Order, error) {
+	coll := db.Client.Database(db.DBName).Collection("orders")
+
+	ctx, cancel := context.WithTimeout(context.Background(), db.QueryTimeout)
+	defer cancel()
+
+	filter := bson.M{"id": id}
+
+	var result order.Order
+
+	err := coll.FindOne(ctx, filter).Decode(&result)
+	if err != nil {
+		return nil, err
 	}
 
-	return ord, nil
+	return &result, nil
 }
 
-func (db *DB) IsOrderExist(txHash string) (bool, error) {
-	var ord Order
-	err := db.Where("tx_hash = ?", txHash).First(&ord).Error
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return false, nil
-	} else if err != nil {
-		return false, DBError{
-			TableName: "Orders",
-			Reason:    err.Error(),
+func (db *Database) IsOrderExist(id string) (bool, error) {
+	coll := db.Client.Database(db.DBName).Collection("orders")
+
+	ctx, cancel := context.WithTimeout(context.Background(), db.QueryTimeout)
+	defer cancel()
+
+	filter := bson.M{"id": id}
+
+	var result order.Order
+
+	err := coll.FindOne(ctx, filter).Decode(&result)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return false, nil
 		}
+		return false, err
 	}
 
 	return true, nil
 }
 
-func (db *DB) GetOrderWithLogs(id string) (*Order, error) {
-	var ord *Order
-	if err := db.Preload("Logs").First(&ord, "id = ?", id).Error; err != nil {
-		return nil, DBError{
-			TableName: "Orders",
-			Reason:    err.Error(),
-		}
+func (db *Database) UpdatePactusState(height uint32) error {
+	coll := db.Client.Database(db.DBName).Collection("state")
+
+	ctx, cancel := context.WithTimeout(context.Background(), db.QueryTimeout)
+	defer cancel()
+
+	update := bson.M{
+		"$set": bson.M{
+			"pactus": height,
+		},
 	}
 
-	return ord, nil
-}
-
-func (db *DB) GetOrderLogs(orderID string) ([]Log, error) {
-	var logs []Log
-	if err := db.Where("order_id = ?", orderID).Find(&logs).Error; err != nil {
-		return nil, DBError{
-			TableName: "Logs",
-			Reason:    err.Error(),
-		}
-	}
-
-	return logs, nil
-}
-
-func (db *DB) UpdatePactusState(pactus uint32) error {
-	var state State
-	if err := db.First(&state).Error; err != nil {
+	result, err := coll.UpdateOne(ctx, bson.M{}, update)
+	if err != nil {
 		return err
 	}
 
-	state.Pactus = pactus
+	if result.ModifiedCount == 0 {
+		return fmt.Errorf("no document was updated for height: %d", height)
+	}
 
-	return db.Save(&state).Error
+	return nil
 }
 
-func (db *DB) UpdatePolygonState(polygon uint32) error {
-	var state State
-	if err := db.First(&state).Error; err != nil {
+func (db *Database) UpdatePolygonState(ordID uint32) error {
+	coll := db.Client.Database(db.DBName).Collection("state")
+
+	ctx, cancel := context.WithTimeout(context.Background(), db.QueryTimeout)
+	defer cancel()
+
+	update := bson.M{
+		"$set": bson.M{
+			"polygon": ordID,
+		},
+	}
+
+	result, err := coll.UpdateOne(ctx, bson.M{}, update)
+	if err != nil {
 		return err
 	}
 
-	state.Polygon = polygon
+	if result.ModifiedCount == 0 {
+		return fmt.Errorf("no document was updated for ordID: %d", ordID)
+	}
 
-	return db.Save(&state).Error
+	return nil
 }
 
-func (db *DB) GetState() (*State, error) {
+func (db *Database) GetState() (*State, error) {
+	coll := db.Client.Database(db.DBName).Collection("state")
+
+	ctx, cancel := context.WithTimeout(context.Background(), db.QueryTimeout)
+	defer cancel()
+
 	var state State
-	if err := db.First(&state).Error; err != nil {
+
+	err := coll.FindOne(ctx, bson.M{}).Decode(&state)
+	if err != nil {
 		return nil, err
 	}
 
 	return &state, nil
 }
 
-func (db *DB) GetLatestOrders(limit int) ([]*Order, error) {
-	var orders []*Order
-	if err := db.Order("created_at desc").Limit(limit).Find(&orders).Error; err != nil {
-		return nil, DBError{
-			TableName: "Orders",
-			Reason:    err.Error(),
+func (db *Database) GetLatestOrders(limit int) ([]*order.Order, error) {
+	coll := db.Client.Database(db.DBName).Collection("orders")
+
+	ctx, cancel := context.WithTimeout(context.Background(), db.QueryTimeout)
+	defer cancel()
+
+	var orders []*order.Order
+
+	cursor, err := coll.Find(ctx, bson.M{}, options.Find().SetSort(bson.D{
+		bson.E{"created_at", -1}, //nolint
+	}).SetLimit(int64(limit)))
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var ord order.Order
+		if err := cursor.Decode(&ord); err != nil {
+			return nil, err
 		}
+		orders = append(orders, &ord)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
 	}
 
 	return orders, nil
 }
 
-func (db *DB) SearchOrders(q string) ([]*Order, error) {
-	var orders []*Order
-	if err := db.Where("tx_hash = ? OR receiver = ? OR sender = ? OR dest_network_tx_hash = ?",
-		q, q, q, q).Find(&orders).Error; err != nil {
-		return nil, DBError{
-			TableName: "Orders",
-			Reason:    err.Error(),
+func (db *Database) SearchOrders(query string) ([]*order.Order, error) {
+	coll := db.Client.Database(db.DBName).Collection("orders")
+
+	ctx, cancel := context.WithTimeout(context.Background(), db.QueryTimeout)
+	defer cancel()
+
+	var orders []*order.Order
+
+	filter := bson.M{
+		"$or": []bson.M{
+			{"tx_hash": query},
+			{"receiver": query},
+			{"sender": query},
+			{"dest_network_tx_hash": query},
+		},
+	}
+
+	cursor, err := coll.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var ord order.Order
+		if err := cursor.Decode(&ord); err != nil {
+			return nil, err
 		}
+		orders = append(orders, &ord)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
 	}
 
 	return orders, nil

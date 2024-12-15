@@ -9,7 +9,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/PACZone/wrapto/config"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -21,7 +20,7 @@ type logger struct {
 	writer io.Writer
 }
 
-func InitGlobalLogger(cfg *config.LoggerConfig) {
+func InitGlobalLogger(cfg *Config) {
 	if globalInst == nil {
 		var writers []io.Writer
 

@@ -1,6 +1,6 @@
 # Code design and structure
 
-In this document, we will explain The Wrapto bridge V1 software design.
+In this document, we will explain The Wrapto bridge software design.
 
 > [!NOTE]
 > We suggest to read [protocol](./protocol(standard).md) document before this document.
