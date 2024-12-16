@@ -200,7 +200,7 @@ func (db *Database) IsOrderExist(id string) (bool, error) {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return false, nil
 		}
-		
+
 		return false, err
 	}
 

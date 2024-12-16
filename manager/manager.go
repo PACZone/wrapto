@@ -44,7 +44,7 @@ func NewManager(ctx context.Context, cancel context.CancelFunc,
 	}
 
 	pactusSide, err := pactus.NewSide(ctx, highway, lastState.Pactus, pactusCh,
-		cfg.Environment, &cfg.Pactus, db)
+		&cfg.Pactus, db)
 	if err != nil {
 		return nil, err
 	}
