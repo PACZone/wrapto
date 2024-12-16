@@ -21,7 +21,7 @@ type Side struct {
 
 func NewSide(ctx context.Context,
 	highway chan message.Message, startBlock uint32,
-	bp chan message.Message, env string, cfg Config,
+	bp chan message.Message, cfg *Config,
 	db *database.Database,
 ) (*Side, error) {
 	client, err := newClient(context.Background(), cfg.RPCNode) //nolint
