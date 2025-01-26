@@ -6,8 +6,8 @@ import (
 	"github.com/PACZone/wrapto/config"
 	"github.com/PACZone/wrapto/database"
 	logger "github.com/PACZone/wrapto/log"
+	"github.com/PACZone/wrapto/sides/evm"
 	"github.com/PACZone/wrapto/sides/pactus"
-	"github.com/PACZone/wrapto/sides/polygon"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 	"github.com/PACZone/wrapto/www/http"
@@ -24,7 +24,7 @@ type Manager struct {
 
 type actors struct {
 	pactus  *pactus.Side
-	polygon *polygon.Side
+	polygon *evm.Side
 
 	http *http.Server
 }
@@ -49,8 +49,8 @@ func NewManager(ctx context.Context, cancel context.CancelFunc,
 		return nil, err
 	}
 
-	polygonSide, err := polygon.NewSide(ctx, highway, lastState.Polygon, polygonCh,
-		cfg.Environment, cfg.Polygon, db)
+	polygonSide, err := evm.NewSide(ctx, highway, lastState.Polygon, polygonCh,
+		cfg.Environment, cfg.Polygon, db, bypass.POLYGON)
 	if err != nil {
 		return nil, err
 	}

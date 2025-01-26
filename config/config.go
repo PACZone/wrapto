@@ -5,8 +5,8 @@ import (
 
 	"github.com/PACZone/wrapto/database"
 	logger "github.com/PACZone/wrapto/log"
+	"github.com/PACZone/wrapto/sides/evm"
 	"github.com/PACZone/wrapto/sides/pactus"
-	"github.com/PACZone/wrapto/sides/polygon"
 	"github.com/PACZone/wrapto/www/http"
 	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v2"
@@ -16,7 +16,7 @@ type Config struct {
 	Environment string `yaml:"environment"`
 	Logger      logger.Config
 	Pactus      pactus.Config
-	Polygon     polygon.Config
+	Polygon     evm.Config
 	Database    database.Config
 	HTTPServer  http.Config
 }

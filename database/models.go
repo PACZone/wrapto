@@ -11,7 +11,6 @@ type Log struct {
 }
 
 type State struct {
-	Pactus uint32 `bson:"pactus"`
-
+	Pactus  uint32 `bson:"pactus"`
 	Polygon uint32 `bson:"polygon"`
 }

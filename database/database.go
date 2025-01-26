@@ -185,13 +185,16 @@ func (db *Database) GetOrder(id string) (*order.Order, error) {
 	return &result, nil
 }
 
-func (db *Database) IsOrderExist(id string) (bool, error) {
+func (db *Database) IsOrderExist(id, bt string) (bool, error) {
 	coll := db.Client.Database(db.DBName).Collection("orders")
 
 	ctx, cancel := context.WithTimeout(context.Background(), db.QueryTimeout)
 	defer cancel()
 
-	filter := bson.M{"id": id}
+	filter := bson.M{
+		"id":          id,
+		"bridge_type": bt,
+	}
 
 	var result order.Order
 
@@ -280,7 +283,10 @@ func (db *Database) GetLatestOrders(limit int) ([]*order.Order, error) {
 	var orders []*order.Order
 
 	cursor, err := coll.Find(ctx, bson.M{}, options.Find().SetSort(bson.D{
-		bson.E{"created_at", -1}, //nolint
+		bson.E{
+			Key:   "created_at",
+			Value: -1,
+		},
 	}).SetLimit(int64(limit)))
 	if err != nil {
 		return nil, err

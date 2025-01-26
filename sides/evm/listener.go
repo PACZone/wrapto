@@ -1,4 +1,4 @@
-package polygon
+package evm
 
 import (
 	"context"
@@ -23,6 +23,7 @@ type Listener struct {
 	bypassName      bypass.Name
 	nextOrderNumber uint32
 	highway         chan message.Message
+	bridgeType      order.BridgeType
 
 	ctx context.Context
 }
@@ -30,12 +31,18 @@ type Listener struct {
 func newListener(ctx context.Context,
 	client *Client, bp bypass.Name, highway chan message.Message, startOrder uint32, db *database.Database,
 ) *Listener {
+	var bt order.BridgeType
+	if bp == bypass.POLYGON {
+		bt = order.POLYGON_PACTUS
+	}
+
 	return &Listener{
 		client:          client,
 		db:              db,
 		bypassName:      bp,
 		nextOrderNumber: startOrder,
 		highway:         highway,
+		bridgeType:      bt,
 		ctx:             ctx,
 	}
 }
@@ -75,7 +82,7 @@ func (l *Listener) processOrder() error {
 
 	id := strconv.FormatUint(uint64(l.nextOrderNumber), 10)
 
-	if exist, err := l.checkOrderExist(id); err != nil {
+	if exist, err := l.checkOrderExist(id, l.bridgeType); err != nil {
 		return err
 	} else if exist {
 		logger.Warn("error repetitive transaction", "actor", l.bypassName, "txHash", id)
@@ -87,7 +94,7 @@ func (l *Listener) processOrder() error {
 
 	amt := o.Amount.Int64()
 	sender := o.Sender.Hex()
-	ord, err := order.NewOrder(id, sender, o.DestinationAddress, amount.Amount(amt), order.POLYGON_PACTUS)
+	ord, err := order.NewOrder(id, sender, o.DestinationAddress, amount.Amount(amt), l.bridgeType)
 	if err != nil {
 		dbErr := l.db.UpdateOrderStatus(ord.ID, order.FAILED)
 		if dbErr != nil {
@@ -130,8 +137,8 @@ func (l *Listener) processOrder() error {
 	return nil
 }
 
-func (l *Listener) checkOrderExist(id string) (bool, error) {
-	isExist, err := l.db.IsOrderExist(id)
+func (l *Listener) checkOrderExist(id string, bt order.BridgeType) (bool, error) {
+	isExist, err := l.db.IsOrderExist(id, string(bt))
 	if err != nil {
 		return false, err
 	}

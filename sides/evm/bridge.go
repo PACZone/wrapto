@@ -1,4 +1,4 @@
-package polygon
+package evm
 
 import (
 	"context"
@@ -109,7 +109,7 @@ func (b *Bridge) processMsg(msg message.Message) error {
 
 	logger.Info("wPAC minted successfully", "actor", b.bypassName, "txHahs", hash, "orderID", msg.Payload.ID)
 
-	err = b.db.AddLog(msg.Payload.ID, "POLYGON", fmt.Sprintf("tx success with tx hash: %s", hash), hash)
+	err = b.db.AddLog(msg.Payload.ID, string(b.bypassName), fmt.Sprintf("tx success with tx hash: %s", hash), hash)
 	if err != nil {
 		return err
 	}
