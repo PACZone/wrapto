@@ -50,7 +50,7 @@ func NewManager(ctx context.Context, cancel context.CancelFunc,
 	}
 
 	polygonSide, err := evm.NewSide(ctx, highway, lastState.Polygon, polygonCh,
-		cfg.Environment, cfg.Polygon, db, bypass.POLYGON)
+		cfg.Polygon, db, bypass.POLYGON)
 	if err != nil {
 		return nil, err
 	}

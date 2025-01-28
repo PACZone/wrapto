@@ -23,7 +23,7 @@ type Side struct {
 }
 
 func NewSide(ctx context.Context, highway chan message.Message, startOrder uint32,
-	bp chan message.Message, env string, cfg Config, db *database.Database, bn bypass.Name,
+	bp chan message.Message, cfg Config, db *database.Database, bn bypass.Name,
 ) (*Side, error) {
 	client, err := newClient(cfg.RPCNode, cfg.PrivateKey, cfg.ContractAddr, cfg.ChainID)
 	if err != nil {
