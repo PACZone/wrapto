@@ -13,6 +13,7 @@ import (
 )
 
 func run(cmd *cobra.Command, args []string) {
+	logger.Info("running wrapto", "version", StringVersion())
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	c, err := core.NewCore(ctx, cancel, args[0])
 	exitOnError(cmd, err)

@@ -222,13 +222,9 @@ func (db *Database) UpdatePactusState(height uint32) error {
 		},
 	}
 
-	result, err := coll.UpdateOne(ctx, bson.M{}, update)
+	_, err := coll.UpdateOne(ctx, bson.M{}, update)
 	if err != nil {
 		return err
-	}
-
-	if result.ModifiedCount == 0 {
-		return fmt.Errorf("no document was updated for height: %d", height)
 	}
 
 	return nil
@@ -246,13 +242,9 @@ func (db *Database) UpdatePolygonState(ordID uint32) error {
 		},
 	}
 
-	result, err := coll.UpdateOne(ctx, bson.M{}, update)
+	_, err := coll.UpdateOne(ctx, bson.M{}, update)
 	if err != nil {
 		return err
-	}
-
-	if result.ModifiedCount == 0 {
-		return fmt.Errorf("no document was updated for ordID: %d", ordID)
 	}
 
 	return nil
