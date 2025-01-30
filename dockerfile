@@ -1,5 +1,5 @@
 # Build
-FROM golang:1.23.3-alpine3.19 AS builder
+FROM golang:1.23.4-alpine3.19 AS builder
 
 WORKDIR /app
 
@@ -16,7 +16,8 @@ FROM alpine:3.19
 WORKDIR /app
 
 COPY --from=builder /app/wrapto .
+COPY --from=builder /app/config/config.yml .
 
 EXPOSE 3000
 
-CMD ["./wrapto"]
+ENTRYPOINT ["./wrapto", "./config.yml"]
