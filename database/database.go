@@ -91,6 +91,7 @@ func (db *Database) AddLog(orderID, actor, desc, trace string) error {
 		Actor:       actor,
 		Description: desc,
 		Trace:       trace,
+		CreatedAt:   time.Now().Unix(),
 	}
 
 	_, err := coll.InsertOne(ctx, log)

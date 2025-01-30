@@ -1,13 +1,11 @@
 package database
 
 type Log struct {
-	Actor string `bson:"actor"`
-
+	Actor       string `bson:"actor"`
 	Description string `bson:"description"`
-
-	Trace string `bson:"trace"`
-
-	OrderID string `bson:"order_id"`
+	Trace       string `bson:"trace"`
+	OrderID     string `bson:"order_id"`
+	CreatedAt   int64  `bson:"created_at"`
 }
 
 type State struct {
