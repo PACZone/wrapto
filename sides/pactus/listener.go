@@ -167,7 +167,7 @@ func (l *Listener) filterValidTransactions(txs []*pactus.TransactionInfo) []*pac
 }
 
 func (l *Listener) checkOrderExist(id string) (bool, error) {
-	isExist, err := l.db.IsOrderExist(id)
+	isExist, err := l.db.IsOrderExist(id, string(order.PACTUS_POLYGON))
 	if err != nil {
 		return false, err
 	}
