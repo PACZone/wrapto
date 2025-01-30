@@ -1,6 +1,6 @@
 module github.com/PACZone/wrapto
 
-go 1.23.3
+go 1.23.4
 
 require (
 	github.com/ethereum/go-ethereum v1.14.12

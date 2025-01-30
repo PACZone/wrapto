@@ -13,7 +13,7 @@ logger:
 pactus:
   wallet_path: ./wallet
   lock_address: pc1zgp0x33hehvczq6dggs04gywfqpzl9fea5039gh
-  wallet_address: pc1rtc6cgpa7zys7gv3pn5mvt2dln6u28ws2v7qqat
+  wallet_address: pc1zqyxjatqfhaj3arc727alwl4sa3z8lv2m730eh2
   rpc_url: bootstrap1.pactus.org:50051
 
 polygon:
