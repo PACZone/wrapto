@@ -25,6 +25,6 @@ teleq.sqlite
 .idea
 .code
 /.idea
-/.code
+/.vscode
 
 /wallet

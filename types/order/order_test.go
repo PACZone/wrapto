@@ -82,6 +82,6 @@ func TestAmount(t *testing.T) {
 		ord, err := order.NewOrder("", "", "", fa.Amount, order.PACTUS_POLYGON)
 		assert.NoError(t, err)
 
-		assert.Equal(t, fa.Amount-fa.Fee, ord.Amount())
+		assert.Equal(t, fa.Amount-fa.Fee, ord.AmountAfterFee())
 	}
 }
