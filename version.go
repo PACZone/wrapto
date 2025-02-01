@@ -7,8 +7,8 @@ import "fmt"
 var (
 	major = 1
 	minor = 0
-	patch = 1
-	meta  = ""
+	patch = 2
+	meta  = "beta"
 )
 
 func StringVersion() string {
