@@ -13,12 +13,12 @@ import (
 )
 
 type Config struct {
-	Environment string `yaml:"environment"`
-	Logger      logger.Config
-	Pactus      pactus.Config
-	Polygon     evm.Config
-	Database    database.Config
-	HTTPServer  http.Config
+	Environment string          `yaml:"environment"`
+	Logger      logger.Config   `yaml:"logger"`
+	Pactus      pactus.Config   `yaml:"pactus"`
+	Polygon     evm.Config      `yaml:"polygon"`
+	Database    database.Config `yaml:"database"`
+	HTTPServer  http.Config     `yaml:"http"`
 }
 
 func LoadConfig(path string) (*Config, error) {
