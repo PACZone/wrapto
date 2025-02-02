@@ -131,7 +131,7 @@ func (h *Server) recentTxs(c echo.Context) error {
 			Date:       tx.CreatedAt,
 			Status:     tx.Status,
 			TxID:       tx.DestNetworkTxHash,
-			Amount:     tx.Amount().ToPAC(),
+			Amount:     tx.AmountAfterFee().ToPAC(),
 			BridgeType: string(tx.BridgeType),
 			Reason:     tx.Reason,
 		}
@@ -192,7 +192,7 @@ func (h *Server) searchTx(c echo.Context) error {
 			Date:       tx.CreatedAt,
 			Status:     tx.Status,
 			TxID:       tx.DestNetworkTxHash,
-			Amount:     tx.Amount().ToPAC(),
+			Amount:     tx.AmountAfterFee().ToPAC(),
 			BridgeType: string(tx.BridgeType),
 			Reason:     tx.Reason,
 		}

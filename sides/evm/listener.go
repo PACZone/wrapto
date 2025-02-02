@@ -80,7 +80,7 @@ func (l *Listener) processOrder() error {
 
 	l.nextOrderNumber++
 
-	id := strconv.FormatUint(uint64(l.nextOrderNumber), 10)
+	id := strconv.FormatUint(uint64(l.nextOrderNumber-1), 10)
 
 	if exist, err := l.checkOrderExist(id, l.bridgeType); err != nil {
 		return err
@@ -90,7 +90,7 @@ func (l *Listener) processOrder() error {
 		return nil
 	}
 
-	logger.Info("processing new message on listener", "actor", l.bypassName, "orderNumber", l.nextOrderNumber)
+	logger.Info("processing new message on listener", "actor", l.bypassName, "orderNumber", id)
 
 	amt := o.Amount.Int64()
 	sender := o.Sender.Hex()
@@ -129,7 +129,7 @@ func (l *Listener) processOrder() error {
 		return err
 	}
 
-	err = l.db.UpdatePolygonState(l.nextOrderNumber - 1)
+	err = l.db.UpdatePolygonState(l.nextOrderNumber)
 	if err != nil {
 		return err
 	}

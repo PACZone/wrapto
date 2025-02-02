@@ -37,8 +37,8 @@ type Order struct {
 	// * address of sender on source network (account that made bridge transaction).
 	Sender string `bson:"sender"`
 
-	// * amount of PAC to be bridged, **including fee**.
-	amount amount.Amount `bson:"amount"`
+	// * Amount of PAC to be bridged, **including fee**.
+	Amount amount.Amount `bson:"amount"`
 
 	// * amount of PAC to be bridged, **including fee**.
 	CreatedAt time.Time `bson:"created_at"`
@@ -67,9 +67,10 @@ func NewOrder(txHash, sender, receiver string, amt amount.Amount, t BridgeType) 
 		TxHash:     txHash,
 		Receiver:   receiver,
 		Sender:     sender,
-		amount:     amt,
+		Amount:     amt,
 		Status:     PENDING,
 		BridgeType: t,
+		CreatedAt:  time.Now(),
 	}
 
 	if err := ord.basicCheck(); err != nil {
@@ -80,7 +81,7 @@ func NewOrder(txHash, sender, receiver string, amt amount.Amount, t BridgeType) 
 }
 
 func (o *Order) Fee() amount.Amount {
-	fee := o.amount / params.FeeFraction // 0.5% of amount
+	fee := o.Amount / params.FeeFraction // 0.5% of amount
 
 	if fee <= params.MinimumFee {
 		return params.MinimumFee
@@ -93,16 +94,16 @@ func (o *Order) Fee() amount.Amount {
 	return fee
 }
 
-func (o *Order) Amount() amount.Amount {
-	return o.amount - o.Fee()
+func (o *Order) AmountAfterFee() amount.Amount {
+	return o.Amount - o.Fee()
 }
 
 func (o *Order) OriginalAmount() amount.Amount {
-	return o.amount
+	return o.Amount
 }
 
 func (o *Order) basicCheck() error {
-	if o.amount <= params.MinimumFee {
+	if o.Amount <= params.MinimumFee {
 		return BasicCheckError{
 			Reason: fmt.Sprintf("amount must be more than %v PAC", params.MinimumFee),
 		}
