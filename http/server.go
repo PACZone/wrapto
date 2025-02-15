@@ -29,7 +29,7 @@ type Response struct {
 }
 
 func NewHTTP(ctx context.Context, cfg Config, db *database.Database,
-	highway chan message.Message, pacCfg pactus.Config, polCfg evm.Config,
+	highway chan message.Message, pacCfg *pactus.Config, polCfg evm.Config,
 ) *Server {
 	app := echo.New()
 

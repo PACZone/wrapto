@@ -19,10 +19,23 @@ const (
 
 type BridgeType string
 
+// ! NEW EVM.
 const (
 	PACTUS_POLYGON BridgeType = "PACTUS_POLYGON" //nolint
 	POLYGON_PACTUS BridgeType = "POLYGON_PACTUS" //nolint
 )
+
+// ! NEW EVM.
+func BridgeTypeToMemo(bt BridgeType) string {
+	switch bt {
+	case POLYGON_PACTUS:
+		return "Bridge from Polygon to Pactus by wrapto.app"
+	case PACTUS_POLYGON:
+		return ""
+	}
+
+	return ""
+}
 
 type Order struct {
 	// * unique ID on Wrapto system.

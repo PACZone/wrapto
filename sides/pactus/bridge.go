@@ -77,7 +77,7 @@ func (b *Bridge) processMessage(msg message.Message) error {
 	}
 
 	payload := msg.Payload
-	memo := fmt.Sprintf("bridge from %s to %s by wrapto.app", msg.From, msg.To)
+	memo := order.BridgeTypeToMemo(msg.Payload.BridgeType)
 
 	txID, err := b.wallet.transferTx(payload.Receiver, memo, payload.OriginalAmount())
 	if err != nil {

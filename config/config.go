@@ -16,7 +16,7 @@ type Config struct {
 	Environment string          `yaml:"environment"`
 	Logger      logger.Config   `yaml:"logger"`
 	Pactus      pactus.Config   `yaml:"pactus"`
-	Polygon     evm.Config      `yaml:"polygon"`
+	Polygon     evm.Config      `yaml:"polygon"` //! NEW EVM.
 	Database    database.Config `yaml:"database"`
 	HTTPServer  http.Config     `yaml:"http"`
 }

@@ -29,6 +29,7 @@ type actors struct {
 	http *http.Server
 }
 
+// ! NEW EVM.
 func NewManager(ctx context.Context, cancel context.CancelFunc,
 	cfg *config.Config, db *database.Database,
 ) (*Manager, error) {
@@ -56,7 +57,7 @@ func NewManager(ctx context.Context, cancel context.CancelFunc,
 	}
 
 	httpServer := http.NewHTTP(ctx, cfg.HTTPServer, db,
-		highway, cfg.Pactus, cfg.Polygon)
+		highway, &cfg.Pactus, cfg.Polygon)
 
 	actors := &actors{
 		pactus:  pactusSide,

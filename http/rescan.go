@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// ! NEW EVM.
 func (s *Server) rescan(c echo.Context) error {
 	id := c.Param("id")
 	if id == "" {

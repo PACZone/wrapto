@@ -31,6 +31,7 @@ type Listener struct {
 func newListener(ctx context.Context,
 	client *Client, bp bypass.Name, highway chan message.Message, startOrder uint32, db *database.Database,
 ) *Listener {
+	//! NEW EVM.
 	var bt order.BridgeType
 	if bp == bypass.POLYGON {
 		bt = order.POLYGON_PACTUS
@@ -93,7 +94,8 @@ func (l *Listener) processOrder() error {
 	logger.Info("processing new message on listener", "actor", l.bypassName, "orderNumber", id)
 
 	amt := amount.Amount(o.Amount.Int64())
-	if amt <= params.MinBridgeAmount {
+	fee := amount.Amount(o.Fee.Int64())
+	if (amt + fee) <= params.MinBridgeAmount {
 		err = l.db.UpdatePolygonState(l.nextOrderNumber)
 		if err != nil {
 			return err

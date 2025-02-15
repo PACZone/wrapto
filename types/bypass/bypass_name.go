@@ -4,6 +4,7 @@ type (
 	Name string
 )
 
+// ! NEW EVM.
 const (
 	PACTUS  Name = "PACTUS"
 	POLYGON Name = "POLYGON"
