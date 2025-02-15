@@ -55,7 +55,8 @@ func NewManager(ctx context.Context, cancel context.CancelFunc,
 		return nil, err
 	}
 
-	httpServer := http.NewHTTP(ctx, cfg.HTTPServer, db, highway)
+	httpServer := http.NewHTTP(ctx, cfg.HTTPServer, db,
+		highway, cfg.Pactus, cfg.Polygon)
 
 	actors := &actors{
 		pactus:  pactusSide,

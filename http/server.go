@@ -28,16 +28,17 @@ type Response struct {
 	Data    interface{} `json:"data"`
 }
 
-func NewHTTP(ctx context.Context, cfg Config, db *database.Database, highway chan message.Message) *Server {
+func NewHTTP(ctx context.Context, cfg Config, db *database.Database,
+	highway chan message.Message, pacCfg pactus.Config, polCfg evm.Config,
+) *Server {
 	app := echo.New()
 
-	polClient, err := evm.NewPublicClient("https://polygon.drpc.org",
-		"0x2f77E0afAEE06970Bf860B8267b5aFECFFF6F216", 137)
+	polClient, err := evm.NewPublicClient(polCfg.RPCNode, polCfg.ContractAddr, polCfg.ChainID)
 	if err != nil {
 		return nil
 	}
 
-	pacClient, err := pactus.NewClient(ctx, "bootstrap1.pactus.org:50051", cfg.LockAddr)
+	pacClient, err := pactus.NewClient(ctx, pacCfg.RPCNode, pacCfg.LockAddr)
 	if err != nil {
 		return nil
 	}

@@ -27,5 +27,4 @@ database:
   query_timeout_in_ms: 3000
 
 http:
-  lock_address: pc1zgp0x33hehvczq6dggs04gywfqpzl9fea5039gh
   port: ":3000"
