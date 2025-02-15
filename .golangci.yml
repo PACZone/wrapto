@@ -103,11 +103,6 @@ linters-settings:
         json: snake
         yaml: snake
 
-  nonamedreturns:
-    # Report named error if it is assigned inside defer.
-    # Default: false
-     report-error-in-defer: false
-
   gocritic:
     disabled-checks:
       - ifElseChain
