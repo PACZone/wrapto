@@ -6,9 +6,9 @@ import "fmt"
 // see: http://semver.org
 var (
 	major = 1
-	minor = 0
-	patch = 4
-	meta  = "beta"
+	minor = 1
+	patch = 0
+	meta  = ""
 )
 
 func StringVersion() string {
