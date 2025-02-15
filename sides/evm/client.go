@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/pactus-project/pactus/types/amount"
 )
 
 type Client struct {
@@ -26,6 +27,25 @@ type BridgeOrder struct {
 	Amount             *big.Int
 	DestinationAddress string
 	Fee                *big.Int
+}
+
+func NewPublicClient(rpcURL, cAddr string, chainID int64) (*Client, error) {
+	client, err := ethclient.Dial(rpcURL)
+	if err != nil {
+		return nil, err
+	}
+
+	instance, err := NewWrappedPac(common.HexToAddress(cAddr), client)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Client{
+		rpcURL:  rpcURL,
+		cAddr:   common.HexToAddress(cAddr),
+		chainID: *big.NewInt(chainID),
+		wpac:    instance,
+	}, nil
 }
 
 func newClient(rpcURL, pk, cAddr string, chainID int64) (*Client, error) {
@@ -53,11 +73,11 @@ func newClient(rpcURL, pk, cAddr string, chainID int64) (*Client, error) {
 	}, nil
 }
 
-func (p *Client) Mint(amt big.Int, to common.Address) (string, error) {
+func (c *Client) Mint(amt big.Int, to common.Address) (string, error) {
 	var err error
 	var opts *bind.TransactOpts
 
-	opts, err = bind.NewKeyedTransactorWithChainID(p.pk, &p.chainID)
+	opts, err = bind.NewKeyedTransactorWithChainID(c.pk, &c.chainID)
 	if err != nil {
 		return "", err
 	}
@@ -65,7 +85,7 @@ func (p *Client) Mint(amt big.Int, to common.Address) (string, error) {
 
 	var result *types.Transaction
 	for i := 0; i <= 3; i++ {
-		result, err = p.wpac.Mint(opts, to, &amt)
+		result, err = c.wpac.Mint(opts, to, &amt)
 		if err == nil {
 			return result.Hash().String(), nil
 		}
@@ -78,7 +98,7 @@ func (p *Client) Mint(amt big.Int, to common.Address) (string, error) {
 	}
 }
 
-func (p *Client) Get(orderID big.Int) (BridgeOrder, error) {
+func (c *Client) Get(orderID big.Int) (BridgeOrder, error) {
 	var err error
 	var result struct {
 		Sender             common.Address
@@ -88,7 +108,7 @@ func (p *Client) Get(orderID big.Int) (BridgeOrder, error) {
 	}
 
 	for i := 0; i <= 3; i++ {
-		result, err = p.wpac.Bridged(&bind.CallOpts{}, &orderID)
+		result, err = c.wpac.Bridged(&bind.CallOpts{}, &orderID)
 		if err == nil {
 			return result, nil
 		}
@@ -98,5 +118,23 @@ func (p *Client) Get(orderID big.Int) (BridgeOrder, error) {
 
 	return BridgeOrder{}, ClientError{
 		reason: fmt.Sprintf("can't get order %d from contract, ::: %v", orderID.Int64(), err),
+	}
+}
+
+func (c *Client) TotalSupply() (float64, error) {
+	var err error
+	var result *big.Int
+
+	for i := 0; i <= 3; i++ {
+		result, err = c.wpac.TotalSupply(&bind.CallOpts{})
+		if err == nil {
+			return amount.Amount(result.Int64()).ToPAC(), nil
+		}
+
+		time.Sleep(5 * time.Second)
+	}
+
+	return 0, ClientError{
+		reason: fmt.Sprintf("can't get total supply %d from contract", err),
 	}
 }

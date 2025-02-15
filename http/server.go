@@ -1,0 +1,71 @@
+package http
+
+import (
+	"context"
+
+	"github.com/PACZone/wrapto/database"
+	"github.com/PACZone/wrapto/sides/evm"
+	"github.com/PACZone/wrapto/sides/pactus"
+	"github.com/PACZone/wrapto/types/bypass"
+	"github.com/PACZone/wrapto/types/message"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+)
+
+type Server struct {
+	echo          *echo.Echo
+	db            *database.Database
+	ctx           context.Context
+	cfg           Config
+	polygonClient evm.Client
+	pactusClient  pactus.Client
+	highway       chan message.Message
+}
+
+type Response struct {
+	Status  int         `json:"status"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
+}
+
+func NewHTTP(ctx context.Context, cfg Config, db *database.Database, highway chan message.Message) *Server {
+	app := echo.New()
+
+	polClient, err := evm.NewPublicClient("https://polygon.drpc.org",
+		"0x2f77E0afAEE06970Bf860B8267b5aFECFFF6F216", 137)
+	if err != nil {
+		return nil
+	}
+
+	pacClient, err := pactus.NewClient(ctx, "bootstrap1.pactus.org:50051", cfg.LockAddr)
+	if err != nil {
+		return nil
+	}
+
+	return &Server{
+		echo:          app,
+		db:            db,
+		ctx:           ctx,
+		cfg:           cfg,
+		polygonClient: *polClient,
+		pactusClient:  *pacClient,
+		highway:       highway,
+	}
+}
+
+func (s *Server) Start() {
+	s.echo.Use(middleware.CORS())
+	s.echo.GET("/rescan/:id", s.rescan)
+	s.echo.GET("/state/latest", s.latestState)
+	s.echo.GET("/state/stats", s.stats)
+	s.echo.GET("/health", s.health)
+	s.echo.GET("/transactions/recent", s.recentTxs)
+	s.echo.GET("/search", s.searchTx)
+
+	err := s.echo.Start(s.cfg.Port)
+	if err != nil {
+		s.highway <- message.NewMessage(bypass.MANAGER, bypass.HTTP, nil)
+	}
+
+	<-s.ctx.Done()
+}

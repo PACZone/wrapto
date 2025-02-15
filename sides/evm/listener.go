@@ -92,9 +92,18 @@ func (l *Listener) processOrder() error {
 
 	logger.Info("processing new message on listener", "actor", l.bypassName, "orderNumber", id)
 
-	amt := o.Amount.Int64()
+	amt := amount.Amount(o.Amount.Int64())
+	if amt <= params.MinBridgeAmount {
+		err = l.db.UpdatePolygonState(l.nextOrderNumber)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
 	sender := o.Sender.Hex()
-	ord, err := order.NewOrder(id, sender, o.DestinationAddress, amount.Amount(amt), l.bridgeType)
+	ord, err := order.NewOrder(id, sender, o.DestinationAddress, amt, l.bridgeType)
 	if err != nil {
 		dbErr := l.db.UpdateOrderStatus(ord.ID, order.FAILED)
 		if dbErr != nil {

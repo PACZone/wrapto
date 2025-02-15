@@ -314,7 +314,8 @@ func (db *Database) SearchOrders(query string) ([]*order.Order, error) {
 			{"tx_hash": query},
 			{"receiver": query},
 			{"sender": query},
-			{"dest_network_tx_hash": query},
+			{"destination_tx_hash": query},
+			{"id": query},
 		},
 	}
 
@@ -337,4 +338,20 @@ func (db *Database) SearchOrders(query string) ([]*order.Order, error) {
 	}
 
 	return orders, nil
+}
+
+func (db *Database) SuccessfulOrdersCount() (int, error) {
+	coll := db.Client.Database(db.DBName).Collection("orders")
+
+	ctx, cancel := context.WithTimeout(context.Background(), db.QueryTimeout)
+	defer cancel()
+
+	filter := bson.M{"status": order.COMPLETE}
+
+	count, err := coll.CountDocuments(ctx, filter)
+	if err != nil {
+		return 0, err
+	}
+
+	return int(count), nil
 }
