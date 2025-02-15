@@ -73,7 +73,7 @@ func (l *Listener) processOrder() error {
 	}
 
 	if o.Sender == common.HexToAddress("0x0000000000000000000000000000000000000000") {
-		time.Sleep(3 * time.Second)
+		time.Sleep(30 * time.Second)
 
 		return nil
 	}
