@@ -11,6 +11,7 @@ import (
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
 	"github.com/PACZone/wrapto/types/order"
+	"github.com/PACZone/wrapto/types/params"
 	"github.com/pactus-project/pactus/types/amount"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 )
@@ -156,7 +157,8 @@ func (l *Listener) filterValidTransactions(txs []*pactus.TransactionInfo) []*pac
 
 	for _, tx := range txs {
 		if tx.PayloadType != pactus.PayloadType_TRANSFER_PAYLOAD ||
-			tx.GetTransfer().Receiver != l.lockAddr {
+			tx.GetTransfer().Receiver != l.lockAddr ||
+			amount.Amount(tx.GetTransfer().Amount) <= params.MinBridgeAmount {
 			continue
 		}
 

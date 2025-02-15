@@ -6,9 +6,10 @@ import (
 )
 
 const (
-	FeeFraction amount.Amount = 200 // Amount / 200 = 0.5%
-	MinimumFee  amount.Amount = 1e9 // 1 PAC
-	MaximumFee  amount.Amount = 5e9 // 5 PAC
+	FeeFraction     amount.Amount = 200 // Amount / 200 = 0.5%
+	MinimumFee      amount.Amount = 1e9 // 1 PAC
+	MaximumFee      amount.Amount = 5e9 // 5 PAC
+	MinBridgeAmount amount.Amount = 2e9 // 2 PAC
 
 	MainBypass = bypass.PACTUS
 )

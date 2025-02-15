@@ -4,10 +4,10 @@ import (
 	"os"
 
 	"github.com/PACZone/wrapto/database"
+	"github.com/PACZone/wrapto/http"
 	logger "github.com/PACZone/wrapto/log"
 	"github.com/PACZone/wrapto/sides/evm"
 	"github.com/PACZone/wrapto/sides/pactus"
-	"github.com/PACZone/wrapto/www/http"
 	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v2"
 )

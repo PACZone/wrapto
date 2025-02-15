@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/pactus-project/pactus/types/amount"
 	pactus "github.com/pactus-project/pactus/www/grpc/gen/go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -14,10 +15,11 @@ type Client struct {
 	transactionClient pactus.TransactionClient
 	conn              *grpc.ClientConn
 
-	ctx context.Context
+	lockAddr string
+	ctx      context.Context
 }
 
-func newClient(ctx context.Context, endpoint string) (*Client, error) {
+func NewClient(ctx context.Context, endpoint, lockaddr string) (*Client, error) {
 	conn, err := grpc.NewClient(endpoint,
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -28,6 +30,7 @@ func newClient(ctx context.Context, endpoint string) (*Client, error) {
 		blockchainClient:  pactus.NewBlockchainClient(conn),
 		transactionClient: pactus.NewTransactionClient(conn),
 		conn:              conn,
+		lockAddr:          lockaddr,
 		ctx:               ctx,
 	}, nil
 }
@@ -67,6 +70,26 @@ func (c *Client) GetBlock(h uint32) (*pactus.GetBlockResponse, error) {
 	}
 
 	return nil, ClientError{
+		reason: err.Error(),
+	}
+}
+
+func (c *Client) GetTotalLocked() (float64, error) {
+	var err error
+	var addr *pactus.GetAccountResponse
+
+	for i := 0; i <= 3; i++ {
+		addr, err = c.blockchainClient.GetAccount(c.ctx, &pactus.GetAccountRequest{
+			Address: c.lockAddr,
+		})
+		if err == nil {
+			return amount.Amount(addr.Account.Balance).ToPAC(), nil
+		}
+
+		time.Sleep(5 * time.Second)
+	}
+
+	return 0, ClientError{
 		reason: err.Error(),
 	}
 }

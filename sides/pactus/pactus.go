@@ -24,7 +24,7 @@ func NewSide(ctx context.Context,
 	bp chan message.Message, cfg *Config,
 	db *database.Database,
 ) (*Side, error) {
-	client, err := newClient(context.Background(), cfg.RPCNode) //nolint
+	client, err := NewClient(context.Background(), cfg.RPCNode, cfg.LockAddr) //nolint
 	if err != nil {
 		return nil, err
 	}

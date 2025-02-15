@@ -5,12 +5,12 @@ import (
 
 	"github.com/PACZone/wrapto/config"
 	"github.com/PACZone/wrapto/database"
+	"github.com/PACZone/wrapto/http"
 	logger "github.com/PACZone/wrapto/log"
 	"github.com/PACZone/wrapto/sides/evm"
 	"github.com/PACZone/wrapto/sides/pactus"
 	"github.com/PACZone/wrapto/types/bypass"
 	"github.com/PACZone/wrapto/types/message"
-	"github.com/PACZone/wrapto/www/http"
 )
 
 type Manager struct {
@@ -55,7 +55,8 @@ func NewManager(ctx context.Context, cancel context.CancelFunc,
 		return nil, err
 	}
 
-	httpServer := http.NewHTTP(ctx, cfg.HTTPServer, db, highway)
+	httpServer := http.NewHTTP(ctx, cfg.HTTPServer, db,
+		highway, cfg.Pactus, cfg.Polygon)
 
 	actors := &actors{
 		pactus:  pactusSide,
