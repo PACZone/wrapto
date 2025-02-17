@@ -12,6 +12,7 @@ import (
 )
 
 type Bridge struct {
+	client     *Client
 	wallet     *Wallet
 	db         *database.Database
 	bypassName bypass.Name
@@ -20,8 +21,10 @@ type Bridge struct {
 	ctx context.Context
 }
 
-func newBridge(ctx context.Context, w *Wallet, b chan message.Message, bn bypass.Name, db *database.Database) Bridge {
+func newBridge(ctx context.Context, w *Wallet, b chan message.Message,
+	bn bypass.Name, db *database.Database, client *Client) Bridge {
 	return Bridge{
+		client:     client,
 		wallet:     w,
 		bypass:     b,
 		bypassName: bn,
@@ -79,11 +82,45 @@ func (b *Bridge) processMessage(msg message.Message) error {
 	payload := msg.Payload
 	memo := order.BridgeTypeToMemo(msg.Payload.BridgeType)
 
-	txID, err := b.wallet.transferTx(payload.Receiver, memo, payload.OriginalAmount())
+	txID, tx, err := b.wallet.transferTx(payload.Receiver, memo, payload.OriginalAmount())
 	if err != nil {
 		logger.Error("can't send transaction to Pactus network", "actor", b.bypassName, "err", err, "payload", payload)
 
-		dbErr := b.db.AddLog(msg.Payload.ID, string(b.bypassName), "bridge failed", err.Error())
+		trace := fmt.Sprintf("error: %s\n", err.Error())
+		if tx != nil {
+			trace += fmt.Sprintf("\ntx id: %s, tx hex: %s, tx fee: %s, tx amount: %s\n",
+				tx.ID().String(), tx.String(), tx.Fee().String(), tx.Payload().Value().String())
+		}
+
+		dbErr := b.db.AddLog(msg.Payload.ID, string(b.bypassName), "bridge failed", trace)
+		if dbErr != nil {
+			return err
+		}
+
+		dbErr = b.db.UpdateOrderReason(msg.Payload.ID, err.Error())
+		if dbErr != nil {
+			return err
+		}
+
+		dbErr = b.db.UpdateOrderStatus(payload.ID, order.FAILED)
+		if dbErr != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	_, err = b.client.GetTransaction(txID)
+	if err != nil {
+		logger.Error("sending tx to pactus network went wrong", "actor", b.bypassName, "err", err, "payload", payload)
+
+		trace := fmt.Sprintf("error: %s\n", err.Error())
+		if tx != nil {
+			trace += fmt.Sprintf("\ntx id: %s, tx hex: %s, tx fee: %s, tx amount: %s\n",
+				tx.ID().String(), tx.String(), tx.Fee().String(), tx.Payload().Value().String())
+		}
+
+		dbErr := b.db.AddLog(msg.Payload.ID, string(b.bypassName), "bridge failed", trace)
 		if dbErr != nil {
 			return err
 		}
@@ -102,7 +139,14 @@ func (b *Bridge) processMessage(msg message.Message) error {
 	}
 
 	logger.Info("successful bridge", "actor", b.bypassName, "txID", txID, "orderID", msg.Payload.ID)
-	err = b.db.AddLog(msg.Payload.ID, string(b.bypassName), "successfully bridged", txID)
+
+	trace := txID
+	if tx != nil {
+		trace += fmt.Sprintf("\ntx id: %s, tx hex: %s, tx fee: %s, tx amount: %s\n",
+			tx.ID().String(), tx.String(), tx.Fee().String(), tx.Payload().Value().String())
+	}
+
+	err = b.db.AddLog(msg.Payload.ID, string(b.bypassName), "successfully bridged", trace)
 	if err != nil {
 		return err
 	}

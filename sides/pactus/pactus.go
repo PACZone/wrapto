@@ -24,7 +24,7 @@ func NewSide(ctx context.Context,
 	bp chan message.Message, cfg *Config,
 	db *database.Database,
 ) (*Side, error) {
-	client, err := NewClient(context.Background(), cfg.RPCNode, cfg.LockAddr) //nolint
+	client, err := NewClient(context.Background(), cfg.RPCNode) //nolint
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func NewSide(ctx context.Context,
 	}
 
 	listener := newListener(ctx, client, bypass.PACTUS, highway, startBlock, cfg.LockAddr, db)
-	bridge := newBridge(ctx, wallet, bp, bypass.PACTUS, db)
+	bridge := newBridge(ctx, wallet, bp, bypass.PACTUS, db, client)
 
 	return &Side{
 		client:   client,

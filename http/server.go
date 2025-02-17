@@ -38,7 +38,7 @@ func NewHTTP(ctx context.Context, cfg Config, db *database.Database,
 		return nil
 	}
 
-	pacClient, err := pactus.NewClient(ctx, pacCfg.RPCNode, pacCfg.LockAddr)
+	pacClient, err := pactus.NewClient(ctx, pacCfg.RPCNode)
 	if err != nil {
 		return nil
 	}
