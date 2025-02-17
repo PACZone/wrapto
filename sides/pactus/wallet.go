@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/pactus-project/pactus/types/amount"
+	"github.com/pactus-project/pactus/types/tx"
 	"github.com/pactus-project/pactus/types/tx/payload"
 	pWallet "github.com/pactus-project/pactus/wallet"
 )
@@ -34,7 +35,7 @@ func openWallet(path, addr, pass string) (*Wallet, error) {
 	}, nil
 }
 
-func (w *Wallet) transferTx(toAddress, memo string, amt amount.Amount) (string, error) {
+func (w *Wallet) transferTx(toAddress, memo string, amt amount.Amount) (string, *tx.Tx, error) {
 	var err error
 	var fee amount.Amount
 
@@ -47,7 +48,7 @@ func (w *Wallet) transferTx(toAddress, memo string, amt amount.Amount) (string, 
 		time.Sleep(5 * time.Second)
 	}
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	opts := []pWallet.TxOption{
@@ -57,13 +58,13 @@ func (w *Wallet) transferTx(toAddress, memo string, amt amount.Amount) (string, 
 
 	tx, err := w.wallet.MakeTransferTx(w.address, toAddress, amt, opts...)
 	if err != nil {
-		return "", err
+		return "", tx, err
 	}
 
 	// sign transaction
 	err = w.wallet.SignTransaction(w.password, tx)
 	if err != nil {
-		return "", err
+		return "", tx, err
 	}
 
 	// broadcast transaction
@@ -77,15 +78,15 @@ func (w *Wallet) transferTx(toAddress, memo string, amt amount.Amount) (string, 
 		time.Sleep(5 * time.Second)
 	}
 	if err != nil {
-		return "", err
+		return "", tx, err
 	}
 
 	err = w.wallet.Save()
 	if err != nil {
-		return "", err
+		return "", tx, err
 	}
 
-	return txID, nil
+	return txID, tx, nil
 }
 
 func (w *Wallet) Address() string {

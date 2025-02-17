@@ -12,7 +12,7 @@ type LatestStateResponse struct {
 }
 
 type Stats struct {
-	TotalSuccessFulBridges int     `json:"total_successful_bridges"`
+	TotalSuccessfulBridges int     `json:"total_successful_bridges"`
 	TotalWPACs             float64 `json:"total_wpacs"`
 	TotalLockedPACs        float64 `json:"total_locked_pacs"`
 }
@@ -75,7 +75,7 @@ func (s *Server) stats(c echo.Context) error {
 		Status:  http.StatusOK,
 		Message: "Ok",
 		Data: Stats{
-			TotalSuccessFulBridges: count,
+			TotalSuccessfulBridges: count,
 			TotalWPACs:             wpacCount,
 			TotalLockedPACs:        lockedPACsCount,
 		},

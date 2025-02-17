@@ -15,11 +15,10 @@ type Client struct {
 	transactionClient pactus.TransactionClient
 	conn              *grpc.ClientConn
 
-	lockAddr string
-	ctx      context.Context
+	ctx context.Context
 }
 
-func NewClient(ctx context.Context, endpoint, lockaddr string) (*Client, error) {
+func NewClient(ctx context.Context, endpoint string) (*Client, error) {
 	conn, err := grpc.NewClient(endpoint,
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -30,7 +29,6 @@ func NewClient(ctx context.Context, endpoint, lockaddr string) (*Client, error) 
 		blockchainClient:  pactus.NewBlockchainClient(conn),
 		transactionClient: pactus.NewTransactionClient(conn),
 		conn:              conn,
-		lockAddr:          lockaddr,
 		ctx:               ctx,
 	}, nil
 }
@@ -74,24 +72,65 @@ func (c *Client) GetBlock(h uint32) (*pactus.GetBlockResponse, error) {
 	}
 }
 
-func (c *Client) GetTotalLocked() (float64, error) {
+func (c *Client) GetTransaction(id string) (*pactus.GetTransactionResponse, error) {
 	var err error
-	var addr *pactus.GetAccountResponse
+	var tx *pactus.GetTransactionResponse
 
 	for i := 0; i <= 3; i++ {
-		addr, err = c.blockchainClient.GetAccount(c.ctx, &pactus.GetAccountRequest{
-			Address: c.lockAddr,
+		tx, err = c.transactionClient.GetTransaction(c.ctx, &pactus.GetTransactionRequest{
+			Id: id,
 		})
 		if err == nil {
-			return amount.Amount(addr.Account.Balance).ToPAC(), nil
+			return tx, nil
 		}
 
 		time.Sleep(5 * time.Second)
 	}
 
-	return 0, ClientError{
+	return nil, ClientError{
 		reason: err.Error(),
 	}
+}
+
+// ! PACTUS CHANGE.
+func (c *Client) GetTotalLocked() (float64, error) {
+	var err error
+	var addr *pactus.GetAccountResponse
+	var total amount.Amount
+
+	for i := 0; i <= 3; i++ {
+		addr, err = c.blockchainClient.GetAccount(c.ctx, &pactus.GetAccountRequest{
+			Address: "pc1zgp0x33hehvczq6dggs04gywfqpzl9fea5039gh",
+		})
+		if err == nil {
+			total += amount.Amount(addr.Account.Balance)
+		}
+
+		time.Sleep(5 * time.Second)
+	}
+	if err != nil {
+		return 0, ClientError{
+			reason: err.Error(),
+		}
+	}
+
+	for i := 0; i <= 3; i++ {
+		addr, err = c.blockchainClient.GetAccount(c.ctx, &pactus.GetAccountRequest{
+			Address: "pc1zqyxjatqfhaj3arc727alwl4sa3z8lv2m730eh2",
+		})
+		if err == nil {
+			total += amount.Amount(addr.Account.Balance)
+		}
+
+		time.Sleep(5 * time.Second)
+	}
+	if err != nil {
+		return 0, ClientError{
+			reason: err.Error(),
+		}
+	}
+
+	return total.ToPAC(), nil
 }
 
 func (c *Client) Close() error {
