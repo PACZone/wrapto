@@ -22,7 +22,8 @@ type Bridge struct {
 }
 
 func newBridge(ctx context.Context, w *Wallet, b chan message.Message,
-	bn bypass.Name, db *database.Database, client *Client) Bridge {
+	bn bypass.Name, db *database.Database, client *Client,
+) Bridge {
 	return Bridge{
 		client:     client,
 		wallet:     w,
