@@ -25,6 +25,7 @@ type Manager struct {
 type actors struct {
 	pactus  *pactus.Side
 	polygon *evm.Side
+	bsc     *evm.Side
 
 	http *http.Server
 }
@@ -38,6 +39,7 @@ func NewManager(ctx context.Context, cancel context.CancelFunc,
 
 	pactusCh := make(chan message.Message, 10)
 	polygonCh := make(chan message.Message, 10)
+	bscCh := make(chan message.Message, 10)
 
 	lastState, err := db.GetState() //nolint
 	if err != nil {
@@ -56,18 +58,26 @@ func NewManager(ctx context.Context, cancel context.CancelFunc,
 		return nil, err
 	}
 
+	bscSide, err := evm.NewSide(ctx, highway, lastState.Bsc, bscCh,
+		cfg.Bsc, db, bypass.BSC)
+	if err != nil {
+		return nil, err
+	}
+
 	httpServer := http.NewHTTP(ctx, cfg.HTTPServer, db,
 		highway, &cfg.Pactus, cfg.Polygon)
 
 	actors := &actors{
 		pactus:  pactusSide,
 		polygon: polygonSide,
+		bsc:     bscSide,
 
 		http: httpServer,
 	}
 
 	bypasses[bypass.POLYGON] = polygonCh
 	bypasses[bypass.PACTUS] = pactusCh
+	bypasses[bypass.BSC] = bscCh
 
 	return &Manager{
 		ctx:      ctx,
@@ -84,6 +94,7 @@ func (m *Manager) Start() {
 
 	go m.actors.pactus.Start()
 	go m.actors.polygon.Start()
+	go m.actors.bsc.Start()
 	go m.actors.http.Start()
 
 	for {
