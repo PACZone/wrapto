@@ -23,6 +23,9 @@ type BridgeType string
 const (
 	PACTUS_POLYGON BridgeType = "PACTUS_POLYGON" //nolint
 	POLYGON_PACTUS BridgeType = "POLYGON_PACTUS" //nolint
+
+	BSC_PACTUS BridgeType = "BSC_PACTUS" //nolint
+	PACTUS_BSC BridgeType = "PACTUS_BSC" //nolint
 )
 
 // ! NEW EVM.
@@ -30,7 +33,11 @@ func BridgeTypeToMemo(bt BridgeType) string {
 	switch bt {
 	case POLYGON_PACTUS:
 		return "Bridge from Polygon to Pactus by wrapto.app"
+	case BSC_PACTUS:
+		return "Bridge from Binance Smart Chain to Pactus by wrapto.app"
 	case PACTUS_POLYGON:
+		return ""
+	case PACTUS_BSC:
 		return ""
 	}
 

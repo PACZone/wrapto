@@ -48,6 +48,10 @@ func (s *Server) rescan(c echo.Context) error {
 		msg = message.NewMessage(bypass.POLYGON, bypass.HTTP, ord)
 	case order.POLYGON_PACTUS:
 		msg = message.NewMessage(bypass.PACTUS, bypass.HTTP, ord)
+	case order.BSC_PACTUS:
+		msg = message.NewMessage(bypass.PACTUS, bypass.HTTP, ord)
+	case order.PACTUS_BSC:
+		msg = message.NewMessage(bypass.BSC, bypass.HTTP, ord)
 	}
 
 	s.highway <- msg
