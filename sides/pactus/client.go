@@ -104,6 +104,7 @@ func (c *Client) GetTotalLocked() (float64, error) {
 		})
 		if err == nil {
 			total += amount.Amount(addr.Account.Balance)
+
 			break
 		}
 
@@ -121,6 +122,7 @@ func (c *Client) GetTotalLocked() (float64, error) {
 		})
 		if err == nil {
 			total += amount.Amount(addr.Account.Balance)
+
 			break
 		}
 
