@@ -355,3 +355,22 @@ func (db *Database) SuccessfulOrdersCount() (int, error) {
 
 	return int(count), nil
 }
+
+func (db *Database) GetAnnouncement() (*Announcement, error) {
+	coll := db.Client.Database(db.DBName).Collection("announcement")
+
+	ctx, cancel := context.WithTimeout(context.Background(), db.QueryTimeout)
+	defer cancel()
+
+	var announc *Announcement
+	result := coll.FindOne(ctx, bson.M{})
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	if err := result.Decode(announc); err != nil {
+		return nil, err
+	}
+
+	return announc, nil
+}
