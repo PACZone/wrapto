@@ -16,5 +16,6 @@ type State struct {
 type Announcement struct {
 	Title       string `bson:"title"`
 	Description string `bson:"desc"`
+	Link        string `bson:"link"`
 	Show        bool   `bson:"show"`
 }

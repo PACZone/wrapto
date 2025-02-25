@@ -9,6 +9,7 @@ import (
 type Announcement struct {
 	Title       string `json:"title"`
 	Description string `json:"desc"`
+	Link        string `json:"link"`
 	Show        bool   `json:"show"`
 }
 
@@ -26,6 +27,7 @@ func (s *Server) announcement(c echo.Context) error {
 		Data: Announcement{
 			Title:       announc.Title,
 			Description: announc.Description,
+			Link:        announc.Link,
 			Show:        announc.Show,
 		},
 		Message: "Ok",
