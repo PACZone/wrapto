@@ -37,6 +37,10 @@ func newListener(ctx context.Context,
 		bt = order.POLYGON_PACTUS
 	}
 
+	if bp == bypass.BSC {
+		bt = order.BSC_PACTUS
+	}
+
 	return &Listener{
 		client:          client,
 		db:              db,
@@ -96,7 +100,7 @@ func (l *Listener) processOrder() error {
 	amt := amount.Amount(o.Amount.Int64())
 	fee := amount.Amount(o.Fee.Int64())
 	if (amt + fee) <= params.MinBridgeAmount {
-		err = l.db.UpdatePolygonState(l.nextOrderNumber)
+		err = l.db.UpdateState(l.nextOrderNumber, l.bypassName.ToStateName())
 		if err != nil {
 			return err
 		}
@@ -140,7 +144,7 @@ func (l *Listener) processOrder() error {
 		return err
 	}
 
-	err = l.db.UpdatePolygonState(l.nextOrderNumber)
+	err = l.db.UpdateState(l.nextOrderNumber, l.bypassName.ToStateName())
 	if err != nil {
 		return err
 	}

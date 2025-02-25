@@ -19,8 +19,13 @@ pactus:
 #! NEW EVM.
 polygon:
   contract_address: 0x2f77E0afAEE06970Bf860B8267b5aFECFFF6F216
-  rpc_url: https://polygon.drpc.org
+  rpc_url: https://bsc.drpc.org
   chain_id: 137 # polygon mainnet.
+
+bsc:
+  contract_address: todo
+  rpc_url: https://polygon.drpc.org
+  chain_id: 56 # bsc mainnet.
 
 database:
   db_name: wrapto

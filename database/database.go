@@ -211,7 +211,7 @@ func (db *Database) IsOrderExist(id, bt string) (bool, error) {
 	return true, nil
 }
 
-func (db *Database) UpdatePactusState(height uint32) error {
+func (db *Database) UpdateState(height uint32, name string) error {
 	coll := db.Client.Database(db.DBName).Collection("state")
 
 	ctx, cancel := context.WithTimeout(context.Background(), db.QueryTimeout)
@@ -219,27 +219,7 @@ func (db *Database) UpdatePactusState(height uint32) error {
 
 	update := bson.M{
 		"$set": bson.M{
-			"pactus": height,
-		},
-	}
-
-	_, err := coll.UpdateOne(ctx, bson.M{}, update)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (db *Database) UpdatePolygonState(ordID uint32) error {
-	coll := db.Client.Database(db.DBName).Collection("state")
-
-	ctx, cancel := context.WithTimeout(context.Background(), db.QueryTimeout)
-	defer cancel()
-
-	update := bson.M{
-		"$set": bson.M{
-			"polygon": ordID,
+			name: height,
 		},
 	}
 
