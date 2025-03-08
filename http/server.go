@@ -70,6 +70,7 @@ func (s *Server) Start() {
 	s.echo.GET("/health", s.health)
 	s.echo.GET("/transactions/recent", s.recentTxs)
 	s.echo.GET("/search", s.searchTx)
+	s.echo.GET("/announcement", s.announcement)
 
 	err := s.echo.Start(s.cfg.Port)
 	if err != nil {

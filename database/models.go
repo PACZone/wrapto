@@ -13,3 +13,10 @@ type State struct {
 	Polygon uint32 `bson:"polygon"`
 	Bsc     uint32 `bson:"bsc"`
 }
+
+type Announcement struct {
+	Title       string `bson:"title"`
+	Description string `bson:"desc"`
+	Link        string `bson:"link"`
+	Show        bool   `bson:"show"`
+}
