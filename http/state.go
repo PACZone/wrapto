@@ -51,7 +51,17 @@ func (s *Server) stats(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, res)
 	}
 
-	wpacCount, err := s.polygonClient.TotalSupply()
+	polWpacCount, err := s.polygonClient.TotalSupply()
+	if err != nil {
+		res := Response{
+			Status:  http.StatusInternalServerError,
+			Message: "Error",
+		}
+
+		return c.JSON(http.StatusInternalServerError, res)
+	}
+
+	bscWpacCount, err := s.bscClient.TotalSupply()
 	if err != nil {
 		res := Response{
 			Status:  http.StatusInternalServerError,
@@ -76,7 +86,7 @@ func (s *Server) stats(c echo.Context) error {
 		Message: "Ok",
 		Data: Stats{
 			TotalSuccessfulBridges: count,
-			TotalWPACs:             wpacCount,
+			TotalWPACs:             polWpacCount + bscWpacCount,
 			TotalLockedPACs:        lockedPACsCount,
 		},
 	}
