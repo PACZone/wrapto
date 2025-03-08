@@ -45,7 +45,7 @@ func TestParseMemo(t *testing.T) {
 		d, err := pactus.ParseMemo(m.memo)
 		if m.expectError {
 			assert.Error(t, err)
-			assert.Nil(t, d)
+			assert.Empty(t, d)
 
 			continue
 		}
