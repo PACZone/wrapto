@@ -103,7 +103,7 @@ func (l *Listener) processBlocks() error {
 			continue
 		}
 
-		ord, err := l.createOrder(tx, destInfo.Addr)
+		ord, err := l.createOrder(tx, destInfo)
 		if err != nil {
 			if errors.Is(err, database.DBError{}) {
 				return err
@@ -177,11 +177,11 @@ func (l *Listener) checkOrderExist(id string) (bool, error) {
 	return isExist, nil
 }
 
-func (l *Listener) createOrder(tx *pactus.TransactionInfo, dest string) (*order.Order, error) { //nolint
+func (l *Listener) createOrder(tx *pactus.TransactionInfo, destInfo Dest) (*order.Order, error) { //nolint
 	sender := tx.GetTransfer().Sender
 	amt := tx.GetTransfer().Amount
 
-	ord, err := order.NewOrder(tx.Id, sender, dest, amount.Amount(amt), order.PACTUS_POLYGON)
+	ord, err := order.NewOrder(tx.Id, sender, destInfo.Addr, amount.Amount(amt), destInfo.GetBridgeType())
 	if err != nil {
 		logger.Error("error while making new order", "actor", l.bypassName, "err", err, "txID", tx.Id)
 
