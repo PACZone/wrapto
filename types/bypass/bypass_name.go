@@ -30,4 +30,5 @@ func (n Name) ToStateName() string {
 	}
 }
 
-var ValidDestinations = []Name{POLYGON}
+// ! NEW EVM.
+var ValidDestinations = []Name{POLYGON, BSC}

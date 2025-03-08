@@ -52,6 +52,7 @@ func Connect(cfg Config) (*Database, error) {
 		defaultState := bson.M{
 			"pactus":  2_000_000,
 			"polygon": 8,
+			"bsc":     0,
 		}
 		_, err := stateColl.InsertOne(ctx, defaultState)
 		if err != nil {
