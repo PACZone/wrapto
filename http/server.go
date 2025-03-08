@@ -18,6 +18,7 @@ type Server struct {
 	ctx           context.Context
 	cfg           Config
 	polygonClient evm.Client
+	bscClient     evm.Client
 	pactusClient  pactus.Client
 	highway       chan message.Message
 }
@@ -28,12 +29,18 @@ type Response struct {
 	Data    interface{} `json:"data"`
 }
 
+// ! NEW EVM.
 func NewHTTP(ctx context.Context, cfg Config, db *database.Database,
-	highway chan message.Message, pacCfg *pactus.Config, polCfg evm.Config,
+	highway chan message.Message, pacCfg *pactus.Config, polCfg, bscCfg evm.Config,
 ) *Server {
 	app := echo.New()
 
 	polClient, err := evm.NewPublicClient(polCfg.RPCNode, polCfg.ContractAddr, polCfg.ChainID)
+	if err != nil {
+		return nil
+	}
+
+	bscClient, err := evm.NewPublicClient(bscCfg.RPCNode, bscCfg.ContractAddr, bscCfg.ChainID)
 	if err != nil {
 		return nil
 	}
@@ -50,6 +57,7 @@ func NewHTTP(ctx context.Context, cfg Config, db *database.Database,
 		cfg:           cfg,
 		polygonClient: *polClient,
 		pactusClient:  *pacClient,
+		bscClient:     *bscClient,
 		highway:       highway,
 	}
 }

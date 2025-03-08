@@ -94,7 +94,7 @@ func (c *Client) Mint(amt big.Int, to common.Address) (string, error) {
 	}
 
 	return "", ClientError{
-		reason: fmt.Sprintf("can't mint %d wPAC to %s, ::: %v", amt.Int64(), to.String(), err),
+		reason: fmt.Sprintf("can't mint %d wPAC to %s, ::: %v ::: ca: %s", amt.Int64(), to.String(), err, c.cAddr.String()),
 	}
 }
 
@@ -117,7 +117,7 @@ func (c *Client) Get(orderID big.Int) (BridgeOrder, error) {
 	}
 
 	return BridgeOrder{}, ClientError{
-		reason: fmt.Sprintf("can't get order %d from contract, ::: %v", orderID.Int64(), err),
+		reason: fmt.Sprintf("can't get order %d from contract, ::: %v ::: ca: %s", orderID.Int64(), err, c.cAddr.String()),
 	}
 }
 
