@@ -18,6 +18,7 @@ type Config struct {
 	Pactus      pactus.Config   `yaml:"pactus"`
 	Polygon     evm.Config      `yaml:"polygon"` //! NEW EVM.
 	Bsc         evm.Config      `yaml:"bsc"`
+	Base        evm.Config      `yaml:"base"`
 	Database    database.Config `yaml:"database"`
 	HTTPServer  http.Config     `yaml:"http"`
 }
@@ -53,6 +54,7 @@ func LoadConfig(path string) (*Config, error) {
 	config.Pactus.WalletPass = os.Getenv("WRAPTO_PACTUS_WALLET_PASSWORD")
 	config.Polygon.PrivateKey = os.Getenv("WRAPTO_POLYGON_PRIVATE_KEY")
 	config.Bsc.PrivateKey = os.Getenv("WRAPTO_BSC_PRIVATE_KEY")
+	config.Base.PrivateKey = os.Getenv("WRAPTO_BASE_PRIVATE_KEY")
 
 	if err = config.basicCheck(); err != nil {
 		return nil, Error{

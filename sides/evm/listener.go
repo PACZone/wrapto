@@ -41,6 +41,10 @@ func newListener(ctx context.Context,
 		bt = order.BSC_PACTUS
 	}
 
+	if bp == bypass.BASE {
+		bt = order.BASE_PACTUS
+	}
+
 	return &Listener{
 		client:          client,
 		db:              db,
