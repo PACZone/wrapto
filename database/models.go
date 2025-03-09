@@ -12,6 +12,7 @@ type State struct {
 	Pactus  uint32 `bson:"pactus"`
 	Polygon uint32 `bson:"polygon"`
 	Bsc     uint32 `bson:"bsc"`
+	Base    uint32 `bson:"base"`
 }
 
 type Announcement struct {
