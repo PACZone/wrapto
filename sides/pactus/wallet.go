@@ -6,17 +6,17 @@ import (
 
 	"github.com/pactus-project/pactus/types/amount"
 	"github.com/pactus-project/pactus/types/tx"
-	"github.com/pactus-project/pactus/types/tx/payload"
 	pWallet "github.com/pactus-project/pactus/wallet"
 )
 
 type Wallet struct {
 	address  string
 	password string
+	txFee    float64
 	wallet   pWallet.Wallet
 }
 
-func openWallet(path, addr, pass string) (*Wallet, error) {
+func openWallet(path, addr, pass string, txFee float64) (*Wallet, error) {
 	if !doesWalletExist(path) {
 		return nil, WalletNotExistError{
 			path: path,
@@ -32,21 +32,14 @@ func openWallet(path, addr, pass string) (*Wallet, error) {
 		wallet:   *wt,
 		address:  addr,
 		password: pass,
+		txFee:    txFee,
 	}, nil
 }
 
 func (w *Wallet) transferTx(toAddress, memo string, amt amount.Amount) (string, *tx.Tx, error) {
 	var err error
-	var fee amount.Amount
 
-	for i := 0; i <= 3; i++ {
-		fee, err = w.wallet.CalculateFee(amt, payload.TypeTransfer)
-		if err == nil {
-			break
-		}
-
-		time.Sleep(5 * time.Second)
-	}
+	fee, err := amount.NewAmount(w.txFee)
 	if err != nil {
 		return "", nil, err
 	}
