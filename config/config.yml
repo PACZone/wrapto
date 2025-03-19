@@ -28,6 +28,11 @@ bsc:
   rpc_url: https://bsc.drpc.org
   chain_id: 56 # bsc mainnet.
 
+base:
+  contract_address: 0x0000000000000000000000000000000000000000
+  rpc_url: https://base.drpc.org
+  chain_id: 8453 # base mainnet.
+
 database:
   db_name: wrapto
   connection_timeout_in_ms: 5000

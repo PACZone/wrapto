@@ -9,6 +9,7 @@ const (
 	PACTUS  Name = "PACTUS"
 	POLYGON Name = "POLYGON"
 	BSC     Name = "BSC"
+	BASE    Name = "BASE"
 	MANAGER Name = "MANAGER"
 	HTTP    Name = "HTTP"
 )
@@ -21,6 +22,8 @@ func (n Name) ToStateName() string {
 		return "pactus"
 	case POLYGON:
 		return "polygon"
+	case BASE:
+		return "base"
 	case HTTP:
 		return ""
 	case MANAGER:
@@ -31,4 +34,4 @@ func (n Name) ToStateName() string {
 }
 
 // ! NEW EVM.
-var ValidDestinations = []Name{POLYGON, BSC}
+var ValidDestinations = []Name{POLYGON, BSC, BASE}
