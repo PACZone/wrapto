@@ -102,9 +102,11 @@ func NewManager(ctx context.Context, cancel context.CancelFunc,
 func (m *Manager) Start() {
 	logger.Info("manager actor spawned")
 
+	//! NEW EVM.
 	go m.actors.pactus.Start()
 	go m.actors.polygon.Start()
 	go m.actors.bsc.Start()
+	go m.actors.base.Start()
 	go m.actors.http.Start()
 
 	for {
