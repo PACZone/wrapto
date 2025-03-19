@@ -29,7 +29,7 @@ func NewSide(ctx context.Context,
 		return nil, err
 	}
 
-	wallet, err := openWallet(cfg.WalletPath, cfg.WalletAddr, cfg.WalletPass)
+	wallet, err := openWallet(cfg.WalletPath, cfg.WalletAddr, cfg.WalletPass, cfg.TxFee)
 	if err != nil {
 		return nil, err
 	}

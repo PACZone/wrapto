@@ -15,6 +15,7 @@ pactus:
   lock_address: pc1zqyxjatqfhaj3arc727alwl4sa3z8lv2m730eh2
   wallet_address: pc1zqyxjatqfhaj3arc727alwl4sa3z8lv2m730eh2
   rpc_url: bootstrap1.pactus.org:50051
+  tx_fee: 0.01
 
 #! NEW EVM.
 polygon:
