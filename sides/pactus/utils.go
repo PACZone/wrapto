@@ -37,13 +37,16 @@ func ParseMemo(memo string) (Dest, error) {
 	}, nil
 }
 
+// ! NEW EVM!
 func (d *Dest) GetBridgeType() order.BridgeType {
 	switch d.BypassName { //nolint
 	case bypass.POLYGON:
 		return order.PACTUS_POLYGON
 	case bypass.BSC:
 		return order.PACTUS_BSC
+	case bypass.BASE:
+		return order.PACTUS_BASE
+	default:
+		return "INVALID_BRIDGE_TYPE"
 	}
-
-	return ""
 }
